@@ -1,0 +1,25 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# node
+node_modules/
+frontend/dist/
+
+# runtime state
+var/
+*.sqlite3
+*.duckdb
+
+# os
+.DS_Store
