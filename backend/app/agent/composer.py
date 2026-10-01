@@ -3,7 +3,7 @@
 import math
 from collections import defaultdict
 
-from app.agent.validator import validate_claims
+from app.agent.validator import is_partial, metric_unit, validate_claims
 from app.contracts.outcomes import Outcome
 from app.contracts.result import (
     AnalysisResult,
@@ -38,6 +38,7 @@ def compose(result: AnalysisResult) -> AnalysisResult:
                     entity={n: values[n] for n in dimensions},
                     period=str(values[times[0]]) if times else None,
                     value=float(value),
+                    unit=metric_unit(result, metric),
                     source=CellSource(
                         row_key={n: values[n] for n in [*dimensions, *times]}, column=metric
                     ),
@@ -62,6 +63,7 @@ def compose(result: AnalysisResult) -> AnalysisResult:
                         metric=metric,
                         entity={n: values[n] for n in dimensions},
                         value=float(value),
+                        unit=metric_unit(result, metric),
                         rank=1,
                         rank_of=len(ordered),
                         direction="highest",
@@ -74,7 +76,12 @@ def compose(result: AnalysisResult) -> AnalysisResult:
         for metric in metrics[:1]:
             grouped = defaultdict(list)
             for row in result.table.rows:
-                if _number(row[names.index(metric)]) and row[names.index(times[0])] is not None:
+                period = row[names.index(times[0])]
+                if (
+                    _number(row[names.index(metric)])
+                    and period is not None
+                    and not is_partial(result, period)
+                ):
                     grouped[tuple(row[names.index(d)] for d in dimensions)].append(row)
             for entity, rows in list(grouped.items())[:3]:
                 rows.sort(key=lambda r: str(r[names.index(times[0])]))
@@ -89,6 +96,7 @@ def compose(result: AnalysisResult) -> AnalysisResult:
                             metric=metric,
                             entity=dict(zip(dimensions, entity, strict=True)),
                             value=float(change),
+                            unit=metric_unit(result, metric),
                             period=(
                                 f"{rows[0][names.index(times[0])]} to "
                                 f"{rows[-1][names.index(times[0])]}"
@@ -124,6 +132,7 @@ def compose(result: AnalysisResult) -> AnalysisResult:
                                 entity=dict(zip(dimensions, entity, strict=True)),
                                 period=period,
                                 value=float(values[metric]),
+                                unit=metric_unit(result, metric),
                                 source=CellSource(
                                     row_key={n: values[n] for n in [*dimensions, *times]},
                                     column=metric,
@@ -169,36 +178,48 @@ def compose(result: AnalysisResult) -> AnalysisResult:
             f"{len(report.flags)} values flagged across {report.series_checked} series."
         )
         for flag in report.flags[:3]:
-            label = ", ".join(f"{k}={v}" for k, v in flag.row_key.items()) or "Observation"
+            label = ", ".join(str(v) for v in flag.row_key.values()) or "Observation"
+            unit = metric_unit(result, flag.metric)
             sentences.append(
-                f"{label}: {flag.metric} was {flag.value:,.6g}, compared with a median "
-                f"of {flag.median:,.6g} in {flag.reference}. Its robust z-score "
-                f"{flag.robust_z:,.6g} exceeded {flag.threshold:,.6g}."
+                f"{label}: {flag.metric} was {_format(flag.value, unit, '.6g')}, compared with "
+                f"a median of {_format(flag.median, unit, '.6g')} in {flag.reference}. Its "
+                f"robust z-score {flag.robust_z:,.6g} exceeded {flag.threshold:,.6g}."
             )
     return result.model_copy(update={"claims": checked, "answer_sentences": sentences})
 
 
+def _format(value, unit, general=".12g"):
+    """Number text for a unit: GBP as £1,234.50, counts as integers, % with a sign-free tail."""
+    if unit == "GBP":
+        return f"{'-' if value < 0 else ''}£{abs(value):,.2f}"
+    if unit == "count":
+        return f"{round(value):,}"
+    if unit == "%":
+        return f"{value:,.2f}".rstrip("0").rstrip(".") + "%"
+    return f"{value:,{general}}"
+
+
 def _render(claim):
-    subject = ", ".join(f"{k}={v}" for k, v in claim.entity.items()) or "The selected data"
+    subject = ", ".join(str(v) for v in claim.entity.values()) or "The selected data"
     if claim.kind == ClaimKind.rank:
         return (
-            f"{subject} had the highest {claim.metric}: {claim.value:,.12g} "
+            f"{subject} had the highest {claim.metric}: {_format(claim.value, claim.unit)} "
             f"among {claim.rank_of} returned groups."
         )
     if claim.kind == ClaimKind.trend:
         word = {"up": "increased", "down": "decreased", "flat": "changed"}[claim.direction]
         return (
-            f"{subject}: {claim.metric} {word} by {abs(claim.value):,.12g} "
+            f"{subject}: {claim.metric} {word} by {_format(abs(claim.value), claim.unit)} "
             f"from {claim.period}, across {claim.periods_covered} periods."
         )
     if claim.kind == ClaimKind.comparison:
         word = {"up": "increased", "down": "decreased", "flat": "changed"}[claim.direction]
         return (
-            f"{subject}: {claim.metric} {word} by {abs(claim.value):,.6g}% "
+            f"{subject}: {claim.metric} {word} by {_format(abs(claim.value), claim.unit)} "
             f"in {claim.period} versus the previous observed period."
         )
     period = f" in {claim.period}" if claim.period else ""
-    return f"{subject}: {claim.metric}{period} was {claim.value:,.12g}."
+    return f"{subject}: {claim.metric}{period} was {_format(claim.value, claim.unit)}."
 
 
 def _number(value):
