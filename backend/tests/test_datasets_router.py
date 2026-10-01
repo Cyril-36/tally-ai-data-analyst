@@ -230,3 +230,19 @@ def test_upload_limit_follows_admin_setting(env):
     big = b"a,b\n" + b"1,2\n" * 300_000
     r = env.client.post("/api/datasets", files=[("files", ("big.csv", big, "text/csv"))])
     assert r.status_code == 422 and "1 MB upload limit" in r.json()["message"]
+
+
+def test_concurrent_same_name_upload_picks_next_name(env, monkeypatch):
+    # Live verification: two simultaneous uploads chose the same free name and one hit 500.
+    from app.datasets import router as r
+
+    env.client.post("/api/datasets", files=[("files", ("p.csv", b"a\n1\n", "text/csv"))])
+    real, calls = r._unique_name, []
+
+    def stale_then_real(conn, owner_id, stem):
+        calls.append(1)
+        return "p" if len(calls) == 1 else real(conn, owner_id, stem)  # first pick is taken
+
+    monkeypatch.setattr(r, "_unique_name", stale_then_real)
+    res = env.client.post("/api/datasets", files=[("files", ("p.csv", b"a\n1\n", "text/csv"))])
+    assert res.status_code == 201 and res.json()[0]["name"] == "p_2"

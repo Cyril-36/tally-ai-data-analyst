@@ -72,14 +72,22 @@ def _create(conn: sqlite3.Connection, user: User, file: UploadFile) -> sqlite3.R
     dataset_id = uuid.uuid4().hex
     try:
         profile = ingest_csv(data, filename, dataset_parquet_path(dataset_id, 1))
-        name = _unique_name(conn, user.id, Path(filename).stem)
-        now = _now()
-        conn.execute(
-            "INSERT INTO datasets (id, owner_id, name, filename, version, row_count, profile_json,"
-            " created_at, updated_at) VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?)",
-            (dataset_id, user.id, name, filename, profile["row_count"], json.dumps(profile),
-             now, now),
-        )
+        for attempt in range(5):
+            # Concurrent uploads of the same filename can pick the same free name;
+            # the UNIQUE constraint decides, and the loser picks again.
+            name = _unique_name(conn, user.id, Path(filename).stem)
+            now = _now()
+            try:
+                conn.execute(
+                    "INSERT INTO datasets (id, owner_id, name, filename, version, row_count,"
+                    " profile_json, created_at, updated_at) VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?)",
+                    (dataset_id, user.id, name, filename, profile["row_count"],
+                     json.dumps(profile), now, now),
+                )
+                break
+            except sqlite3.IntegrityError:
+                if attempt == 4:
+                    raise
     except BaseException:
         shutil.rmtree(dataset_parquet_path(dataset_id, 1).parent, ignore_errors=True)
         raise
