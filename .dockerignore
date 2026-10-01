@@ -10,7 +10,8 @@ backend/.ruff_cache
 .env.*
 !.env.example
 frontend
-data
+data/*
+!data/sample
 docs
 evals
 scripts

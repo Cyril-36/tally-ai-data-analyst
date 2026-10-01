@@ -248,3 +248,250 @@ def test_concurrent_same_name_upload_picks_next_name(env, monkeypatch):
     monkeypatch.setattr(r, "_unique_name", stale_then_real)
     res = env.client.post("/api/datasets", files=[("files", ("p.csv", b"a\n1\n", "text/csv"))])
     assert res.status_code == 201 and res.json()[0]["name"] == "p_2"
+
+
+# ---- rename --------------------------------------------------------------------------
+
+
+def test_rename_changes_name_and_updated_at_but_not_version_or_data(env):
+    ds = env.upload()
+    r = env.client.patch(f"/api/datasets/{ds['id']}", json={"name": "  Q3 sales "})
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["name"] == "Q3 sales" and body["version"] == 1 and body["row_count"] == 3
+    assert body["updated_at"] > ds["updated_at"] and body["created_at"] == ds["created_at"]
+    assert [d["name"] for d in env.client.get("/api/datasets").json()] == ["Q3 sales"]
+    preview = env.client.get(f"/api/datasets/{ds['id']}").json()["preview"]
+    assert preview["rows"][0] == ["North", 10.5]
+    assert dataset_parquet_path(ds["id"], 1).exists()
+    # renaming to the current name is not a clash
+    same = env.client.patch(f"/api/datasets/{ds['id']}", json={"name": "Q3 sales"})
+    assert same.status_code == 200
+
+
+def test_rename_to_an_existing_name_is_refused_but_only_per_owner(env):
+    a, b = env.upload("a.csv"), env.upload("b.csv")
+    r = env.client.patch(f"/api/datasets/{b['id']}", json={"name": "a"})
+    assert r.status_code == 422 and r.json() == {
+        "outcome": "invalid_input", "message": "You already have a dataset named 'a'."}
+    assert env.client.get(f"/api/datasets/{b['id']}").json()["name"] == "b"
+
+    carol = env.as_user(BOB).upload("c.csv")  # Bob may take a name Alice already uses
+    assert env.client.patch(f"/api/datasets/{carol['id']}", json={"name": "a"}).status_code == 200
+    env.as_user(ALICE)
+    assert env.client.patch(f"/api/datasets/{a['id']}", json={"name": "c"}).status_code == 200
+
+
+@pytest.mark.parametrize("name", ["", "   ", "x" * 129, None, 5])
+def test_rename_validates_the_name(env, name):
+    ds = env.upload()
+    r = env.client.patch(f"/api/datasets/{ds['id']}", json={"name": name})
+    assert r.status_code == 422
+    assert env.client.get(f"/api/datasets/{ds['id']}").json()["name"] == "sales"
+
+
+def test_rename_accepts_the_length_limits(env):
+    ds = env.upload()
+    url = f"/api/datasets/{ds['id']}"
+    assert env.client.patch(url, json={"name": "x" * 128}).status_code == 200
+    assert env.client.patch(url, json={"name": "y"}).status_code == 200
+
+
+# ---- rows ----------------------------------------------------------------------------
+
+
+def test_rows_are_paged_with_total_and_json_safe_values(env):
+    ds = env.upload("orders.csv", (FIXTURES / "orders.csv").read_bytes())
+    base = f"/api/datasets/{ds['id']}/rows"
+    first = env.client.get(base).json()
+    assert first["offset"] == 0 and first["limit"] == 50 and first["total"] == ds["row_count"]
+    assert first["columns"][0] == "order_id" and len(first["rows"]) == 50
+    assert first["rows"][0][:2] == ["O000001", "2025-01-01"]  # dates are ISO strings
+    page = env.client.get(base, params={"offset": 10, "limit": 5}).json()
+    assert page["rows"] == first["rows"][10:15] and page["offset"] == 10 and page["limit"] == 5
+    tail = env.client.get(base, params={"offset": ds["row_count"] - 2, "limit": 200}).json()
+    assert len(tail["rows"]) == 2
+    beyond = env.client.get(base, params={"offset": ds["row_count"] + 5}).json()
+    assert beyond["rows"] == [] and beyond["total"] == ds["row_count"]
+    preview = env.client.get(f"/api/datasets/{ds['id']}").json()["preview"]
+    assert preview["rows"] == first["rows"][:20]
+
+
+def test_rows_read_the_current_version(env):
+    ds = env.upload()
+    env.client.put(f"/api/datasets/{ds['id']}",
+                   files={"file": ("sales.csv", b"region,revenue\nEast,1\n", "text/csv")})
+    body = env.client.get(f"/api/datasets/{ds['id']}/rows").json()
+    assert body["rows"] == [["East", 1]] and body["total"] == 1
+
+
+@pytest.mark.parametrize("params", [{"limit": 0}, {"limit": 201}, {"offset": -1}, {"limit": "x"}])
+def test_rows_paging_bounds(env, params):
+    ds = env.upload()
+    assert env.client.get(f"/api/datasets/{ds['id']}/rows", params=params).status_code == 422
+
+
+# ---- sample data ---------------------------------------------------------------------
+
+SAMPLES = ["orders", "customers", "products", "payments"]
+
+
+def test_sample_loads_the_four_datasets_through_the_normal_path(env):
+    r = env.client.post("/api/datasets/sample")
+    assert r.status_code == 201, r.text
+    assert [d["name"] for d in r.json()["created"]] == SAMPLES and r.json()["existing"] == []
+    assert all(d["version"] == 1 and d["filename"] == f"{d['name']}.csv"
+               for d in r.json()["created"])
+    listed = {d["name"]: d for d in env.client.get("/api/datasets").json()}
+    assert listed["orders"]["row_count"] == 4971 and listed["customers"]["row_count"] == 400
+    profile = env.client.get(f"/api/datasets/{listed['orders']['id']}").json()["profile"]
+    assert profile["row_count"] == 4971  # profiled like an upload
+
+
+def test_sample_is_idempotent_and_only_adds_what_is_missing(env):
+    first = env.client.post("/api/datasets/sample").json()["created"]
+    again = env.client.post("/api/datasets/sample")
+    assert again.status_code == 200
+    assert again.json()["created"] == []
+    assert [d["id"] for d in again.json()["existing"]] == [d["id"] for d in first]
+    assert [d["name"] for d in env.client.get("/api/datasets").json()] == SAMPLES
+
+    gone = next(d for d in first if d["name"] == "products")
+    env.client.delete(f"/api/datasets/{gone['id']}", params={"confirm": "true"})
+    partial = env.client.post("/api/datasets/sample").json()
+    assert [d["name"] for d in partial["created"]] == ["products"]
+    assert sorted(d["name"] for d in partial["existing"]) == ["customers", "orders", "payments"]
+    names = [d["name"] for d in env.client.get("/api/datasets").json()]
+    assert len(names) == 4 and not any(n.endswith("_2") for n in names)
+
+
+def test_sample_is_per_user(env):
+    env.client.post("/api/datasets/sample")
+    r = env.as_user(BOB).client.post("/api/datasets/sample")
+    assert r.status_code == 201 and len(r.json()["created"]) == 4
+    assert len(env.client.get("/api/datasets").json()) == 4  # Bob's copies are Bob's
+
+
+def test_sample_is_refused_when_an_admin_turned_it_off(env):
+    env.conn.execute("INSERT INTO settings VALUES ('sample_data_enabled', 'false')")
+    r = env.client.post("/api/datasets/sample")
+    assert r.status_code == 403
+    assert r.json() == {"outcome": "permission_denied",
+                        "message": "Sample data is turned off by an admin."}
+    assert env.client.get("/api/datasets").json() == []
+
+
+def test_sample_failure_keeps_nothing_and_hides_paths(env, tmp_path, monkeypatch):
+    broken = tmp_path / "sample"
+    broken.mkdir()
+    (broken / "orders.csv").write_bytes(CSV)  # customers.csv etc. are missing
+    monkeypatch.setenv("SAMPLE_DIR", str(broken))
+    get_settings.cache_clear()
+    r = env.client.post("/api/datasets/sample")
+    assert r.status_code == 500 and r.json()["outcome"] == "execution_failed"
+    assert str(broken) not in r.text
+    assert env.client.get("/api/datasets").json() == []  # orders was rolled back too
+    root = Path(get_settings().data_dir) / "datasets"
+    assert not root.exists() or not any(root.iterdir())
+
+
+# ---- quality examples ----------------------------------------------------------------
+
+
+@pytest.fixture
+def messy(env, monkeypatch):
+    monkeypatch.setenv("DEMO_REFERENCE_DATE", "2026-09-30")
+    get_settings.cache_clear()
+    ds = env.upload("messy_customers.csv", (FIXTURES / "messy_customers.csv").read_bytes())
+    return env, ds
+
+
+def examples(env, ds, check, column=None):
+    params = {"check": check, **({"column": column} if column else {})}
+    return env.client.get(f"/api/datasets/{ds['id']}/quality/examples", params=params)
+
+
+def test_examples_follow_the_quality_report_definitions(messy):
+    env, ds = messy
+    report = env.client.get(f"/api/datasets/{ds['id']}/quality").json()
+    by_check = {"nulls": "nulls", "numeric_text": "numeric_stored_as_text",
+                "future_dates": "future_dates", "variants": "category_variants"}
+    seen = set()
+    for check, code in by_check.items():
+        for issue in (i for i in report["issues"] if i["code"] == code):
+            body = examples(env, ds, check, issue["column"]).json()
+            seen.add(check)
+            assert body["check"] == check and body["column"] == issue["column"]
+            assert body["columns"] == [c["name"] for c in report["columns"]]
+            if check != "variants":  # variants shows one row per spelling, not per row
+                assert len(body["rows"]) == min(5, issue["count"]), (check, issue)
+            assert 1 <= len(body["rows"]) <= 5
+    assert seen == set(by_check)  # the fixture exercises every column-based check
+
+
+def test_example_rows_really_contain_the_issue(messy):
+    env, ds = messy
+    nulls = examples(env, ds, "nulls", "email").json()
+    idx = {c: i for i, c in enumerate(nulls["columns"])}
+    assert all(r[idx["email"]] is None for r in nulls["rows"])
+
+    for row in examples(env, ds, "numeric_text", "lifetime_value").json()["rows"]:
+        with pytest.raises(ValueError):
+            float(row[idx["lifetime_value"]])
+
+    future = examples(env, ds, "future_dates", "signup_date").json()["rows"]
+    assert future and all(r[idx["signup_date"]] > "2026-09-30" for r in future)
+
+    spellings = [r[idx["country"]] for r in examples(env, ds, "variants", "country").json()["rows"]]
+    assert len(spellings) == len(set(spellings)) >= 2
+    assert {s.strip().casefold().replace(".", "") for s in spellings} <= {"france", "germany", "uk"}
+
+    dup = examples(env, ds, "duplicates").json()
+    assert 1 <= len(dup["rows"]) <= 5 and dup["column"] is None
+    assert len({tuple(map(str, r)) for r in dup["rows"]}) == len(dup["rows"])  # one per group
+
+
+def test_negative_example_and_empty_example(env):
+    ds = env.upload("orders.csv", (FIXTURES / "orders.csv").read_bytes())
+    neg = examples(env, ds, "negatives", "quantity").json()
+    q = neg["columns"].index("quantity")
+    assert len(neg["rows"]) == 1 and neg["rows"][0][q] < 0
+    assert examples(env, ds, "nulls", "order_id").json()["rows"] == []
+    assert examples(env, ds, "numeric_text", "region").json()["rows"] == []  # plain text column
+
+
+@pytest.mark.parametrize("check,column", [
+    ("bogus", "email"), ("nulls", "no_such_column"), ("nulls", None),
+    ("negatives", "email"), ("future_dates", "email"), ("numeric_text", "signup_date"),
+])
+def test_examples_reject_unknown_or_inapplicable_input(messy, check, column):
+    env, ds = messy
+    r = examples(env, ds, check, column)
+    assert r.status_code == 422 and r.json()["outcome"] == "invalid_input"
+
+
+def test_examples_require_the_check_parameter(messy):
+    env, ds = messy
+    assert env.client.get(f"/api/datasets/{ds['id']}/quality/examples").status_code == 422
+
+
+# ---- ownership of the new routes -----------------------------------------------------
+
+
+def test_other_users_dataset_is_hidden_from_rename_rows_and_examples(env):
+    ds = env.upload("messy_customers.csv", (FIXTURES / "messy_customers.csv").read_bytes())
+    env.as_user(BOB)
+    base = f"/api/datasets/{ds['id']}"
+    responses = {
+        "rename": env.client.patch(base, json={"name": "mine"}),
+        "rows": env.client.get(f"{base}/rows"),
+        "examples": env.client.get(f"{base}/quality/examples",
+                                   params={"check": "nulls", "column": "email"}),
+        "examples_dups": env.client.get(f"{base}/quality/examples", params={"check": "duplicates"}),
+    }
+    for action, r in responses.items():
+        assert r.status_code == 404, action
+        assert r.json()["outcome"] == "not_found", action
+        assert "alice" not in r.text.lower(), action
+    env.as_user(ALICE)
+    assert env.client.get(base).json()["name"] == "messy_customers"

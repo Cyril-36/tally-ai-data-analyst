@@ -9,6 +9,7 @@ services:
       LLM_BASE_URL: ${LLM_BASE_URL:-https://aicredits.in/v1}
       LLM_API_KEY: ${LLM_API_KEY:-}
       LLM_MODEL: ${LLM_MODEL:-gemini-2.5-flash}
+      LLM_PROVIDER: ${LLM_PROVIDER:-real}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
     volumes:
