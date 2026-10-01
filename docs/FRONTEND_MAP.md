@@ -1,6 +1,6 @@
 # Frontend: screen → API map (Tally prototype → real backend)
 
-Visual reference is `Tally design system.zip` (`Tally.dc.html`). It's a prototype, not a source of behaviour. The prototype's `mock-api.js`, `support.js`, DC runtime and CDN React/Babel are **not** shipped.
+Visual reference is `Tally design system.zip` (`Tally.dc.html`). **Design fidelity wins:** keep every prototype control, and where the backend lacks support, extend the backend (decided 2026-10-02). Behaviour still comes from the real API: no fake toasts, invented numbers, or client-side business math. The prototype's `mock-api.js`, `support.js`, DC runtime and CDN React/Babel are **not** shipped.
 
 All calls use the HttpOnly `sid` cookie (`credentials: "include"`). Every POST/PUT/PATCH/DELETE sends `X-Requested-With: fetch`. A 401 anywhere returns to sign-in, and the typed question is kept in memory (not localStorage). Admin status comes only from `GET /api/auth/me` → `role`.
 
@@ -20,17 +20,21 @@ All calls use the HttpOnly `sid` cookie (`credentials: "include"`). Every POST/P
 | Data | **preview pagination** | `GET /api/datasets/{id}/rows?offset=0&limit=50` → `{columns, rows, offset, limit, total}` (limit ≤ 200) | **gap → add** |
 | Data | **load sample data** | `POST /api/datasets/sample` → list of created datasets (orders, customers, products, payments); reports existing ones instead of duplicating | **gap → add** |
 | Quality | report per dataset | `GET /api/datasets/{id}/quality` | exists |
-| Quality | example rows per issue | only the examples the report already contains (e.g. `non_numeric_examples`) | **adapt**: no new endpoint |
+| Quality | **example rows per issue** | `GET /api/datasets/{id}/quality/examples?check=<nulls\|duplicates\|numeric_text\|variants\|future_dates\|negatives>&column=<col>` → up to 5 rows | **gap → add** |
 | Anomalies | explorer (metric, grouping, run) | `POST /api/conversations/{id}/analyze` with `spec` + `anomaly_metric` → `AnalysisResult.anomalies` | exists |
 | Anomalies | "expected range" (prototype rolling method) | **not shown.** Show median, MAD, robust z, threshold, reference population, `insufficient_data` reason, `excluded_values` | adapt |
 | Settings (admin) | upload limit, **AI enable/disable switch** | `GET/PUT /api/admin/settings` | exists |
 | Settings (admin) | **test AI provider** | `POST /api/admin/provider-test` → `{ok, latency_ms, model}` or `provider_failed`; admin only | **gap → add** |
-| Settings | sample-data toggle, retention settings, mock latency | none | **remove** (no backend meaning; don't fake) |
+| Settings (admin) | **allow sample data** toggle | `sample_data_enabled` in `/api/admin/settings`; `POST /api/datasets/sample` returns 403 when off | **gap → add** |
+| Settings (admin) | **retention** (30/90/365 days, never) | `retention_days` in `/api/admin/settings`; conversations and results older than that are purged on startup and when the setting is saved (pins on them go too). Datasets are not purged | **gap → add** |
+| Prototype only | mock scenarios panel, latency switch | none | **not shipped** (testing tool of the prototype) |
 | Settings (any user) | change password | `POST /api/auth/change-password` | exists |
 
 ## Backend gaps (surgical; no change to authorization or calculation semantics)
 1. `PATCH /api/datasets/{id}`: rename, using `require_owned` (404 for others), unique per owner, 1–128 chars.
 2. `GET /api/datasets/{id}/rows`: owner-only. Paged read of the stored Parquet file, with `total`.
 3. `POST /api/datasets/sample`: copies `data/sample/{orders,customers,products,payments}.csv` through the normal ingest path for the current user.
-4. `POST /api/admin/provider-test`: admin-only, one minimal provider call; never echoes provider errors or keys.
-5. **Server-side fake provider for E2E:** `LLM_PROVIDER=fake` selects a scripted provider that answers a fixed set of demo questions with real `AnalysisSpec`s (so the whole validated path runs) and asks a clarification for "underperforming". Enabled only by that env var; the server logs a warning at startup when it's on. It is never the default.
+4. `GET /api/datasets/{id}/quality/examples`: owner-only, ≤ 5 example rows per check/column.
+5. Admin settings: add `sample_data_enabled` (default true) and `retention_days` (default 90; `null` = never), and make both have real effects as above.
+6. `POST /api/admin/provider-test`: admin-only, one minimal provider call; never echoes provider errors or keys.
+7. **Server-side fake provider for E2E:** `LLM_PROVIDER=fake` selects a scripted provider that answers a fixed set of demo questions with real `AnalysisSpec`s (so the whole validated path runs) and asks a clarification for "underperforming". Enabled only by that env var; the server logs a warning at startup when it's on. It is never the default.
