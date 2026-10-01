@@ -35,3 +35,8 @@ Kept from v2: per-field owner/check/failure table, monitoring → response per f
 - **Upload limit comes from the admin setting**, not env config (cross-area rule).
 - **Period-over-period is not in the `AnalysisSpec` grammar.** Trend and comparison claims use time-bucketed results instead. Add it only if a golden question needs it.
 - **Open:** `AnomalyReport` lacks an `excluded_values` count (it currently goes in `reason`); add it when the agent turns it into a caveat.
+
+## 2026-10-02: findings from live verification of the backend gaps (fake provider, HTTP)
+- **Open (correctness): a partial final period.** Demo data ends today (2026-10-02), so the 2026-10 month bucket holds 2 days. The trend sentence ("revenue decreased by 22,980.8 … to 2026-10-01") and three anomaly flags (South/North 2026-10) are artifacts of that partial month. Fix: mark a final time bucket as `partial_period` when the data's max date falls before the bucket's end; add a caveat, and exclude it from trend claims and anomaly series.
+- **Open (wording):** sentences read "region=West had the highest revenue: 135,306.2", with key=value entities and no currency. Render "West had the highest revenue: £135,306.20" using the metric unit.
+- The fake provider references datasets by their sample names. After a rename it falls back to a dataset clarification, which is correct behaviour, but the e2e specs must not rename sample datasets.
