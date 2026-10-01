@@ -17,11 +17,15 @@ class Settings(BaseSettings):
     max_user_active_turns: int = 2
     max_active_turns: int = 16
     executor_socket: str = ""
+    # "fake" selects the scripted demo provider (E2E only); anything else is the real one.
+    llm_provider: str = "real"
 
     app_secret_key: str = "dev-only-change-me"  # noqa: S105 - overridden via .env
     data_dir: Path = Path("./var")
     max_upload_mb: int = 50
     demo_reference_date: str = ""
+    # Docker overrides this; the default is data/sample at the repository root.
+    sample_dir: Path = Path(__file__).resolve().parents[2] / "data" / "sample"
 
     admin_email: str = ""
     admin_password: str = ""

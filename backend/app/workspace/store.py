@@ -3,7 +3,7 @@
 import json
 import sqlite3
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from app.auth import authz
@@ -113,3 +113,44 @@ def update_state(
     conn.execute(
         "UPDATE conversations SET state_json = ? WHERE id = ?", (json.dumps(state), conversation_id)
     )
+
+
+def _as_utc(text: str) -> datetime:
+    value = datetime.fromisoformat(text)
+    return value if value.tzinfo else value.replace(tzinfo=UTC)
+
+
+def purge_old_conversations(conn: sqlite3.Connection, retention_days: int | None) -> int:
+    """Delete conversations whose latest activity (creation, newest result or newest turn)
+    is older than ``retention_days``; results, turns and pins go with them (FK cascade).
+    ``None`` keeps everything. Datasets are never purged. Returns the number deleted."""
+    if retention_days is None:
+        return 0
+    cutoff = datetime.now(UTC) - timedelta(days=retention_days)
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        old = []
+        for row in conn.execute(
+            "SELECT c.id, c.created_at,"
+            " (SELECT max(created_at) FROM results WHERE conversation_id = c.id) AS last_result,"
+            " (SELECT max(started_at) FROM turns WHERE conversation_id = c.id) AS last_turn"
+            " FROM conversations c"
+        ).fetchall():
+            try:
+                stamps = [_as_utc(row["created_at"])]
+                if row["last_result"]:
+                    stamps.append(_as_utc(row["last_result"]))
+                if row["last_turn"]:
+                    stamps.append(datetime.fromtimestamp(row["last_turn"], UTC))
+            except ValueError:
+                continue  # an unreadable timestamp is never grounds for deleting someone's work
+            latest = max(stamps)
+            if latest < cutoff:
+                old.append(row["id"])
+        for conversation_id in old:
+            conn.execute("DELETE FROM conversations WHERE id = ?", (conversation_id,))
+        conn.commit()
+    except BaseException:
+        conn.rollback()
+        raise
+    return len(old)

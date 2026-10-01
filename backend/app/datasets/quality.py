@@ -18,7 +18,14 @@ import re
 from datetime import date
 from pathlib import Path
 
-from app.datasets.profile import is_date_like, is_numeric, open_parquet, quote_ident
+from app.contracts.outcomes import AppError, Outcome
+from app.datasets.profile import (
+    is_date_like,
+    is_numeric,
+    jsonable,
+    open_parquet,
+    quote_ident,
+)
 
 _MAX_VARIANT_DISTINCT = 200  # beyond this a text column is not a category
 _NUMERIC_TEXT_SHARE = 0.5
@@ -31,6 +38,18 @@ def _issue(level: str, code: str, column: str | None, message: str,
 
 def _normalise(value: str) -> str:
     return re.sub(r"[^0-9a-z]", "", value.casefold())
+
+
+def _variant_clashes(con, q: str) -> list[list[str]]:
+    """Groups of distinct values of column ``q`` that differ only in case, spacing or
+    punctuation."""
+    values = [r[0] for r in con.execute(
+        f"SELECT DISTINCT {q} FROM data WHERE {q} IS NOT NULL ORDER BY {q}").fetchall()]
+    groups: dict[str, list[str]] = {}
+    for v in values:
+        if key := _normalise(v):
+            groups.setdefault(key, []).append(v)
+    return [g for g in groups.values() if len(g) > 1]
 
 
 def quality_report(parquet_path: Path, profile: dict, reference_date: date) -> dict:
@@ -93,13 +112,7 @@ def quality_report(parquet_path: Path, profile: dict, reference_date: date) -> d
 
         if (dtype == "VARCHAR" and c["role_hint"] != "id"
                 and 1 < c["distinct_count"] <= _MAX_VARIANT_DISTINCT):
-            values = [r[0] for r in con.execute(
-                f"SELECT DISTINCT {q} FROM data WHERE {q} IS NOT NULL ORDER BY {q}").fetchall()]
-            groups: dict[str, list[str]] = {}
-            for v in values:
-                if key := _normalise(v):
-                    groups.setdefault(key, []).append(v)
-            clashes = [g for g in groups.values() if len(g) > 1]
+            clashes = _variant_clashes(con, q)
             if clashes:
                 variants.append({"column": name, "groups": clashes})
                 issues.append(_issue(
@@ -147,3 +160,63 @@ def quality_report(parquet_path: Path, profile: dict, reference_date: date) -> d
         "negative_values": negatives,
         "issues": issues,
     }
+
+
+EXAMPLE_CHECKS = ("nulls", "duplicates", "numeric_text", "variants", "future_dates", "negatives")
+_EXAMPLE_ROWS = 5
+_NO_ROWS = ("SELECT * FROM data WHERE false", [])
+
+
+def quality_examples(parquet_path: Path, profile: dict, reference_date: date, check: str,
+                     column: str | None) -> dict:
+    """Up to 5 rows showing one issue, using the same definitions as ``quality_report``.
+    ``duplicates`` ignores ``column`` and shows one row per group of exact copies; every
+    other check needs a column of a type the check applies to."""
+    if check not in EXAMPLE_CHECKS:
+        raise AppError(Outcome.invalid_input,
+                       f"Unknown check. Use one of: {', '.join(EXAMPLE_CHECKS)}.")
+    con = open_parquet(parquet_path)
+    if check == "duplicates":
+        sql, params = "SELECT * FROM data GROUP BY ALL HAVING count(*) > 1 ORDER BY ALL", []
+    else:
+        col = next((c for c in profile["columns"] if c["name"] == column), None)
+        if col is None:
+            raise AppError(Outcome.invalid_input, "Unknown column for this dataset.")
+        dtype = col["dtype"].upper()
+        applies = {"nulls": True, "numeric_text": dtype == "VARCHAR",
+                   "variants": dtype == "VARCHAR", "future_dates": is_date_like(dtype),
+                   "negatives": is_numeric(dtype)}[check]
+        if not applies:
+            raise AppError(Outcome.invalid_input, f"This check does not apply to '{column}'.")
+        sql, params = _example_query(con, profile, col, check, reference_date)
+    cur = con.execute(f"{sql} LIMIT {_EXAMPLE_ROWS}", params)
+    return {"check": check, "column": column,
+            "columns": [d[0] for d in cur.description],
+            "rows": [[jsonable(v) for v in r] for r in cur.fetchall()]}
+
+
+def _example_query(con, profile: dict, col: dict, check: str,
+                   reference_date: date) -> tuple[str, list]:
+    q = quote_ident(col["name"])
+    if check == "nulls":
+        return f"SELECT * FROM data WHERE {q} IS NULL", []
+    if check == "future_dates":
+        return f"SELECT * FROM data WHERE {q} > DATE '{reference_date.isoformat()}'", []
+    if check == "negatives":
+        return f"SELECT * FROM data WHERE {q} < 0", []
+    if check == "numeric_text":
+        non_null = profile["row_count"] - col["null_count"]
+        numeric = con.execute(
+            f"SELECT count(*) FILTER (WHERE try_cast(trim({q}) AS DOUBLE) IS NOT NULL) FROM data"
+        ).fetchone()[0]
+        if non_null and numeric / non_null >= _NUMERIC_TEXT_SHARE:
+            return (f"SELECT * FROM data WHERE {q} IS NOT NULL "
+                    f"AND try_cast(trim({q}) AS DOUBLE) IS NULL", [])
+    elif col["role_hint"] != "id" and 1 < col["distinct_count"] <= _MAX_VARIANT_DISTINCT:
+        # variants: one row per spelling that clashes with another spelling
+        values = [v for group in _variant_clashes(con, q) for v in group]
+        if values:
+            marks = ",".join("?" * len(values))
+            return (f"SELECT * FROM data WHERE {q} IN ({marks}) "
+                    f"QUALIFY row_number() OVER (PARTITION BY {q}) = 1 ORDER BY {q}", values)
+    return _NO_ROWS

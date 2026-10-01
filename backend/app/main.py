@@ -7,7 +7,9 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
+from app.admin.router import read_system_settings
 from app.admin.router import router as admin_router
+from app.agent.provider import fake_provider_enabled
 from app.agent.router import router as agent_router
 from app.auth import passwords
 from app.auth.router import router as auth_router
@@ -16,6 +18,7 @@ from app.contracts.outcomes import HTTP_STATUS, AppError, ErrorBody, Outcome
 from app.datasets.router import router as datasets_router
 from app.db import connect, db_path, init_db
 from app.logging import configure_logging
+from app.workspace import store
 from app.workspace.router import router as workspace_router
 
 # Routers. Other tracks append theirs here at merge (e.g. app.datasets.router).
@@ -34,8 +37,17 @@ def _error(outcome: Outcome, message: str, status: int) -> JSONResponse:
 async def lifespan(app: FastAPI):
     init_db(db_path())
     settings = get_settings()
+    if fake_provider_enabled():
+        log.warning("LLM_PROVIDER=fake: answers come from a scripted demo provider, "
+                    "not a real model. Never use this in production.")
     with connect(db_path()) as conn:
         passwords.ensure_admin(conn, settings.admin_email, settings.admin_password)
+        try:
+            purged = store.purge_old_conversations(conn, read_system_settings(conn).retention_days)
+            if purged:
+                log.info("retention purge", extra={"purged_conversations": purged})
+        except Exception:
+            log.exception("retention purge failed")  # never block startup on housekeeping
     yield
 
 
@@ -98,7 +110,8 @@ def create_app() -> FastAPI:
                 conn.execute("SELECT 1 FROM users LIMIT 1").fetchone()
         except Exception:
             return _error(Outcome.execution_failed, "Metadata store is unavailable.", 503)
-        return {"status": "ready", "ai_configured": bool(get_settings().llm_api_key)}
+        ai = bool(get_settings().llm_api_key) or fake_provider_enabled()
+        return {"status": "ready", "ai_configured": ai}
 
     for router in ROUTERS:
         app.include_router(router)

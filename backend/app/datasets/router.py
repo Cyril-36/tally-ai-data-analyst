@@ -13,7 +13,8 @@ from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, UploadFile
+from fastapi import APIRouter, Depends, Query, Response, UploadFile
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.admin.router import read_system_settings
 from app.auth import authz
@@ -23,15 +24,21 @@ from app.config import get_settings
 from app.contracts.outcomes import AppError, Outcome
 from app.datasets.ingest import ingest_csv
 from app.datasets.profile import jsonable, open_parquet
-from app.datasets.quality import quality_report
+from app.datasets.quality import quality_examples, quality_report
 from app.db import dataset_parquet_path, get_conn
 
 router = APIRouter(prefix="/api/datasets")
 CurrentUser = Annotated[User, Depends(get_current_user)]
 Conn = Annotated[sqlite3.Connection, Depends(get_conn)]
 
+_SAMPLE_FILES = ("orders.csv", "customers.csv", "products.csv", "payments.csv")
 _META = ("id", "name", "filename", "version", "row_count", "created_at", "updated_at")
 _PREVIEW_ROWS = 20
+
+
+class RenameBody(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    name: str = Field(min_length=1, max_length=128)
 
 
 def _now() -> str:
@@ -69,6 +76,10 @@ def _remove(conn: sqlite3.Connection, dataset_id: str) -> None:
 
 def _create(conn: sqlite3.Connection, user: User, file: UploadFile) -> sqlite3.Row:
     filename, data = _read_upload(conn, file)
+    return _store(conn, user, filename, data)
+
+
+def _store(conn: sqlite3.Connection, user: User, filename: str, data: bytes) -> sqlite3.Row:
     dataset_id = uuid.uuid4().hex
     try:
         profile = ingest_csv(data, filename, dataset_parquet_path(dataset_id, 1))
@@ -135,6 +146,42 @@ def upload_datasets(files: list[UploadFile], user: CurrentUser,
     return [_meta(r) for r in created]
 
 
+@router.post("/sample")
+def load_sample_data(user: CurrentUser, conn: Conn, response: Response) -> dict:
+    """Ingest the bundled sample CSVs like uploads. Samples the user already has (by name)
+    are returned as ``existing`` instead of being copied again. All or none are kept."""
+    if not read_system_settings(conn).sample_data_enabled:
+        raise AppError(Outcome.permission_denied, "Sample data is turned off by an admin.")
+    sample_dir = get_settings().sample_dir
+    conn.execute("BEGIN IMMEDIATE")  # two concurrent calls must not both create the datasets
+    created: list[sqlite3.Row] = []
+    existing: list[sqlite3.Row] = []
+    try:
+        for filename in _SAMPLE_FILES:
+            row = conn.execute("SELECT * FROM datasets WHERE owner_id = ? AND name = ?",
+                               (user.id, Path(filename).stem)).fetchone()
+            if row:
+                existing.append(row)
+                continue
+            try:
+                data = (sample_dir / filename).read_bytes()
+            except OSError:
+                raise AppError(Outcome.execution_failed,
+                               "Sample data is not available on this server.") from None
+            if len(data) > read_system_settings(conn).max_upload_mb * 1024 * 1024:
+                raise AppError(Outcome.invalid_input,
+                               f"'{filename}': the file is larger than the upload limit.")
+            created.append(_store(conn, user, filename, data))
+        conn.commit()
+    except BaseException:
+        conn.rollback()
+        for row in created:
+            shutil.rmtree(dataset_parquet_path(row["id"], 1).parent, ignore_errors=True)
+        raise
+    response.status_code = 201 if created else 200
+    return {"created": [_meta(r) for r in created], "existing": [_meta(r) for r in existing]}
+
+
 @router.get("")
 @router.get("/", include_in_schema=False)
 def list_datasets(user: CurrentUser,
@@ -154,6 +201,18 @@ def get_dataset(dataset_id: str, user: CurrentUser,
     return {**_meta(row), "profile": json.loads(row["profile_json"]), "preview": preview}
 
 
+@router.get("/{dataset_id}/rows")
+def get_rows(dataset_id: str, user: CurrentUser, conn: Conn,
+             offset: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=200)) -> dict:
+    row = authz.require_owned(conn, "datasets", dataset_id, user, Action.read)
+    con = open_parquet(_parquet(row))
+    total = con.execute("SELECT count(*) FROM data").fetchone()[0]
+    cur = con.execute("SELECT * FROM data LIMIT ? OFFSET ?", [limit, offset])
+    return {"columns": [d[0] for d in cur.description],
+            "rows": [[jsonable(v) for v in r] for r in cur.fetchall()],
+            "offset": offset, "limit": limit, "total": total}
+
+
 @router.get("/{dataset_id}/quality")
 def get_quality(dataset_id: str, user: CurrentUser,
                 conn: Conn) -> dict:
@@ -161,11 +220,35 @@ def get_quality(dataset_id: str, user: CurrentUser,
     return quality_report(_parquet(row), json.loads(row["profile_json"]), _reference_date())
 
 
+@router.get("/{dataset_id}/quality/examples")
+def get_quality_examples(dataset_id: str, user: CurrentUser, conn: Conn, check: str,
+                         column: str | None = None) -> dict:
+    row = authz.require_owned(conn, "datasets", dataset_id, user, Action.read)
+    return quality_examples(_parquet(row), json.loads(row["profile_json"]), _reference_date(),
+                            check, column)
+
+
 @router.get("/{dataset_id}/dependents")
 def get_dependents(dataset_id: str, user: CurrentUser,
                    conn: Conn) -> dict:
     authz.require_owned(conn, "datasets", dataset_id, user, Action.read)
     return _dependents(conn, user, dataset_id)
+
+
+@router.patch("/{dataset_id}")
+def rename_dataset(dataset_id: str, body: RenameBody, user: CurrentUser, conn: Conn) -> dict:
+    """Rename only: the data and its version are unchanged."""
+    authz.require_owned(conn, "datasets", dataset_id, user, Action.modify)
+    clash = AppError(Outcome.invalid_input, f"You already have a dataset named '{body.name}'.")
+    try:
+        if conn.execute("SELECT 1 FROM datasets WHERE owner_id = ? AND name = ? AND id != ?",
+                        (user.id, body.name, dataset_id)).fetchone():
+            raise clash
+        conn.execute("UPDATE datasets SET name = ?, updated_at = ? WHERE id = ?",
+                     (body.name, _now(), dataset_id))
+    except sqlite3.IntegrityError:
+        raise clash from None
+    return _meta(conn.execute("SELECT * FROM datasets WHERE id = ?", (dataset_id,)).fetchone())
 
 
 @router.put("/{dataset_id}")
