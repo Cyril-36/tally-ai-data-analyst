@@ -223,3 +223,10 @@ def test_same_filename_for_two_users_does_not_clash(env):
     assert env.upload("sales.csv")["name"] == "sales"
     assert env.as_user(BOB).upload("sales.csv")["name"] == "sales"
     assert len(env.client.get("/api/datasets").json()) == 1  # Bob sees only his own
+
+
+def test_upload_limit_follows_admin_setting(env):
+    env.conn.execute("INSERT INTO settings VALUES ('max_upload_mb', '1')")
+    big = b"a,b\n" + b"1,2\n" * 300_000
+    r = env.client.post("/api/datasets", files=[("files", ("big.csv", big, "text/csv"))])
+    assert r.status_code == 422 and "1 MB upload limit" in r.json()["message"]

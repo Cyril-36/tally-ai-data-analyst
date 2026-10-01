@@ -6,7 +6,6 @@ from pathlib import Path
 import duckdb
 import pytest
 
-from app.config import get_settings
 from app.contracts.outcomes import AppError, Outcome
 from app.datasets.ingest import ingest_csv
 
@@ -53,19 +52,6 @@ def test_binary_content_is_refused(tmp_path):
     with pytest.raises(AppError) as e:
         ingest_csv(b"a,b\n1,\x00\x01\n", "fake.csv", tmp_path / "v1.parquet")
     assert e.value.outcome == Outcome.invalid_input and "fake.csv" in e.value.message
-
-
-def test_size_limit_is_enforced(tmp_path, monkeypatch):
-    monkeypatch.setenv("MAX_UPLOAD_MB", "1")
-    get_settings.cache_clear()
-    try:
-        big = b"a,b\n" + b"1,2\n" * (300_000)
-        with pytest.raises(AppError) as e:
-            ingest_csv(big, "big.csv", tmp_path / "v1.parquet")
-        assert e.value.outcome == Outcome.invalid_input and "1 MB" in e.value.message
-    finally:
-        monkeypatch.undo()
-        get_settings.cache_clear()
 
 
 def test_latin1_is_decoded_with_a_warning(tmp_path):

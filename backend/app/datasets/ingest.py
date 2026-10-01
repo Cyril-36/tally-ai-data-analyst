@@ -10,7 +10,6 @@ from pathlib import Path
 
 import duckdb
 
-from app.config import get_settings
 from app.contracts.outcomes import AppError, Outcome
 from app.datasets.profile import build_profile, quote_literal
 
@@ -61,9 +60,6 @@ def ingest_csv(data: bytes, filename: str, parquet_path: Path) -> dict:
     Nothing is written if the file is refused."""
     if not filename.lower().endswith(".csv"):
         raise _refuse(filename, "only .csv files are accepted.")
-    limit_mb = get_settings().max_upload_mb
-    if len(data) > limit_mb * 1024 * 1024:
-        raise _refuse(filename, f"the file is larger than the {limit_mb} MB upload limit.")
 
     warnings: list[str] = []
     text = _decode(data, filename, warnings).lstrip()

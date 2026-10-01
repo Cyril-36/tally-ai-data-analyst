@@ -53,7 +53,9 @@ def init_db(path: Path) -> None:
 
 @contextmanager
 def connect(path: Path) -> Iterator[sqlite3.Connection]:
-    conn = sqlite3.connect(path, timeout=10, isolation_level=None)
+    # check_same_thread=False: FastAPI may open the connection and run the handler on
+    # different threadpool threads. Each request still gets its own connection.
+    conn = sqlite3.connect(path, timeout=10, isolation_level=None, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys=ON")
     conn.execute("PRAGMA journal_mode=WAL")

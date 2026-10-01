@@ -15,6 +15,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, UploadFile
 
+from app.admin.router import read_system_settings
 from app.auth import authz
 from app.auth.authz import Action
 from app.auth.deps import User, get_current_user
@@ -41,15 +42,14 @@ def _meta(row: sqlite3.Row) -> dict:
     return {k: row[k] for k in _META}
 
 
-def _read_upload(file: UploadFile) -> tuple[str, bytes]:
-    """Return (base filename, bytes), refusing anything over the size limit."""
+def _read_upload(conn: sqlite3.Connection, file: UploadFile) -> tuple[str, bytes]:
+    """Return (base filename, bytes), refusing anything over the admin-set size limit."""
     filename = Path(file.filename or "").name or "upload.csv"
-    limit = get_settings().max_upload_mb * 1024 * 1024
-    data = file.file.read(limit + 1)
-    if len(data) > limit:
+    limit_mb = read_system_settings(conn).max_upload_mb
+    data = file.file.read(limit_mb * 1024 * 1024 + 1)
+    if len(data) > limit_mb * 1024 * 1024:
         raise AppError(Outcome.invalid_input,
-                       f"'{filename}': the file is larger than the "
-                       f"{get_settings().max_upload_mb} MB upload limit.")
+                       f"'{filename}': the file is larger than the {limit_mb} MB upload limit.")
     return filename, data
 
 
@@ -68,7 +68,7 @@ def _remove(conn: sqlite3.Connection, dataset_id: str) -> None:
 
 
 def _create(conn: sqlite3.Connection, user: User, file: UploadFile) -> sqlite3.Row:
-    filename, data = _read_upload(file)
+    filename, data = _read_upload(conn, file)
     dataset_id = uuid.uuid4().hex
     try:
         profile = ingest_csv(data, filename, dataset_parquet_path(dataset_id, 1))
@@ -165,7 +165,7 @@ def replace_dataset(dataset_id: str, file: UploadFile, user: CurrentUser,
                     conn: Conn) -> dict:
     """Replace the file: version + 1. Old Parquet versions are kept."""
     row = authz.require_owned(conn, "datasets", dataset_id, user, Action.modify)
-    filename, data = _read_upload(file)
+    filename, data = _read_upload(conn, file)
     version = row["version"] + 1
     profile = ingest_csv(data, filename, dataset_parquet_path(dataset_id, version))
     conn.execute(

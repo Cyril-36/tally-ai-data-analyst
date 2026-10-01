@@ -12,11 +12,12 @@ from app.auth import passwords
 from app.auth.router import router as auth_router
 from app.config import get_settings
 from app.contracts.outcomes import HTTP_STATUS, AppError, ErrorBody, Outcome
+from app.datasets.router import router as datasets_router
 from app.db import connect, db_path, init_db
 from app.logging import configure_logging
 
 # Routers. Other tracks append theirs here at merge (e.g. app.datasets.router).
-ROUTERS = [auth_router, admin_router]
+ROUTERS = [auth_router, admin_router, datasets_router]
 
 log = logging.getLogger("app.request")
 STATE_CHANGING = {"POST", "PUT", "PATCH", "DELETE"}
