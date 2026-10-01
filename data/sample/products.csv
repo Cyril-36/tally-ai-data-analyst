@@ -1,0 +1,31 @@
+product_id,product_name,category,unit_cost
+P001,Wireless Mouse,Electronics,52.79
+P002,USB-C Hub,Electronics,65.66
+P003,Bluetooth Speaker,Electronics,53.41
+P004,Webcam HD,Electronics,37.53
+P005,Mechanical Keyboard,Electronics,34.78
+P006,Portable Charger,Electronics,48.69
+P007,Desk Organiser,Office,14.41
+P008,Notebook Pack,Office,23.24
+P009,Chair Cushion,Office,17.17
+P010,Desk Mat,Office,15.84
+P011,Whiteboard Set,Office,6.97
+P012,Label Maker,Office,7.22
+P013,Ceramic Mug Set,Home,20.26
+P014,Scented Candle,Home,25.72
+P015,Throw Blanket,Home,11.20
+P016,Wall Clock,Home,30.28
+P017,Storage Basket,Home,41.25
+P018,Table Lamp,Home,10.65
+P019,Yoga Mat,Fitness,13.61
+P020,Resistance Bands,Fitness,22.36
+P021,Water Bottle,Fitness,9.75
+P022,Jump Rope,Fitness,10.17
+P023,Foam Roller,Fitness,9.65
+P024,Gym Towel,Fitness,27.81
+P025,Chef Knife,Kitchen,38.90
+P026,Cutting Board,Kitchen,14.31
+P027,Coffee Grinder,Kitchen,38.46
+P028,Mixing Bowls,Kitchen,21.66
+P029,Spice Rack,Kitchen,6.22
+P030,Tea Infuser,Kitchen,54.40
