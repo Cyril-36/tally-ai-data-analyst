@@ -2,14 +2,21 @@
 
 import sqlite3
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field, StrictBool
 
 from app.auth import authz
 from app.auth.deps import Conn, CurrentUser
 from app.config import get_settings
 
-router = APIRouter(prefix="/api/admin", tags=["admin"])
+
+def _require_admin(user: CurrentUser) -> None:
+    # A dependency runs before body validation, so non-admins are refused
+    # without learning anything about the settings schema.
+    authz.require_admin(user)
+
+
+router = APIRouter(prefix="/api/admin", tags=["admin"], dependencies=[Depends(_require_admin)])
 
 
 class SystemSettings(BaseModel):
@@ -27,19 +34,15 @@ def read_system_settings(conn: sqlite3.Connection) -> SystemSettings:
 
 
 @router.get("/settings")
-def get_system_settings(
-    user: CurrentUser, conn: Conn
-) -> SystemSettings:
-    authz.require_admin(user)
+def get_system_settings(conn: Conn) -> SystemSettings:
     return read_system_settings(conn)
 
 
 @router.put("/settings")
 def put_system_settings(
     body: SystemSettings,
-    user: CurrentUser, conn: Conn,
+    conn: Conn,
 ) -> SystemSettings:
-    authz.require_admin(user)
     values = {"max_upload_mb": str(body.max_upload_mb),
               "llm_enabled": "true" if body.llm_enabled else "false"}
     for key, value in values.items():

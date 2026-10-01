@@ -81,3 +81,9 @@ def test_no_api_path_creates_an_admin(client):
                                         "role": "admin"}))
     assert r.status_code in (201, 422)
     assert client.get("/api/auth/me").json().get("role", "analyst") == "analyst"
+
+
+def test_analyst_refused_before_body_validation(make_client):
+    r = make_client().put("/api/admin/settings", json={})
+    assert r.status_code == 403
+    assert r.json()["message"] == "Only an admin can change system settings."
