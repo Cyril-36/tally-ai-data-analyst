@@ -1,0 +1,68 @@
+/* Design tokens, translated from the Tally prototype's inline styles. */
+:root {
+  /* surfaces */
+  --bg: #f3f1ec;
+  --surface: #ffffff;
+  --surface-alt: #faf9f6;
+  --surface-sunken: #eae7e0; /* sidebar, tab track */
+  --surface-dark: #1b1b18;
+  --surface-dark-raised: #2a2925;
+
+  /* text */
+  --ink: #1b1b18;
+  --muted: #57554d;
+  --faint: #a39e92;
+  --on-dark: #f3f1ec;
+  --on-dark-muted: #cfcac0;
+  --on-dark-accent: #8fb3a5;
+
+  /* lines */
+  --border: #cec9be;
+  --border-soft: #e0dcd2;
+  --border-faint: #eeeae2;
+  --border-row: #f2efe8;
+  --border-sidebar: #dcd7cc;
+  --border-dark: #3a3934;
+
+  /* accent (green) */
+  --accent: #1f5c4a;
+  --accent-soft: #e3eee9;
+  --accent-tint: #cfe0d8;
+  --accent-line: #a9c2b7;
+  --accent-mid: #9dbbae;
+  --accent-mid-2: #5e8c7c;
+  --accent-faint: #f6faf8;
+
+  /* status */
+  --error: #9b2c1d;
+  --error-bg: #fbe8e3;
+  --error-line: #e9c3b8;
+  --warn: #7a4e00;
+  --warn-bg: #faf0d9;
+  --warn-line: #e8d5a8;
+  --warn-wash: #fdf8ec;
+  --flag: #b8401a; /* anomaly markers */
+  --flag-ink: #8a2f12;
+  --flag-bg: #f8e7df;
+
+  /* type */
+  --font-sans: 'Geist Variable', 'Geist', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-serif: 'Instrument Serif', Georgia, serif;
+
+  /* shape */
+  --radius-sm: 5px;
+  --radius: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+
+  --shadow-pop: 0 12px 32px rgba(27, 27, 24, 0.16);
+  --shadow-toast: 0 8px 28px rgba(27, 27, 24, 0.22);
+  --shadow-drawer: 0 0 40px rgba(27, 27, 24, 0.25);
+  --scrim: rgba(27, 27, 24, 0.35);
+  --scrim-dialog: rgba(27, 27, 24, 0.4);
+
+  --sidebar-w: 264px;
+  --header-h: 56px;
+}
