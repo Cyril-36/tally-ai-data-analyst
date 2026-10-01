@@ -29,3 +29,9 @@ Kept from v2: per-field owner/check/failure table, monitoring → response per f
 - **Auth mechanics fixed:** Argon2id, server-side sessions (8h idle / 24h absolute), logout deletes the session, CLI/env-only admin provisioning.
 - **Forecasting comes before sharing** post-gate. *Why:* it's a listed bonus; sharing adds authorization lifecycle work.
 - **Planning is closed.** Further changes are made as edits alongside the code that needs them.
+
+## 2026-10-02: integration findings (live verification of tracks A–C)
+- **Join rule extended:** when a metric comes from the *joined* (right) dataset, the left key must be unique too. Live data had one duplicated order whose payments (£134.64) were silently double-counted even with `pre_aggregate`.
+- **Upload limit comes from the admin setting**, not env config (cross-area rule).
+- **Period-over-period is not in the `AnalysisSpec` grammar.** Trend and comparison claims use time-bucketed results instead. Add it only if a golden question needs it.
+- **Open:** `AnomalyReport` lacks an `excluded_values` count (it currently goes in `reason`); add it when the agent turns it into a caveat.

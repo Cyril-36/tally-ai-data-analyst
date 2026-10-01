@@ -27,7 +27,7 @@ from app.analysis.validator import expr_text, validate
 from app.config import get_settings
 from app.contracts.outcomes import AppError, Outcome
 from app.contracts.result import Caveat, ExecutionMeta, ResultColumn, ResultTable
-from app.contracts.spec import AnalysisSpec, BinOp, Metric
+from app.contracts.spec import AnalysisSpec, BinOp, Col, ColumnRef, Expr, Metric
 
 WORKER = Path(__file__).with_name("worker.py")
 _VIEW = re.compile(r"^[A-Za-z_][A-Za-z0-9_]{0,31}$")
@@ -130,7 +130,10 @@ def run_spec(spec: AnalysisSpec, catalog: Catalog) -> tuple[ResultTable, Executi
     validate(spec, catalog)
     caveats: list[Caveat] = []
     for join in spec.joins:
-        check = check_join(join, catalog, execute)
+        uses_right = any(
+            ref.dataset == join.right.dataset for m in spec.metrics for ref in _refs(m.expr)
+        )
+        check = check_join(join, catalog, execute, metrics_use_right=uses_right)
         if not check.allowed:
             raise AppError(Outcome.unsupported, check.reason or "Join refused")
         if check.orphan_left_rows:
@@ -198,6 +201,14 @@ def run_spec(spec: AnalysisSpec, catalog: Catalog) -> tuple[ResultTable, Executi
         caveats=caveats,
     )
     return table, meta
+
+
+def _refs(expr: Expr | None) -> list[ColumnRef]:
+    if isinstance(expr, Col):
+        return [expr.ref]
+    if isinstance(expr, BinOp):
+        return [*_refs(expr.left), *_refs(expr.right)]
+    return []
 
 
 def _all_metrics(spec: AnalysisSpec) -> list[Metric]:

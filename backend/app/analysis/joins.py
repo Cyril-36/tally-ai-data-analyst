@@ -33,7 +33,9 @@ class JoinCheck:
     reason: str | None  # why the join was refused; None when allowed
 
 
-def check_join(join: Join, catalog: Catalog, executor: Executor) -> JoinCheck:
+def check_join(
+    join: Join, catalog: Catalog, executor: Executor, metrics_use_right: bool = False
+) -> JoinCheck:
     left = lookup_dataset(catalog, join.left.dataset)
     right = lookup_dataset(catalog, join.right.dataset)
     for ds, column in ((left, join.left.column), (right, join.right.column)):
@@ -52,8 +54,15 @@ def check_join(join: Join, catalog: Catalog, executor: Executor) -> JoinCheck:
     orphans = out.extra[1].rows[0][0]
 
     right_unique = right_nonnull == right_distinct
+    left_unique = left_nonnull == left_distinct
     reason = None
-    if not right_unique and join.pre_aggregate is None:
+    if metrics_use_right and not left_unique:
+        # Totals taken from the right side are repeated once per duplicate left key.
+        reason = (
+            f"{left.name}.{lkey} has duplicate values, so {right.name} figures would be "
+            f"counted more than once per {lkey}. Remove the duplicates in {left.name} first."
+        )
+    elif not right_unique and join.pre_aggregate is None:
         reason = (
             f"Joining {left.name} to {right.name} would repeat each {left.name} row once per "
             f"matching {right.name} row and inflate totals; aggregate {right.name} per "
@@ -61,7 +70,7 @@ def check_join(join: Join, catalog: Catalog, executor: Executor) -> JoinCheck:
         )
     return JoinCheck(
         allowed=reason is None,
-        left_unique=left_nonnull == left_distinct,
+        left_unique=left_unique,
         right_unique=right_unique,
         right_null_keys=right_rows - right_nonnull,
         orphan_left_rows=orphans,

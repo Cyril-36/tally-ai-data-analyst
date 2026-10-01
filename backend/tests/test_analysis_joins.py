@@ -140,3 +140,33 @@ def test_run_spec_with_pre_aggregate_keeps_the_order_total(one_order):
     table, meta = run_spec(s, one_order)
     assert table.rows == [["West", 100.0, 100.0]]  # not 200
     assert not meta.caveats
+
+
+def test_duplicate_left_key_refused_when_total_comes_from_right(tmp_path):
+    # Found in live verification: a duplicated order row doubled its payments total.
+    cat = make_catalog(
+        tmp_path,
+        {
+            "orders": pd.DataFrame({"order_id": [1, 1, 2], "total": [100.0, 100.0, 50.0]}),
+            "payments": pd.DataFrame({"order_id": [1, 2], "amount": [100.0, 50.0]}),
+        },
+    )
+    paid = {"name": "paid", "agg": "sum", "expr": col("payments", "amount")}
+    s = spec(
+        base_dataset="orders",
+        metrics=[paid],
+        joins=[{"left": ref("orders", "order_id"), "right": ref("payments", "order_id")}],
+    )
+    with pytest.raises(AppError) as err:
+        run_spec(s, cat)
+    assert err.value.outcome == Outcome.unsupported
+    assert "counted more than once" in err.value.message
+
+    # The same join is fine when the total comes from the left side only.
+    s = spec(
+        base_dataset="orders",
+        metrics=[{"name": "total", "agg": "sum", "expr": col("orders", "total")}],
+        joins=[{"left": ref("orders", "order_id"), "right": ref("payments", "order_id")}],
+    )
+    table, _ = run_spec(s, cat)
+    assert table.rows == [[250.0]]
