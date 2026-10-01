@@ -61,3 +61,21 @@ def connect(path: Path) -> Iterator[sqlite3.Connection]:
         yield conn
     finally:
         conn.close()
+
+
+def db_path() -> Path:
+    from app.config import get_settings
+
+    return get_settings().data_dir / "app.sqlite3"
+
+
+def get_conn() -> Iterator[sqlite3.Connection]:
+    """FastAPI dependency. Tests override it or point DATA_DIR at a tmp dir."""
+    with connect(db_path()) as conn:
+        yield conn
+
+
+def dataset_parquet_path(dataset_id: str, version: int) -> Path:
+    from app.config import get_settings
+
+    return get_settings().data_dir / "datasets" / dataset_id / f"v{version}.parquet"
