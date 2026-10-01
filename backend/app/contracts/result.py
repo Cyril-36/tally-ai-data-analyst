@@ -150,6 +150,7 @@ class AnomalyReport(_Model):
     reason: str | None = None  # required unless completed_*
     series_checked: int = 0
     series_skipped: int = 0
+    excluded_values: int = 0
 
 
 # ---- the result -----------------------------------------------------------------

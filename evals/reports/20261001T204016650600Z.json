@@ -1,0 +1,38 @@
+{
+  "cases": [
+    {
+      "http_status": 502,
+      "id": "total_revenue",
+      "latency_ms": 18452,
+      "message": "The AI provider failed or returned an invalid response. Try again.",
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "chart_valid": false,
+        "claims_valid": false,
+        "correct": false,
+        "outcome": "provider_failed",
+        "outcome_correct": false,
+        "table_correct": false
+      },
+      "status": "http_error",
+      "tokens": null
+    }
+  ],
+  "correct": 0,
+  "cost": null,
+  "cost_note": "Provider billing rates were not available to this runner.",
+  "dirty_tree": true,
+  "fixture_sha256": {
+    "customers.csv": "cc4f9454e24069c08aa04572e22e318bd2609025ba04022960ad842990c419ac",
+    "orders.csv": "29a6d83fc3c35567723d02d821eb3170f86231085f1bbc27de068a15f907d00c",
+    "products.csv": "44199f7b3cda030273cf62e700098a95d6797d9cae0d1b254df7b67430032c67"
+  },
+  "git_sha": "b6972db61b78378094dc767fe0cd52a2e92e7d93",
+  "model": "gemini-2.5-flash",
+  "not_run": 0,
+  "prompt_config_sha256": "278fed389523eab25024e5655a5b160aa4ab04e2e39f231f9b3a86861b5c9175",
+  "reference_date": "2026-10-02",
+  "run_at": "2026-10-01T20:39:56.706354+00:00",
+  "temperature": 0
+}

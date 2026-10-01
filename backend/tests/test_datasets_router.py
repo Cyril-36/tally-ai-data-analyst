@@ -71,8 +71,10 @@ def add_result_and_pin(env: Env, dataset_id: str, owner: User = ALICE) -> None:
                      (owner.id, json.dumps({dataset_id: 1})))
     env.conn.execute("INSERT INTO results VALUES ('r2', ?, 'c1', '{}', ?, '2026-01-01')",
                      (owner.id, json.dumps({"some-other-dataset": 1})))
-    env.conn.execute("INSERT INTO pins VALUES ('p1', ?, 'r1', 'k1', '2026-01-01')", (owner.id,))
-    env.conn.execute("INSERT INTO pins VALUES ('p2', ?, 'r2', 'k2', '2026-01-01')", (owner.id,))
+    env.conn.execute("INSERT INTO pins (id, owner_id, result_id, idempotency_key, created_at)"
+                     " VALUES ('p1', ?, 'r1', 'k1', '2026-01-01')", (owner.id,))
+    env.conn.execute("INSERT INTO pins (id, owner_id, result_id, idempotency_key, created_at)"
+                     " VALUES ('p2', ?, 'r2', 'k2', '2026-01-01')", (owner.id,))
 
 
 # ---- upload / list / get -------------------------------------------------------------

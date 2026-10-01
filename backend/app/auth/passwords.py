@@ -53,15 +53,27 @@ def create_user(conn: sqlite3.Connection, email: str, password: str, role: str) 
     if user_exists(conn, email):
         raise AppError(Outcome.invalid_input, "That email is already registered.")
     user_id = uuid.uuid4().hex
-    conn.execute(
-        "INSERT INTO users (id, email, password_hash, role, created_at) VALUES (?, ?, ?, ?, ?)",
-        (user_id, normalize_email(email), hash_password(password), role,
-         datetime.now(UTC).isoformat()),
-    )
+    try:
+        conn.execute(
+            "INSERT INTO users (id, email, password_hash, role, created_at)"
+            " VALUES (?, ?, ?, ?, ?)",
+            (user_id, normalize_email(email), hash_password(password), role,
+             datetime.now(UTC).isoformat()),
+        )
+    except sqlite3.IntegrityError:
+        raise AppError(Outcome.invalid_input, "That email is already registered.") from None
     return user_id
 
 
 def ensure_admin(conn: sqlite3.Connection, email: str, password: str) -> None:
     """Startup seed: create the admin only if that email does not exist yet."""
-    if email and password and not user_exists(conn, email):
-        create_user(conn, email, password, "admin")
+    if not email or not password:
+        return
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        if not user_exists(conn, email):
+            create_user(conn, email, password, "admin")
+        conn.commit()
+    except BaseException:
+        conn.rollback()
+        raise

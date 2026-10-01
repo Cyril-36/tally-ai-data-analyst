@@ -7,6 +7,7 @@ Rule 2 (admin): only admins change system settings. Admin grants NO data access.
 Sharing is not in v1, so every non-owner access is refused.
 """
 
+import logging
 import sqlite3
 from enum import StrEnum
 
@@ -15,6 +16,7 @@ from app.contracts.outcomes import AppError, Outcome
 
 _OWNED_TABLES = {"datasets": "Dataset", "conversations": "Conversation",
                  "results": "Result", "pins": "Pinned item"}
+log = logging.getLogger("app.authz")
 
 
 class Action(StrEnum):
@@ -36,6 +38,8 @@ def require_owned(
         (resource_id, user.id),
     ).fetchone()
     if row is None:
+        log.info("access_refused", extra={"user_id": user.id, "resource": table,
+                                          "action": action.value})
         raise AppError(Outcome.not_found, f"{label} not found or you don't have access to it.")
     return row
 

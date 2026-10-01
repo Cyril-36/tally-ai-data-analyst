@@ -11,7 +11,7 @@
 5. **Verification beats feature count.** An optional feature only ships if it has a passing acceptance check.
 
 ## 2. Stack (decided)
-FastAPI + Pydantic v2 · DuckDB · pandas · SQLite (users, sessions, results, cache) · React + TypeScript + Vite + Tailwind + shadcn/ui · **Plotly** (the only chart library) · pytest + Playwright · Docker (one image; FastAPI serves the built SPA) · `uv.lock` and `package-lock.json` committed, installed with `--frozen` / `npm ci`.
+FastAPI + Pydantic v2 · DuckDB · pandas · SQLite (users, sessions, results, cache) · React + TypeScript + Vite + Tailwind + shadcn/ui · **Plotly** (the only chart library) · pytest + Playwright · Docker for the backend; the frontend is integrated when it is ready · `uv.lock` committed and installed with `--frozen` (the frontend will own its lockfile).
 **LLM: one provider**, chosen only after a tool-calling smoke test proves access and quota. The adapter interface exists, but there is no second provider in the acceptance gate.
 
 ## 3. Query path: structured only (v1)
@@ -24,7 +24,7 @@ FastAPI + Pydantic v2 · DuckDB · pandas · SQLite (users, sessions, results, c
   - a time bucket (`day|week|month|quarter|year`)
   - sort + limit (top-k)
   - joins along approved relationships only (see Join rule)
-  - period-over-period comparison
+  - period-over-period comparison derived from complete time-bucket results
 - **Identifiers** are validated against the dataset schema and quoted by the compiler. **Values** are always bound parameters, never interpolated.
 - **Unsupported questions** → `needs_clarification` or `unsupported`, with what's missing. No free-form SQL in v1. LLM-written SQL is a post-v1 extension and needs its own sandbox and test suite.
 - **Join rule (refusal, not a warning).** `check_join` measures cardinality on the actual data: key uniqueness on each side, plus null and orphan rates.
@@ -50,7 +50,7 @@ Threat model: v1 runs **only compiler-generated SQL from validated specs** (iden
 - Linux `setrlimit`: `RLIMIT_AS` (hard memory cap), `RLIMIT_CPU`, `RLIMIT_NOFILE`, `RLIMIT_FSIZE=0`.
 - The parent enforces a wall-clock timeout with `SIGKILL`, then deletes the temp dir in `finally`. One worker per request means no state is shared between sessions.
 
-**Tier B, in `docker-compose` (the documented deployment):**
+**Tier B, after the v1 backend gate (not currently shipped):**
 - The executor is its own service with `network_mode: none`, `read_only: true` rootfs, a `tmpfs` scratch, `mem_limit`/`cpus`/`pids_limit`, `cap_drop: [ALL]`, `no-new-privileges`, and no secrets in its env.
 - It receives Parquet + spec from the API over a Unix socket on a shared volume.
 
@@ -62,7 +62,7 @@ Threat model: v1 runs **only compiler-generated SQL from validated specs** (iden
 - Two concurrent sessions can't see each other's tables.
 - Tier B only, in CI: an outbound connect from the executor container fails.
 
-The README states the tier per deployment target (e.g. HF Spaces = Tier A only).
+The current Docker Compose deployment uses Tier A in a non-root container with a read-only root filesystem, dropped capabilities, process and memory limits. The README states the achieved tier per deployment target. A separate network-isolated executor is future hardening.
 
 ## 4. Agent loop (adaptive, bounded)
 - **Steps:** interpret → inspect schema → decide (clarify / derive metric / check join / check quality / analyze / stop) → tool → inspect result → refine or stop.
@@ -96,7 +96,7 @@ The README states the tier per deployment target (e.g. HF Spaces = Tier A only).
 | `chart_spec` | `charts/builder.py` | Columns exist; type is in the allowed set for the data shape; plotted values = table values | Table + reason |
 | `anomalies` | `analysis/anomalies.py` | Each flag has method, value, median, MAD, robust-z, threshold, row ref | `completed_none` / `completed_found` / `insufficient_data` / `execution_failed` (distinct) |
 | `caveats` | executor metadata | Present whenever the metadata says so | Never empty by fallback |
-| `clarification` | `agent/planner.py` | Triggered on ambiguous metric/date (golden cases) | — |
+| `clarification` | `agent/service.py` | Triggered on ambiguous metric/date (golden cases) | — |
 | `export` | `reports/builder.py` | Built from stored `result_id`; permission rechecked | Discloses stale/missing dependencies |
 
 ## 7. Authorization matrix
@@ -128,7 +128,7 @@ Each row gets a test. Destructive actions in the UI need a confirmation dialog t
 - **Demo accounts:** `analyst1@example.com`, `analyst2@example.com`, `admin@example.com`. Passwords live in `.env.example`/seed for local use only and are documented as demo-only.
 
 ## 8. Cache
-`key = hash(canonical AnalysisSpec after context resolution, dataset ids + versions, metric definitions, executor version)`. Results are stored with an `access_scope`, and permission is **rechecked on every read**. Replacing a dataset bumps its version (old keys stop matching), and pinned cards and reports show "Dataset changed — refresh required". There is no LLM-response cache in v1.
+`key = hash(canonical AnalysisSpec after context resolution, owner id, dataset ids + versions, executor version)`. Cache rows are owner-scoped, and permission is **rechecked on every read**. Replacing a dataset bumps its version (old keys stop matching), and pinned cards and reports show "Dataset changed — refresh required". There is no LLM-response cache in v1.
 
 ## 9. Anomaly detection (v1 = one method, done well)
 - **Method:** robust z-score `|x − median| / (1.4826·MAD) > 3.5`.
@@ -175,7 +175,7 @@ Each row gets a test. Destructive actions in the UI need a confirmation dialog t
 
 ## 12. Data and dates
 - **Fixtures** (tests and eval) are generated with a fixed seed and a fixed `REFERENCE_DATE=2026-09-30`; they are reproducible byte-for-byte.
-- **Demo data** is the same generator with `DEMO_REFERENCE_DATE` (default: today) so "last month" stays meaningful live. The reference date is recorded in every eval report.
+- **Demo data** uses the same generator with today's date by default, or `--reference-date` to pin a walkthrough, so "last month" stays meaningful. The reference date is recorded in `ANOMALIES.md` and every eval report.
 - Fictional names only, `@example.com` emails, GBP, documented metric definitions (revenue = quantity × unit_price − discount_amount).
 - Planted anomalies are listed in `data/fixtures/ANOMALIES.md` (ground truth).
 

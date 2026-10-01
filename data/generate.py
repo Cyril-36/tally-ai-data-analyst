@@ -1,8 +1,9 @@
 """Deterministic sample-data generator (PLAN.md section 12).
 
-    python data/generate.py                              # data/sample + backend/tests/fixtures
-    python data/generate.py --reference-date 2026-10-02  # demo data, data/sample only
-    python data/generate.py --out-dir /tmp/x             # custom folder only
+    python data/generate.py                              # current-date sample + fixed fixtures
+    python data/generate.py --reference-date 2026-10-02  # pin sample date
+    python data/generate.py --out-dir /tmp/x              # fixed fixture date
+    python data/generate.py --demo-today --out-dir /tmp/x # current-date demo
 
 Same seed + same reference date => byte-identical files. Everything is fictional:
 made-up names, @example.com emails, GBP. Revenue = quantity * unit_price - discount_amount.
@@ -384,17 +385,21 @@ def write(ref: date, out_dir: Path, bad_dir: Path | None = None) -> None:
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     p.add_argument("--reference-date", type=date.fromisoformat,
-                   help="demo date (default 2026-09-30)")
+                   help="pin the sample/custom output date (otherwise sample uses today)")
+    p.add_argument("--demo-today", action="store_true",
+                   help="use today's date with --out-dir")
     p.add_argument("--out-dir", type=Path, help="write only here")
     args = p.parse_args()
-    ref = args.reference_date or DEFAULT_REFERENCE_DATE
+    if args.reference_date and args.demo_today:
+        p.error("choose --reference-date or --demo-today, not both")
     if args.out_dir:
-        write(ref, args.out_dir)
+        write(args.reference_date or (date.today() if args.demo_today else DEFAULT_REFERENCE_DATE),
+              args.out_dir)
     elif args.reference_date:
-        write(ref, SAMPLE_DIR)
+        write(args.reference_date, SAMPLE_DIR)
     else:
-        write(ref, SAMPLE_DIR)
-        write(ref, FIXTURE_DIR, bad_dir=FIXTURE_DIR / "bad")
+        write(date.today(), SAMPLE_DIR)
+        write(DEFAULT_REFERENCE_DATE, FIXTURE_DIR, bad_dir=FIXTURE_DIR / "bad")
 
 
 if __name__ == "__main__":

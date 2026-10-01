@@ -8,6 +8,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from app.admin.router import router as admin_router
+from app.agent.router import router as agent_router
 from app.auth import passwords
 from app.auth.router import router as auth_router
 from app.config import get_settings
@@ -15,9 +16,10 @@ from app.contracts.outcomes import HTTP_STATUS, AppError, ErrorBody, Outcome
 from app.datasets.router import router as datasets_router
 from app.db import connect, db_path, init_db
 from app.logging import configure_logging
+from app.workspace.router import router as workspace_router
 
 # Routers. Other tracks append theirs here at merge (e.g. app.datasets.router).
-ROUTERS = [auth_router, admin_router, datasets_router]
+ROUTERS = [auth_router, admin_router, datasets_router, workspace_router, agent_router]
 
 log = logging.getLogger("app.request")
 STATE_CHANGING = {"POST", "PUT", "PATCH", "DELETE"}
@@ -40,7 +42,6 @@ async def lifespan(app: FastAPI):
 def create_app() -> FastAPI:
     configure_logging()
     app = FastAPI(title="AI Data Analyst", lifespan=lifespan)
-    app.state.login_attempts = {}
 
     @app.middleware("http")
     async def request_middleware(request: Request, call_next):
@@ -62,6 +63,11 @@ def create_app() -> FastAPI:
             response = _error(Outcome.execution_failed,
                               f"Something went wrong (request {request_id}).", 500)
         response.headers["X-Request-ID"] = request_id
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "no-referrer"
+        if path.startswith("/api"):
+            response.headers["Cache-Control"] = "no-store"
         log.info("request", extra={
             "request_id": request_id, "method": request.method, "path": path,
             "status": response.status_code, "user_id": request.state.user_id,
@@ -84,6 +90,15 @@ def create_app() -> FastAPI:
     @app.get("/api/health")
     def health():
         return {"status": "ok"}
+
+    @app.get("/api/ready")
+    def ready():
+        try:
+            with connect(db_path()) as conn:
+                conn.execute("SELECT 1 FROM users LIMIT 1").fetchone()
+        except Exception:
+            return _error(Outcome.execution_failed, "Metadata store is unavailable.", 503)
+        return {"status": "ready", "ai_configured": bool(get_settings().llm_api_key)}
 
     for router in ROUTERS:
         app.include_router(router)

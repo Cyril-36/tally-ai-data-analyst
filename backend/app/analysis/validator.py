@@ -78,6 +78,9 @@ def validate(spec: AnalysisSpec, catalog: Catalog) -> None:
 
     sortable = set(dim_names) | {m.name for m in spec.metrics}
     if spec.time_bucket:
+        if "time_bucket" in sortable:
+            raise invalid("'time_bucket' is reserved for time sorting when a time bucket is used. "
+                          "Rename the metric or use a different dimension.")
         sortable.add("time_bucket")
     for key in spec.sort:
         if key.by not in sortable:

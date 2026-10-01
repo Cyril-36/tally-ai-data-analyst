@@ -6,6 +6,7 @@ import json
 import re
 import subprocess
 import sys
+from datetime import date
 from pathlib import Path
 
 import pandas as pd
@@ -14,7 +15,6 @@ import pytest
 REPO = Path(__file__).resolve().parents[2]
 GENERATOR = REPO / "data" / "generate.py"
 FIXTURES = Path(__file__).parent / "fixtures"
-SAMPLE = REPO / "data" / "sample"
 OUTPUTS = ["orders.csv", "customers.csv", "products.csv", "payments.csv", "messy_customers.csv",
            "ANOMALIES.md"]
 
@@ -48,7 +48,6 @@ def test_two_runs_are_byte_identical_and_match_committed_files(tmp_path):
     for name in OUTPUTS:
         assert _sha(tmp_path / "a" / name) == _sha(tmp_path / "b" / name), name
         assert _sha(tmp_path / "a" / name) == _sha(FIXTURES / name), f"fixtures/{name} is stale"
-        assert _sha(tmp_path / "a" / name) == _sha(SAMPLE / name), f"sample/{name} is stale"
 
 
 def test_other_reference_date_keeps_anomalies_and_ends_on_that_date(tmp_path):
@@ -56,6 +55,12 @@ def test_other_reference_date_keeps_anomalies_and_ends_on_that_date(tmp_path):
     df = pd.read_csv(tmp_path / "orders.csv")
     assert df.order_date.max() == "2026-10-15"
     assert (tmp_path / "ANOMALIES.md").read_text().count("2026-10-15") >= 1
+
+
+def test_demo_today_keeps_sample_dates_current_without_changing_fixtures(tmp_path):
+    _run(tmp_path, "--demo-today")
+    df = pd.read_csv(tmp_path / "orders.csv")
+    assert df.order_date.max() == date.today().isoformat()
 
 
 def test_orders_shape(orders):

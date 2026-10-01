@@ -11,6 +11,12 @@ class Settings(BaseSettings):
     llm_api_key: str = ""
     llm_model: str = "gemini-2.5-flash"
     llm_timeout_s: float = 60.0
+    llm_wall_s: float = 90.0
+    llm_max_tokens: int = 2000
+    llm_turn_token_cap: int = 12000
+    max_user_active_turns: int = 2
+    max_active_turns: int = 16
+    executor_socket: str = ""
 
     app_secret_key: str = "dev-only-change-me"  # noqa: S105 - overridden via .env
     data_dir: Path = Path("./var")

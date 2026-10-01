@@ -23,4 +23,5 @@ var/
 
 # os
 .DS_Store
+*.swp
 

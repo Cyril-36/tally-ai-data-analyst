@@ -1,0 +1,29 @@
+services:
+  api:
+    image: digitalback-api:latest
+    build: .
+    ports:
+      - "${PORT:-8768}:8000"
+    environment:
+      DATA_DIR: /srv/app/var
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://aicredits.in/v1}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-gemini-2.5-flash}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+    volumes:
+      - analyst-data:/srv/app/var
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=2g
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 128
+    mem_limit: 3g
+    cpus: 2
+    restart: unless-stopped
+
+volumes:
+  analyst-data:

@@ -115,6 +115,7 @@ def detect(
         reason="; ".join(notes) or None,
         series_checked=checked,
         series_skipped=skipped,
+        excluded_values=excluded,
     )
 
 

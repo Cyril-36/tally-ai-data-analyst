@@ -1,6 +1,7 @@
 """SQLite metadata store. One shared schema so parallel tracks don't diverge.
 Datasets themselves are Parquet files under data_dir/datasets/<id>/v<version>.parquet."""
 
+import fcntl
 import sqlite3
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -42,13 +43,40 @@ CREATE TABLE IF NOT EXISTS cache (
     result_json TEXT NOT NULL, created_at TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS login_attempts (
+    ip TEXT NOT NULL, email TEXT NOT NULL, attempted_at REAL NOT NULL
+);
+CREATE INDEX IF NOT EXISTS login_attempt_time ON login_attempts(attempted_at);
+CREATE TABLE IF NOT EXISTS turns (
+    id TEXT PRIMARY KEY, conversation_id TEXT NOT NULL REFERENCES conversations(id)
+      ON DELETE CASCADE, request_key TEXT NOT NULL, request_json TEXT NOT NULL,
+    result_id TEXT REFERENCES results(id), status TEXT NOT NULL,
+    started_at REAL NOT NULL, UNIQUE(conversation_id, request_key)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS one_active_turn ON turns(conversation_id)
+    WHERE status = 'running';
 """
 
 
 def init_db(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    with connect(path) as conn:
-        conn.executescript(SCHEMA)
+    # WAL mode cannot be changed while another worker initializes the same database.
+    with path.with_suffix(".init.lock").open("a+b") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        with connect(path) as conn:
+            conn.execute("PRAGMA journal_mode=WAL")
+            conn.executescript(SCHEMA)
+            conn.execute("BEGIN IMMEDIATE")
+            try:
+                pin_columns = {row["name"] for row in conn.execute("PRAGMA table_info(pins)")}
+                if "title" not in pin_columns:
+                    conn.execute("ALTER TABLE pins ADD COLUMN title TEXT NOT NULL DEFAULT ''")
+                if "position" not in pin_columns:
+                    conn.execute("ALTER TABLE pins ADD COLUMN position INTEGER NOT NULL DEFAULT 0")
+                conn.commit()
+            except BaseException:
+                conn.rollback()
+                raise
 
 
 @contextmanager
@@ -58,7 +86,6 @@ def connect(path: Path) -> Iterator[sqlite3.Connection]:
     conn = sqlite3.connect(path, timeout=10, isolation_level=None, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys=ON")
-    conn.execute("PRAGMA journal_mode=WAL")
     try:
         yield conn
     finally:

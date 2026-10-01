@@ -1,0 +1,16 @@
+.git
+.venv
+backend/.venv
+backend/.pytest_cache
+backend/.ruff_cache
+**/__pycache__
+**/*.pyc
+**/*.sqlite3
+.env
+.env.*
+!.env.example
+frontend
+data
+docs
+evals
+scripts

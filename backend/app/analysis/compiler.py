@@ -268,7 +268,8 @@ def _temporal_cast(dtype: str) -> str:
 
 def _order(spec: AnalysisSpec, roles: dict[str, ColumnRole]) -> list[exp.Ordered]:
     if spec.sort:
-        keys = [("period" if k.by == "time_bucket" else k.by, k.descending) for k in spec.sort]
+        keys = [("period" if spec.time_bucket and k.by == "time_bucket" else k.by,
+                 k.descending) for k in spec.sort]
     elif spec.time_bucket:
         keys = [("period", False)]
     else:

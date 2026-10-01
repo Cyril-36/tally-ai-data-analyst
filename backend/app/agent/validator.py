@@ -1,0 +1,158 @@
+"""Validate factual semantics and values; templates, not model prose, render them."""
+
+import math
+
+from app.contracts.result import CalcSource, ClaimKind, ColumnRole
+
+
+def validate_claims(result):
+    if result.table is None:
+        return []
+    columns = result.table.columns
+    names = [c.name for c in columns]
+    roles = {c.name: c.role for c in columns}
+    dimensions = [c.name for c in columns if c.role == ColumnRole.dimension]
+    times = [c.name for c in columns if c.role == ColumnRole.time]
+    keys = [*dimensions, *times]
+    rows = [dict(zip(names, row, strict=True)) for row in result.table.rows]
+    accepted = []
+    known = {}
+    for claim in result.claims:
+        expected_unit = (
+            "%"
+            if isinstance(claim.source, CalcSource) and (claim.source.op == "pct_change")
+            else None
+        )
+        if claim.id in known or claim.unit != expected_unit or not math.isfinite(claim.value):
+            continue  # A currency cannot be inferred from an arbitrary CSV.
+        if isinstance(claim.source, CalcSource):
+            if not _calc(claim, known, result, rows, times):
+                continue
+        else:
+            source = claim.source
+            if roles.get(source.column) != ColumnRole.metric or claim.metric != source.column:
+                continue
+            if set(source.row_key) != set(keys):
+                continue
+            matches = [r for r in rows if all(r[k] == v for k, v in source.row_key.items())]
+            if len(matches) != 1:
+                continue
+            row = matches[0]
+            entity = {k: row[k] for k in dimensions}
+            if entity != claim.entity:
+                continue
+            if claim.kind == ClaimKind.trend:
+                if not times or not _complete(result):
+                    continue
+                series = [
+                    r
+                    for r in rows
+                    if all(r[k] == v for k, v in entity.items())
+                    and r[times[0]] is not None
+                    and _number(r[claim.metric])
+                ]
+                series.sort(key=lambda r: str(r[times[0]]))
+                if len(series) < 3:
+                    continue
+                change = series[-1][claim.metric] - series[0][claim.metric]
+                direction = "up" if change > 0 else "down" if change < 0 else "flat"
+                if (
+                    claim.periods_covered != len(series)
+                    or claim.direction != direction
+                    or claim.period != f"{series[0][times[0]]} to {series[-1][times[0]]}"
+                    or not _same(claim.value, change)
+                ):
+                    continue
+            else:
+                period = str(row[times[0]]) if times else None
+                if claim.period != period or not _same(claim.value, row[claim.metric]):
+                    continue
+                if claim.kind == ClaimKind.rank:
+                    if not _complete(result) or claim.direction not in {"highest", "lowest"}:
+                        continue
+                    population = [r[claim.metric] for r in rows if _number(r[claim.metric])]
+                    rank = 1 + sum(
+                        v > claim.value if claim.direction == "highest" else v < claim.value
+                        for v in population
+                    )
+                    if claim.rank != rank or claim.rank_of != len(population):
+                        continue
+                elif claim.kind != ClaimKind.value or any(
+                    x is not None
+                    for x in (
+                        claim.rank,
+                        claim.rank_of,
+                        claim.direction,
+                        claim.periods_covered,
+                        claim.compared_to,
+                    )
+                ):
+                    continue
+        accepted.append(claim)
+        known[claim.id] = claim
+    return accepted
+
+
+def _complete(result):
+    return not (result.meta and result.meta.truncated or result.spec and result.spec.limit)
+
+
+def _calc(claim, known, result, rows, times):
+    inputs = [known.get(i) for i in claim.source.inputs]
+    if len(inputs) != 2 or any(c is None for c in inputs):
+        return False
+    a, b = inputs
+    if (
+        a.metric != b.metric
+        or claim.metric != a.metric
+        or claim.entity != a.entity
+        or claim.compared_to != b.id
+    ):
+        return False
+    if claim.source.op == "difference":
+        if claim.period != a.period or a.period != b.period:
+            return False
+        expected = a.value - b.value
+    elif b.value == 0:
+        return False
+    elif claim.source.op == "ratio":
+        if claim.period != a.period or a.period != b.period:
+            return False
+        expected = a.value / b.value
+    elif claim.source.op == "pct_change":
+        if not times or not _complete(result) or a.period == b.period:
+            return False
+        series = [
+            r
+            for r in rows
+            if all(r[k] == v for k, v in a.entity.items())
+            and r[times[0]] is not None
+            and _number(r[a.metric])
+        ]
+        series.sort(key=lambda r: str(r[times[0]]))
+        if (
+            len(series) < 2
+            or claim.period != a.period
+            or str(series[-1][times[0]]) != a.period
+            or str(series[-2][times[0]]) != b.period
+            or claim.periods_covered != 2
+        ):
+            return False
+        expected = (a.value - b.value) / abs(b.value) * 100
+    else:
+        # A model-selected denominator is not proof of a population total.
+        return False
+    direction = "up" if expected > 0 else "down" if expected < 0 else "flat"
+    return (
+        claim.kind == ClaimKind.comparison
+        and _same(claim.value, expected)
+        and claim.direction == direction
+    )
+
+
+def _number(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+
+
+def _same(a, b):
+    return _number(b) and math.isclose(a, float(b), rel_tol=1e-9, abs_tol=1e-9)

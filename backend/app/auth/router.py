@@ -59,17 +59,29 @@ def _start_session(request: Request, response: Response, conn: sqlite3.Connectio
     )
 
 
-def _check_rate_limit(request: Request, email: str) -> None:
-    attempts: dict = request.app.state.login_attempts
-    key = (request.client.host if request.client else "unknown", email)
-    now = time.monotonic()
-    recent = [t for t in attempts.get(key, []) if now - t < 60]
-    if len(recent) >= LOGIN_ATTEMPTS_PER_MINUTE:
-        attempts[key] = recent
+def _check_rate_limit(request: Request, email: str, conn: sqlite3.Connection) -> None:
+    ip = request.client.host if request.client else "unknown"
+    now = time.time()
+    # Shared across API workers, expires after one minute, with a hard storage bound.
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        conn.execute("DELETE FROM login_attempts WHERE attempted_at <= ?", (now - 60,))
+        total = conn.execute("SELECT count(*) FROM login_attempts").fetchone()[0]
+        pair = conn.execute("SELECT count(*) FROM login_attempts WHERE ip = ? AND email = ?",
+                            (ip, email)).fetchone()[0]
+        ip_count = conn.execute("SELECT count(*) FROM login_attempts WHERE ip = ?",
+                                (ip,)).fetchone()[0]
+        limited = pair >= LOGIN_ATTEMPTS_PER_MINUTE or ip_count >= 60 or total >= 10000
+        if not limited:
+            conn.execute("INSERT INTO login_attempts VALUES (?, ?, ?)", (ip, email, now))
+        conn.commit()
+    except BaseException:
+        conn.rollback()
+        raise
+    if limited:
         raise StatusError(
             Outcome.permission_denied, "Too many sign-in attempts. Try again in a minute.", 429
         )
-    attempts[key] = [*recent, now]
 
 
 @router.post("/signup", status_code=201)
@@ -77,6 +89,7 @@ def signup(
     body: SignupBody, request: Request, response: Response,
     conn: Conn,
 ) -> UserOut:
+    _check_rate_limit(request, body.email, conn)
     user_id = passwords.create_user(conn, body.email, body.password, "analyst")
     _start_session(request, response, conn, user_id)
     return UserOut(id=user_id, email=body.email, role="analyst")
@@ -88,7 +101,7 @@ def login(
     conn: Conn,
 ) -> UserOut:
     email = passwords.normalize_email(body.email)
-    _check_rate_limit(request, email)
+    _check_rate_limit(request, email, conn)
     row = conn.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
     if row is None:
         passwords.burn_verification_time(body.password)
