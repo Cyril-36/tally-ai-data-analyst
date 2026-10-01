@@ -9,7 +9,9 @@ from an explicit reference population:
   ``group_cols`` is empty). Callers filter a cross-section to a single period first.
 
 A series needs at least 8 non-null points and a MAD above zero, otherwise it is skipped.
-Missing values are excluded and counted in ``reason``. ``mad`` in a flag is the raw MAD.
+Missing values are excluded and counted in ``reason``. ``exclude_period`` (the start date of an
+incomplete final time bucket, see ExecutionMeta.partial_period) is excluded the same way and
+counted in ``excluded_values``. ``mad`` in a flag is the raw MAD.
 """
 
 import math
@@ -31,7 +33,11 @@ _MAD_TO_SIGMA = 1.4826
 
 
 def detect(
-    table: ResultTable, metric: str, group_cols: list[str], time_col: str | None
+    table: ResultTable,
+    metric: str,
+    group_cols: list[str],
+    time_col: str | None,
+    exclude_period: str | None = None,
 ) -> AnomalyReport:
     names = [c.name for c in table.columns]
     for name in [metric, *group_cols, *([time_col] if time_col else [])]:
@@ -45,11 +51,14 @@ def detect(
 
     # group value tuple -> [(row_key, value)]
     series: dict[tuple, list[tuple[dict[str, Any], float]]] = {}
-    excluded = 0
+    excluded = partial = 0
     for row in table.rows:
         points = series.setdefault(tuple(row[pos[g]] for g in group_cols), [])
         value = _number(row[pos[metric]])
-        if value is None:
+        if exclude_period and time_col and str(row[pos[time_col]])[:10] == exclude_period:
+            partial += 1
+            excluded += 1
+        elif value is None:
             excluded += 1
         else:
             points.append(({k: row[pos[k]] for k in key_cols}, value))
@@ -101,8 +110,10 @@ def detect(
             if n
         ]
         notes.append(f"{skipped} of {len(series)} series skipped: {', '.join(parts)}")
-    if excluded:
-        notes.append(f"{excluded} missing values excluded")
+    if excluded - partial:
+        notes.append(f"{excluded - partial} missing values excluded")
+    if partial:
+        notes.append(f"{partial} values in the incomplete final period excluded")
 
     if checked == 0:
         status = AnomalyStatus.insufficient_data

@@ -199,7 +199,8 @@ def detect_result(result: AnalysisResult, metric: str) -> None:
         return
     time_col = next((c.name for c in columns if c.role == ColumnRole.time), None)
     groups = [c.name for c in columns if c.role == ColumnRole.dimension] if time_col else []
-    result.anomalies = detect(result.table, metric, groups, time_col)
+    partial = result.meta.partial_period if result.meta else None
+    result.anomalies = detect(result.table, metric, groups, time_col, partial)
     if result.meta:
         if result.anomalies.excluded_values:
             result.meta.caveats.append(
@@ -207,8 +208,8 @@ def detect_result(result: AnalysisResult, metric: str) -> None:
                     code="anomaly_values_excluded",
                     count=result.anomalies.excluded_values,
                     message=(
-                        f"{result.anomalies.excluded_values} missing metric values "
-                        "were excluded from anomaly detection."
+                        f"{result.anomalies.excluded_values} values (missing, or in the "
+                        "incomplete final period) were excluded from anomaly detection."
                     ),
                 )
             )

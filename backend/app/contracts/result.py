@@ -43,7 +43,7 @@ class ResultTable(_Model):
 class Caveat(_Model):
     """Produced from execution metadata, never by the model. Cannot be dropped by
     the composer. Codes: nulls_excluded, rows_truncated, type_coerced,
-    join_orphans, derived_metric, anomaly_values_excluded, ..."""
+    join_orphans, derived_metric, partial_period, anomaly_values_excluded, ..."""
 
     code: str
     message: str
@@ -58,6 +58,9 @@ class ExecutionMeta(_Model):
     elapsed_ms: int
     dataset_versions: dict[str, int]  # dataset_id -> version
     caveats: list[Caveat] = Field(default_factory=list)
+    # Start date (ISO) of a final time bucket that holds data only up to part of its span.
+    # Trend claims and anomaly detection skip it; its rows stay in the table.
+    partial_period: str | None = None
 
 
 # ---- charts ---------------------------------------------------------------------

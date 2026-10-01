@@ -1,8 +1,42 @@
 """Validate factual semantics and values; templates, not model prose, render them."""
 
 import math
+import re
 
 from app.contracts.result import CalcSource, ClaimKind, ColumnRole
+from app.contracts.spec import Aggregate, BinOp, Col
+
+# The demo data's single reporting currency (PLAN.md section 12). A metric is only labelled
+# with it when its own name or the columns it is built from read as money.
+CURRENCY = "GBP"
+_MONEY = re.compile(r"price|amount|revenue|cost|sales|profit|discount|spend|fee|income|value", re.I)
+
+
+def metric_unit(result, metric):
+    """Unit of a result metric, derived from the spec (never chosen by the model):
+    "GBP" for money, "count" for counting aggregates, otherwise None."""
+    specs = result.spec.metrics if result.spec else []
+    found = next((m for m in specs if m.name == metric), None)
+    if found is None:
+        return None
+    if found.agg in (Aggregate.count, Aggregate.count_distinct):
+        return "count"
+    names = [metric, *_columns(found.expr)]
+    return CURRENCY if any(_MONEY.search(n) for n in names) else None
+
+
+def _columns(expr):
+    if isinstance(expr, Col):
+        return [expr.ref.column]
+    if isinstance(expr, BinOp):
+        return [*_columns(expr.left), *_columns(expr.right)]
+    return []
+
+
+def is_partial(result, period):
+    """True for the incomplete final time bucket (ExecutionMeta.partial_period)."""
+    partial = result.meta.partial_period if result.meta else None
+    return partial is not None and period is not None and str(period)[:10] == partial
 
 
 def validate_claims(result):
@@ -18,13 +52,15 @@ def validate_claims(result):
     accepted = []
     known = {}
     for claim in result.claims:
-        expected_unit = (
-            "%"
-            if isinstance(claim.source, CalcSource) and (claim.source.op == "pct_change")
-            else None
-        )
+        if isinstance(claim.source, CalcSource):
+            expected_unit = {
+                "pct_change": "%",
+                "difference": metric_unit(result, claim.metric),
+            }.get(claim.source.op)
+        else:
+            expected_unit = metric_unit(result, claim.metric)
         if claim.id in known or claim.unit != expected_unit or not math.isfinite(claim.value):
-            continue  # A currency cannot be inferred from an arbitrary CSV.
+            continue
         if isinstance(claim.source, CalcSource):
             if not _calc(claim, known, result, rows, times):
                 continue
@@ -49,6 +85,7 @@ def validate_claims(result):
                     for r in rows
                     if all(r[k] == v for k, v in entity.items())
                     and r[times[0]] is not None
+                    and not is_partial(result, r[times[0]])
                     and _number(r[claim.metric])
                 ]
                 series.sort(key=lambda r: str(r[times[0]]))
@@ -127,6 +164,7 @@ def _calc(claim, known, result, rows, times):
             for r in rows
             if all(r[k] == v for k, v in a.entity.items())
             and r[times[0]] is not None
+            and not is_partial(result, r[times[0]])
             and _number(r[a.metric])
         ]
         series.sort(key=lambda r: str(r[times[0]]))

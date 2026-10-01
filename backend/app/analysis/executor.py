@@ -17,6 +17,7 @@ import sys
 import tempfile
 import time
 from dataclasses import dataclass
+from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -150,6 +151,9 @@ def run_spec(spec: AnalysisSpec, catalog: Catalog) -> tuple[ResultTable, Executi
 
     compiled = compile_spec(spec, catalog)
     extra = [(compiled.null_check_sql, compiled.params)] if compiled.null_check_sql else []
+    latest_at = len(extra)
+    if compiled.latest_date_sql:
+        extra.append((compiled.latest_date_sql, compiled.params))
     out = execute(compiled.sql, compiled.params, compiled.tables, extra)
 
     rows = out.main.rows[: compiled.limit]
@@ -162,7 +166,7 @@ def run_spec(spec: AnalysisSpec, catalog: Catalog) -> tuple[ResultTable, Executi
                 count=compiled.limit,
             )
         )
-    if extra:
+    if compiled.null_check_sql:
         for label, count in zip(compiled.null_check_inputs, out.extra[0].rows[0], strict=True):
             if count:
                 caveats.append(
@@ -173,6 +177,22 @@ def run_spec(spec: AnalysisSpec, catalog: Catalog) -> tuple[ResultTable, Executi
                         count=count,
                     )
                 )
+    partial_period = None
+    if compiled.latest_date_sql and out.extra[latest_at].rows[0][0]:
+        latest = date.fromisoformat(str(out.extra[latest_at].rows[0][0])[:10])
+        grain = spec.time_bucket.grain.value
+        start, end = _bucket_bounds(latest, grain)
+        if latest < end:
+            partial_period = start.isoformat()
+            caveats.append(
+                Caveat(
+                    code="partial_period",
+                    message=(
+                        f"{_bucket_label(start, grain)} only contains data up to "
+                        f"{latest.isoformat()}, so it is incomplete."
+                    ),
+                )
+            )
     for metric in _all_metrics(spec):
         if isinstance(metric.expr, BinOp):
             text = f"{metric.agg.value}({expr_text(metric.expr)})"
@@ -199,8 +219,33 @@ def run_spec(spec: AnalysisSpec, catalog: Catalog) -> tuple[ResultTable, Executi
         elapsed_ms=out.meta["elapsed_ms"],
         dataset_versions={catalog[n].id: catalog[n].version for n in dataset_names(spec)},
         caveats=caveats,
+        partial_period=partial_period,
     )
     return table, meta
+
+
+def _bucket_bounds(day: date, grain: str) -> tuple[date, date]:
+    """First and last day of the DuckDB date_trunc bucket (weeks start on Monday)."""
+    if grain == "day":
+        return day, day
+    if grain == "week":
+        start = day - timedelta(days=day.weekday())
+        return start, start + timedelta(days=6)
+    months = {"month": 1, "quarter": 3, "year": 12}[grain]
+    first = 1 if grain == "year" else (day.month - 1) // months * months + 1
+    start = date(day.year, first, 1)
+    nxt = first - 1 + months
+    return start, date(day.year + nxt // 12, nxt % 12 + 1, 1) - timedelta(days=1)
+
+
+def _bucket_label(start: date, grain: str) -> str:
+    if grain == "year":
+        return f"{start.year}"
+    if grain == "quarter":
+        return f"{start.year}-Q{(start.month - 1) // 3 + 1}"
+    if grain == "month":
+        return f"{start.year}-{start.month:02d}"
+    return f"The week of {start.isoformat()}"
 
 
 def _refs(expr: Expr | None) -> list[ColumnRef]:

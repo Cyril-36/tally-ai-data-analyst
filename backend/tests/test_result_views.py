@@ -53,7 +53,7 @@ def result() -> AnalysisResult:
 def test_composer_claims_and_validator_rederive_row_identity_and_period():
     composed = compose(result())
     assert len(composed.claims) == 2
-    assert "region=<West>" in composed.answer_sentences[0]
+    assert composed.answer_sentences[0].startswith("<West>: revenue in 2026-01-01 was ")
     assert "2026-01-01" in composed.answer_sentences[0]
     assert validate_claims(composed) == composed.claims
 
