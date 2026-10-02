@@ -202,6 +202,7 @@ def detect_result(result: AnalysisResult, metric: str) -> None:
     if result.meta and result.meta.truncated or result.spec and result.spec.limit is not None:
         result.anomalies = AnomalyReport(
             status=AnomalyStatus.insufficient_data,
+            metric=metric,
             reason="Anomaly checks require an uncapped population.",
         )
         return
@@ -209,6 +210,7 @@ def detect_result(result: AnalysisResult, metric: str) -> None:
     groups = [c.name for c in columns if c.role == ColumnRole.dimension] if time_col else []
     partial = result.meta.partial_period if result.meta else None
     result.anomalies = detect(result.table, metric, groups, time_col, partial)
+    result.anomalies.metric = metric
     if result.meta:
         if result.anomalies.excluded_values:
             result.meta.caveats.append(

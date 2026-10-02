@@ -154,6 +154,7 @@ class AnomalyFlag(_Model):
 
 class AnomalyReport(_Model):
     status: AnomalyStatus
+    metric: str | None = None  # the result column that was checked, recorded even with no flags
     flags: list[AnomalyFlag] = Field(default_factory=list)
     reason: str | None = None  # required unless completed_*
     series_checked: int = 0

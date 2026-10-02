@@ -73,3 +73,67 @@ def test_refresh_respects_ownership_and_deleted_sources(workspace, make_client):
     client.delete(f"/api/datasets/{orders['id']}?confirm=true")
     gone = client.post(f"/api/pins/{pin['id']}/refresh")
     assert gone.status_code == 404 and "deleted" in gone.json()["message"]
+
+
+def _two_metric_pin(client, workspace_conversation, sample_orders_id):
+    """A deterministic /analyze result with two metrics whose anomaly check used the second."""
+    col = lambda c: {"kind": "col", "ref": {"dataset": "orders", "column": c}}  # noqa: E731
+    spec = {"base_dataset": "orders",
+            "metrics": [{"name": "x_total", "agg": "sum", "expr": col("quantity")},
+                        {"name": "y_total", "agg": "count"}],
+            "time_bucket": {"column": {"dataset": "orders", "column": "order_date"},
+                            "grain": "month"}}
+    r = client.post(f"/api/conversations/{workspace_conversation}/analyze", json={
+        "question": "Check y", "spec": spec, "anomaly_metric": "y_total", "request_key": "two-m"})
+    assert r.status_code == 200, r.text
+    saved = r.json()
+    assert saved["anomalies"]["metric"] == "y_total"
+    pin = client.post("/api/pins", json={"result_id": saved["id"]}).json()
+    with open(SAMPLE / "orders.csv", "rb") as f:  # make the pin stale
+        client.put(f"/api/datasets/{sample_orders_id}",
+                   files={"file": ("orders.csv", f, "text/csv")})
+    return saved, pin
+
+
+def _orders_id(client):
+    return next(d["id"] for d in client.get("/api/datasets").json() if d["name"] == "orders")
+
+
+def test_refresh_rechecks_the_same_anomaly_metric(workspace):  # noqa: F811
+    # Review finding: a check on the second metric with no flags was refreshed on the first.
+    client, conversation_id = workspace
+    saved, pin = _two_metric_pin(client, conversation_id, _orders_id(client))
+    item = client.post(f"/api/pins/{pin['id']}/refresh").json()
+    assert item["status"] == "current"
+    assert item["result"]["anomalies"]["metric"] == "y_total"
+
+
+def test_refresh_is_retry_safe_and_loses_a_race_cleanly(workspace, db, monkeypatch):  # noqa: F811
+    client, conversation_id = workspace
+    saved, pin = _two_metric_pin(client, conversation_id, _orders_id(client))
+    count = lambda: db.execute("SELECT count(*) FROM results").fetchone()[0]  # noqa: E731
+
+    first = client.post(f"/api/pins/{pin['id']}/refresh").json()
+    before = count()
+    again = client.post(f"/api/pins/{pin['id']}/refresh").json()  # e.g. a client retry
+    assert again["result_id"] == first["result_id"] and count() == before
+
+    # A concurrent refresh moves the pin while this one is still calculating.
+    with open(SAMPLE / "orders.csv", "rb") as f:
+        client.put(f"/api/datasets/{_orders_id(client)}",
+                   files={"file": ("orders.csv", f, "text/csv")})
+    import app.workspace.refresh as refresh
+
+    real = refresh.tools.analyze
+
+    def analyze_then_lose_race(*args, **kwargs):
+        result = real(*args, **kwargs)
+        db.execute("UPDATE pins SET result_id = ? WHERE id = ?", (saved["id"], pin["id"]))
+        return result
+
+    monkeypatch.setattr(refresh.tools, "analyze", analyze_then_lose_race)
+    before = count()
+    lost = client.post(f"/api/pins/{pin['id']}/refresh")
+    assert lost.status_code == 200
+    assert lost.json()["result_id"] == saved["id"]  # the winner's result is kept
+    assert count() == before  # and the losing refresh left no extra result behind

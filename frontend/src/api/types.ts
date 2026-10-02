@@ -98,6 +98,8 @@ export interface AnomalyFlag {
 
 export interface AnomalyReport {
   status: AnomalyStatus;
+  /** The result column that was checked; recorded even when nothing was flagged. */
+  metric?: string | null;
   flags: AnomalyFlag[];
   reason?: string | null;
   series_checked: number;

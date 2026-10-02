@@ -22,6 +22,8 @@ from app.workspace import store
 def refresh_pin(conn: sqlite3.Connection, user: User, pin_id: str) -> dict:
     pin = require_owned(conn, "pins", pin_id, user, Action.modify)
     old = store.load_result(conn, user, pin["result_id"])
+    if store.result_status(conn, user, old) == "current":
+        return _item(conn, user, pin, old)  # nothing changed: a retry after success is a no-op
     if old.spec is None or old.meta is None:
         raise AppError(Outcome.unsupported, "This card has no stored calculation to re-run.")
     ids = list(old.meta.dataset_versions)
@@ -44,8 +46,26 @@ def refresh_pin(conn: sqlite3.Connection, user: User, pin_id: str) -> dict:
         with suppress(AppError):  # keep the chart the user chose, if it still fits the rows
             tools.set_chart(result, old.chart)
     result = compose(result)
-    store.save_result(conn, result)
-    conn.execute("UPDATE pins SET result_id = ? WHERE id = ?", (result.id, pin_id))
+    # Save and repoint together, and only if the pin still shows the result this refresh
+    # started from; a concurrent or retried refresh that already moved it wins, and this one
+    # leaves no extra result behind.
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        store.save_result(conn, result)
+        moved = conn.execute(
+            "UPDATE pins SET result_id = ? WHERE id = ? AND result_id = ?",
+            (result.id, pin_id, old.id),
+        ).rowcount
+        conn.execute("COMMIT" if moved else "ROLLBACK")
+    except BaseException:
+        conn.execute("ROLLBACK")
+        raise
+    pin = require_owned(conn, "pins", pin_id, user, Action.read)
+    return _item(conn, user, pin, result if moved else store.load_result(conn, user,
+                                                                          pin["result_id"]))
+
+
+def _item(conn: sqlite3.Connection, user: User, pin, result: AnalysisResult) -> dict:
     return {
         "id": pin["id"],
         "result_id": result.id,
@@ -80,6 +100,17 @@ def _rename(value, old: str, new: str):
 
 
 def _anomaly_metric(old: AnalysisResult, new: AnalysisResult) -> str:
-    if old.anomalies.flags:
-        return old.anomalies.flags[0].metric
-    return next(c.name for c in new.table.columns if c.role == ColumnRole.metric)
+    """The metric the original check used. Older results did not record it; fall back to a
+    flagged metric, then to the only metric. Guessing among several is refused."""
+    report = old.anomalies
+    if report.metric:
+        return report.metric
+    if report.flags:
+        return report.flags[0].metric
+    metrics = [c.name for c in new.table.columns if c.role == ColumnRole.metric]
+    if len(metrics) == 1:
+        return metrics[0]
+    raise AppError(
+        Outcome.invalid_input,
+        "This card's anomaly check can't be repeated exactly. Ask the question again.",
+    )
