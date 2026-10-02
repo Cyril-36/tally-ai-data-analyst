@@ -21,7 +21,7 @@ export function PlotlyChart({ figure, ariaLabel, height, onError }: Props) {
     if (!node) return;
     let live = true;
     let observer: ResizeObserver | undefined;
-    import('plotly.js-dist-min')
+    import('plotly.js-cartesian-dist-min')
       .then(async (mod) => {
         if (!live) return;
         const Plotly = mod.default ?? (mod as unknown as typeof mod.default);
@@ -52,7 +52,7 @@ export function PlotlyChart({ figure, ariaLabel, height, onError }: Props) {
   useEffect(() => {
     const node = el.current;
     return () => {
-      void import('plotly.js-dist-min').then((mod) => {
+      void import('plotly.js-cartesian-dist-min').then((mod) => {
         // The import resolves later; by then a remount (StrictMode, fast re-render) may have
         // redrawn this same node, so only purge a node that is really gone.
         if (node && !node.isConnected && node._fullLayout) mod.default?.purge(node);
