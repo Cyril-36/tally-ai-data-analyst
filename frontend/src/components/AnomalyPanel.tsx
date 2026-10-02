@@ -36,7 +36,7 @@ function headline(report: AnomalyReport): string {
 /** Renders a stored AnomalyReport: status, evidence per flag, method. Nothing is derived beyond formatting. */
 export function AnomalyPanel({ report, result, onAskDrive, onRetry, methodOpen = false }: Props) {
   const [open, setOpen] = useState(methodOpen);
-  const grain = result.spec?.time_bucket ?? undefined;
+  const grain = result.spec?.time_bucket?.grain ?? null;
   const banner = BANNER[report.status];
   const references = [...new Set(report.flags.map((f) => f.reference))];
   const threshold = report.flags[0]?.threshold;
@@ -64,7 +64,7 @@ export function AnomalyPanel({ report, result, onAskDrive, onRetry, methodOpen =
             return (
               <li key={i} className="anom__flag card">
                 <div className="anom__flag-head">
-                  <span className="serif anom__flag-title">{entityLabel(flag.row_key, grain)}</span>
+                  <span className="serif anom__flag-title">{entityLabel(flag.row_key, result.table, grain)}</span>
                   <span className="mono anom__dir">{above ? 'ABOVE' : 'BELOW'} TYPICAL</span>
                 </div>
                 <dl className="anom__nums">

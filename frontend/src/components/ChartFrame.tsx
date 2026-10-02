@@ -1,8 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { AnalysisResult, AnomalyFlag, ChartSpec, ResultTable, TimeGrain } from '../api/types';
 import { buildFigure, chartTableAlternative } from '../lib/figure';
-import { formatCell } from '../lib/format';
-import { currencyFor } from '../lib/format';
+import { currencyFor, formatCell } from '../lib/format';
 import { PlotlyChart } from './PlotlyChart';
 
 interface Props {

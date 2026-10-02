@@ -371,8 +371,7 @@ function EntryView({ entry, conversationId, highlighted, onEdit }: EntryProps) {
             onChartType={(chart) => void threads.changeChart(conversationId, entry, chart)}
             onAsk={askMore}
             onAskDrive={(flag: AnomalyFlag) => {
-              const grain = result.spec?.time_bucket;
-              askMore(`What drove ${flag.metric.replace(/_/g, ' ')} for ${entityLabel(flag.row_key, grain)}?`);
+              askMore(`What drove ${flag.metric.replace(/_/g, ' ')} for ${entityLabel(flag.row_key, result.table, result.spec?.time_bucket?.grain)}?`);
             }}
           />
         );

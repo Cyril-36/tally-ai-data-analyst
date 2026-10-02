@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import type { AnalysisResult, AnomalyFlag, ChartSpec, DatasetMeta, ResultStatus } from '../api/types';
 import { candidateChartTypes } from '../lib/figure';
 import { clock, currencyFor, formatWithUnit, shortId } from '../lib/format';
@@ -48,9 +48,13 @@ export function AnswerCard(props: AnswerCardProps) {
   const types = useMemo(() => (table && chart ? candidateChartTypes(table, chart) : []), [table, chart]);
   const stale = staleLabel(status, sources);
   const checks = countChecks(result);
+  const [moreStatements, setMoreStatements] = useState(false);
+  const sentences = result.answer_sentences;
+  const shownSentences = moreStatements ? sentences : sentences.slice(0, 3);
+  // Headline figures come from rank / share / comparison claims; plain values are already in the table.
   const kpis = verified
     ? result.claims
-        .filter((c) => c.kind === 'value' || c.kind === 'rank' || c.kind === 'comparison')
+        .filter((c) => c.kind === 'rank' || c.kind === 'share' || c.kind === 'comparison')
         .slice(0, 3)
         .map((c) => ({
           key: c.id,
@@ -78,11 +82,16 @@ export function AnswerCard(props: AnswerCardProps) {
       <div className="answer__lead">
         <h3 className="answer__title">{result.question}</h3>
         {verified &&
-          result.answer_sentences.map((s, i) => (
+          shownSentences.map((s, i) => (
             <p key={i} className={`serif ${i === 0 ? 'answer__conclusion' : 'answer__sentence'}`}>
               {s}
             </p>
           ))}
+        {verified && sentences.length > 3 && (
+          <button type="button" className="btn btn--link btn--xs" style={{ alignSelf: 'flex-start' }} onClick={() => setMoreStatements((v) => !v)}>
+            {moreStatements ? 'Show fewer statements' : `Show ${sentences.length - 3} more statements`}
+          </button>
+        )}
         {withheld && (
           <div role="note" className="inline-warn">
             <strong>Summary withheld.</strong> {result.message ?? 'The written summary could not be validated, so it is not shown.'} The table

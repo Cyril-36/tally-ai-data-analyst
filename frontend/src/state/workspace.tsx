@@ -66,9 +66,10 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const applyDatasets = useCallback((list: DatasetMeta[], selectNew: boolean) => {
     setDatasets(list);
     const ids = new Set(list.map((d) => d.id));
+    // Computed before the updater runs: `known` is reassigned right below.
+    const fresh = list.filter((d) => !known.current.has(d.id)).map((d) => d.id);
     setSelectedIds((prev) => {
       const kept = prev.filter((id) => ids.has(id));
-      const fresh = list.filter((d) => !known.current.has(d.id)).map((d) => d.id);
       return selectNew ? [...kept, ...fresh.filter((id) => !kept.includes(id))] : kept;
     });
     known.current = ids;

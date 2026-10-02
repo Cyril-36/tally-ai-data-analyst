@@ -6,7 +6,9 @@ import type {
   Expr,
   Metric,
   ResultStatus,
+  ResultTable,
   SpecFilter,
+  TimeGrain,
 } from '../api/types';
 import { formatTime } from './format';
 
@@ -166,21 +168,37 @@ export function formatParam(value: unknown): string {
   return String(value);
 }
 
+const clip = (text: string, max = 90) => (text.length > max ? `${text.slice(0, max - 1)}…` : text);
+
+/** One line of the stored tool trace: the tool name, then its fields with long values clipped. */
 export function traceLine(entry: Record<string, unknown>): { label: string; detail: string } {
   const tool = typeof entry.tool === 'string' ? entry.tool : Object.keys(entry)[0] ?? 'step';
-  const rest = Object.entries(entry).filter(([k]) => k !== 'tool');
-  const detail = rest
-    .map(([k, v]) => `${k}=${typeof v === 'string' ? v : JSON.stringify(v)}`)
+  const show = (v: unknown): string => {
+    if (typeof v === 'string') return clip(v);
+    if (v && typeof v === 'object') {
+      return `{${Object.entries(v as Record<string, unknown>)
+        .map(([k, x]) => `${k}: ${typeof x === 'string' ? clip(x, 40) : JSON.stringify(x)}`)
+        .join(', ')}}`;
+    }
+    return String(v);
+  };
+  const detail = Object.entries(entry)
+    .filter(([k]) => k !== 'tool')
+    .map(([k, v]) => `${k}=${show(v)}`)
     .join(' · ');
   return { label: tool, detail };
 }
 
-export function entityLabel(rowKey: Record<string, unknown>, grain?: AnalysisSpec['time_bucket']): string {
-  const parts = Object.entries(rowKey).map(([k, v]) => {
-    if (grain && k === grain.column.column) return formatTime(v as string, grain.grain);
-    return `${k} ${String(v)}`;
-  });
-  return parts.join(' · ') || 'Observation';
+/** "Jan 2026 · region West" for a flagged row: time columns are formatted, the rest are "column value". */
+export function entityLabel(rowKey: Record<string, unknown>, table?: ResultTable | null, grain?: TimeGrain | null): string {
+  const roles = new Map((table?.columns ?? []).map((c) => [c.name, c.role]));
+  const time: string[] = [];
+  const rest: string[] = [];
+  for (const [k, v] of Object.entries(rowKey)) {
+    if (roles.get(k) === 'time') time.push(formatTime(v as string, grain));
+    else rest.push(`${k} ${String(v)}`);
+  }
+  return [...time, ...rest].join(' · ') || 'Observation';
 }
 
 export function countChecks(result: AnalysisResult): number {

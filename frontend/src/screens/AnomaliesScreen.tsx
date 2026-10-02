@@ -131,7 +131,7 @@ export function AnomaliesScreen() {
 
   const askDrive = (flag: AnomalyFlag, result: AnalysisResult) => {
     navigate('/ask');
-    void threads.ask(`What drove ${flag.metric.replace(/_/g, ' ')} for ${entityLabel(flag.row_key, result.spec?.time_bucket)}?`, null);
+    void threads.ask(`What drove ${flag.metric.replace(/_/g, ' ')} for ${entityLabel(flag.row_key, result.table, result.spec?.time_bucket?.grain)}?`, null);
   };
 
   const result = run.status === 'done' ? run.result : null;
