@@ -139,7 +139,9 @@ def _answer_table_matches(actual: dict, expected_spec: dict, expected_table: dic
         unused.remove(match)
 
     # Ordering and row limits change the answer for ranking questions (top/bottom N, lowest).
-    if observed["limit"] != target["limit"]:
+    # Without a requested limit, any limit that cut no rows is harmless (row counts are compared
+    # below), e.g. the model restating the server's 1000-row cap on a 7-row result.
+    if target["limit"] is not None and observed["limit"] != target["limit"]:
         return False
     alias = dict(zip((m["name"] for m in target["metrics"]), matched_names, strict=True))
     wanted = [(alias.get(k["by"], k["by"]), k["descending"]) for k in target["sort"]]

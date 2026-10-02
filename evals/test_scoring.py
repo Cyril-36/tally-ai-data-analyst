@@ -145,3 +145,16 @@ def test_answer_score_requires_the_requested_order_and_limit():
     assert not _answer_table_matches({"spec": flipped, "table": table}, expected_spec, expected)
     unlimited = {**good_spec, "limit": None}
     assert not _answer_table_matches({"spec": unlimited, "table": table}, expected_spec, expected)
+
+
+def test_a_harmless_limit_on_an_unlimited_question_is_accepted():
+    expected_spec = spec("revenue", dimensions=REGION)
+    expected = {"columns": [{"name": "region", "role": "dimension"},
+                            {"name": "revenue", "role": "metric"}],
+                "rows": [["East", 80.0], ["West", 100.0]]}
+    capped = {**expected_spec, "limit": 1000}
+    table = {"columns": expected["columns"], "rows": [["West", 100.0], ["East", 80.0]]}
+    assert _answer_table_matches({"spec": capped, "table": table}, expected_spec, expected)
+    cut = {"spec": {**expected_spec, "limit": 1},
+           "table": {"columns": expected["columns"], "rows": [["West", 100.0]]}}
+    assert not _answer_table_matches(cut, expected_spec, expected)
