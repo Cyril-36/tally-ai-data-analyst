@@ -5,7 +5,7 @@ Checked against the supplied one-page AI Engineer assignment PDF. It has feature
 | Assignment item | Backend evidence | Status |
 |---|---|---|
 | Upload and validate one or more CSVs | Multipart upload, atomic multi-file handling, profile/quality checks; upload and invalid-file tests | Verified |
-| Natural-language questions | Bounded tool-calling provider adapter, structured spec, clarification, conversation state; fake-provider HTTP tests and two live suites | Implemented; retail 28/31, transfer 10/10; model errors remain |
+| Natural-language questions | Bounded tool-calling provider adapter, structured spec, clarification, conversation state; fake-provider HTTP tests and two live suites | Implemented; retail 29/31 (26–29 across runs), transfer 10/10; model errors remain |
 | Insights and summaries | Deterministic value, rank, trend and period comparison claims rechecked against result rows; tampering tests | Verified offline |
 | Bar, line, pie, scatter charts | Plotly builder validates encodings and plots stored result values; chart tests and HTTP chart route | Verified offline |
 | SQL and/or Pandas code | The exact compiled SQL and bound parameters are in `AnalysisResult.meta`; SQL goldens execute in DuckDB | Verified; Pandas omitted by design |
@@ -15,7 +15,7 @@ Checked against the supplied one-page AI Engineer assignment PDF. It has feature
 | Multi-file, joins, quality | Authorized catalog, cardinality checks, refused fan-out, quality endpoint | Verified offline |
 | Dashboard, auth, cache, export, streaming, logs | Owner-only pins/results, admin-only settings, versioned owner-scoped cache, HTML/CSV reports, SSE, structured logs | Verified offline and in local HTTP smoke |
 | Production engineering | Input validation, bounded turns, login/signup throttle, idempotent retries, secure cookies, no-store headers, isolated query worker, two-worker Docker run | Verified locally; live model reliability remains a blocker |
-| Evaluation framework | Revised 31-question retail suite plus a 10-question non-retail transfer suite, deterministic expected specs, one-command checks and live reports with query/table diagnostics | 31/31 and 10/10 offline baselines; live 28/31 and 10/10, 0 skipped |
+| Evaluation framework | Revised 31-question retail suite plus a 10-question non-retail transfer suite, deterministic expected specs, one-command checks and live reports with query/table diagnostics | 31/31 and 10/10 offline baselines; live 29/31 and 10/10, 0 skipped |
 | README, architecture diagram, Docker, sample datasets | Present in repository | Verified |
 | Frontend screens and integration | React frontend in the combined image; 30 component tests and 24 browser flows against dev servers and the rebuilt Docker image | Verified locally with fake provider |
 | Screenshots, demo video, GitHub submission | Live model report is in `evals/reports/`; final submission artifacts remain to be prepared | Pending |
