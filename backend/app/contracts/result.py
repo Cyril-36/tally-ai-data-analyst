@@ -60,6 +60,9 @@ class ExecutionMeta(_Model):
     caveats: list[Caveat] = Field(default_factory=list)
     # Currency each used dataset declares (dataset name -> ISO code). Units come only from here.
     currencies: dict[str, str] = Field(default_factory=dict)
+    # The same declarations by dataset id, None when undeclared: provenance for staleness, so a
+    # later currency change marks this result out of date even after a rename.
+    source_currencies: dict[str, str | None] = Field(default_factory=dict)
     # Start date (ISO) of a final time bucket that holds data only up to part of its span.
     # Trend claims and anomaly detection skip it; its rows stay in the table.
     partial_period: str | None = None

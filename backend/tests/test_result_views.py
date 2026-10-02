@@ -148,16 +148,14 @@ def test_reports_escape_html_protect_csv_formulas_and_show_sql_caveats_status():
     assert "SELECT '<script>'" not in exported  # CSV is a table export, not a report.
 
 
-def test_csv_export_has_no_binary_float_noise():
+def test_csv_export_preserves_every_stored_float_exactly():
+    import csv
+    import io
+
     from app.reports.builder import csv_report
 
+    values = [135306.1999999999, 123456789012.345, 1234567890123456.0, 0.1 + 0.2, 3.3e-12, 5.0]
     data = result()
-    data.table.rows = [
-        ["West", datetime(2026, 1, 1).date(), 135306.1999999999],
-        ["East", datetime(2026, 1, 1).date(), 123456789012.345],
-        ["North", datetime(2026, 1, 1).date(), 98765432109876.5],
-    ]
-    lines = csv_report(data).splitlines()
-    assert lines[1] == "West,2026-01-01,135306.2"
-    assert lines[2] == "East,2026-01-01,123456789012.345"  # real digits are never rounded
-    assert lines[3] == "North,2026-01-01,98765432109876.5"
+    data.table.rows = [["R", datetime(2026, 1, 1).date(), v] for v in values]
+    rows = list(csv.reader(io.StringIO(csv_report(data))))[1:]
+    assert [float(r[2]) for r in rows] == values  # every value reads back bit-for-bit

@@ -97,7 +97,7 @@ def _safe(value):
     ):
         return "'" + value
     if isinstance(value, float):
-        # 15 significant digits (all a double holds reliably) drops binary noise such as
-        # 135306.1999999999 -> 135306.2 while keeping real digits (123456789012.345 stays).
-        return format(value, ".15g")
+        # The shortest text that reads back to exactly the stored value. Exports preserve
+        # data; rounding for people happens only in the UI and the written sentences.
+        return repr(value)
     return value

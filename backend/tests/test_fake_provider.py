@@ -250,3 +250,23 @@ def test_dataset_update_rules(workspace, make_client):
     with open(SAMPLE / "orders.csv", "rb") as f:
         replaced = client.put(url, files={"file": ("orders.csv", f, "text/csv")})
     assert replaced.status_code == 200 and replaced.json()["currency"] == "GBP"
+
+
+def test_changing_a_currency_marks_saved_results_and_pins_out_of_date(workspace):
+    client, conversation_id = workspace
+    orders = next(d for d in client.get("/api/datasets").json() if d["name"] == "orders")
+    saved = ask(client, conversation_id, REGION_Q, key="stale-1").json()
+    pin = client.post("/api/pins", json={"result_id": saved["id"]}).json()
+    status = lambda: client.get(f"/api/results/{saved['id']}").json()["status"]  # noqa: E731
+    pin_status = lambda: next(  # noqa: E731
+        p["status"] for p in client.get("/api/dashboard").json() if p["id"] == pin["id"])
+    assert status() == "current" and pin_status() == "current"
+
+    client.patch(f"/api/datasets/{orders['id']}", json={"name": "orders_renamed"})
+    assert status() == "current"  # a rename changes nothing about the figures
+    client.patch(f"/api/datasets/{orders['id']}", json={"name": "orders"})
+
+    client.patch(f"/api/datasets/{orders['id']}", json={"currency": "USD"})
+    assert status() == "stale" and pin_status() == "stale"
+    client.patch(f"/api/datasets/{orders['id']}", json={"currency": "GBP"})
+    assert status() == "current"  # back to what the result was calculated with

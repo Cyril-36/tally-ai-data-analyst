@@ -83,7 +83,7 @@ def result_status(conn: sqlite3.Connection, user: User, result: AnalysisResult) 
     missing = False
     for dataset_id, version in versions.items():
         source = conn.execute(
-            "SELECT id, owner_id, version FROM datasets WHERE id = ?", (dataset_id,)
+            "SELECT id, owner_id, version, profile_json FROM datasets WHERE id = ?", (dataset_id,)
         ).fetchone()
         if source is None:
             missing = True
@@ -91,6 +91,10 @@ def result_status(conn: sqlite3.Connection, user: User, result: AnalysisResult) 
         # If a source was transferred or corrupted, never expose its metadata.
         authz.require_owned(conn, "datasets", dataset_id, user, Action.read)
         stale |= source["version"] != version
+        # A changed currency declaration changes how this result's money reads.
+        declared = result.meta.source_currencies if result.meta else {}
+        if dataset_id in declared:
+            stale |= json.loads(source["profile_json"]).get("currency") != declared[dataset_id]
     if missing:
         return "missing"
     return "stale" if stale else "current"

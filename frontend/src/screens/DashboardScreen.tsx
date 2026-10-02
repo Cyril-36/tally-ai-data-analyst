@@ -5,7 +5,7 @@ import { conversations as convApi, exportResult, pins as pinsApi } from '../api/
 import type { DashboardItem } from '../api/types';
 import { ChartFrame } from '../components/ChartFrame';
 import { currencyFor, formatCell, shortDate, shortId } from '../lib/format';
-import { contextItems, sourceVersions } from '../lib/resultView';
+import { contextItems, currencyChanges, sourceVersions } from '../lib/resultView';
 import { useToast } from '../state/toast';
 import { useWorkspace } from '../state/workspace';
 
@@ -223,6 +223,8 @@ function PinCard(p: PinCardProps) {
   const stale = item.status !== 'current';
   const missing = item.status === 'missing';
   const sources = sourceVersions(result, ws.datasets ?? []);
+  const changes = currencyChanges(result, ws.datasets);
+  const onlyCurrency = changes.length > 0 && !sources.some((s) => s.stale);
   const ctx = contextItems(result.spec);
   const grain = result.spec?.time_bucket?.grain ?? null;
   const input = useRef<HTMLInputElement>(null);
@@ -292,7 +294,9 @@ function PinCard(p: PinCardProps) {
             <strong>{missing ? 'Source deleted.' : 'Out of date.'}</strong>{' '}
             {missing
               ? `A dataset behind this result no longer exists, so it can’t be refreshed. It shows what was true on ${shortDate(result.created_at)}.`
-              : `${sources.filter((s) => !s.missing).map((s) => s.name).join(', ') || 'A source'} was replaced after this result was calculated. Values below reflect the previous version.`}
+              : onlyCurrency
+                ? `${changes.map((c) => `${c.name} currency changed from ${c.from ?? 'none'} to ${c.to ?? 'none'}`).join('; ')} after this result was calculated. Amounts below use the earlier currency.`
+                : `${sources.filter((s) => s.stale).map((s) => s.name).join(', ') || 'A source'} was replaced after this result was calculated. Values below reflect the previous version.`}
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
             {!missing && (

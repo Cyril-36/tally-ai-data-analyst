@@ -48,6 +48,8 @@ export interface ExecutionMeta {
   elapsed_ms: number;
   dataset_versions: Record<string, number>;
   caveats: Caveat[];
+  /** Declared currency of each source dataset (by id) when this result was calculated. */
+  source_currencies?: Record<string, string | null>;
 }
 
 export type ChartType = 'bar' | 'line' | 'area' | 'pie' | 'scatter' | 'histogram';

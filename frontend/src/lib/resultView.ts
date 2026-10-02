@@ -87,19 +87,36 @@ export interface SourceVersion {
   name: string;
   version: number;
   missing: boolean;
+  /** The dataset has a newer version than the one this result used. */
+  stale: boolean;
 }
 
 export function sourceVersions(result: AnalysisResult, datasets: DatasetMeta[]): SourceVersion[] {
   return Object.entries(result.meta?.dataset_versions ?? {}).map(([id, version]) => {
     const found = datasets.find((d) => d.id === id);
-    return { id, name: found?.name ?? 'deleted dataset', version, missing: !found };
+    return { id, name: found?.name ?? 'deleted dataset', version, missing: !found, stale: !!found && found.version !== version };
   });
 }
 
-/** Live comparison of the result's source versions with the current datasets. */
+export interface CurrencyChange {
+  name: string;
+  from: string | null;
+  to: string | null;
+}
+
+/** Sources whose declared currency changed after the result was calculated. */
+export function currencyChanges(result: AnalysisResult, datasets: DatasetMeta[] | null): CurrencyChange[] {
+  const declared = result.meta?.source_currencies ?? {};
+  return Object.entries(declared).flatMap(([id, from]) => {
+    const found = datasets?.find((d) => d.id === id);
+    return found && (found.currency ?? null) !== from ? [{ name: found.name, from, to: found.currency ?? null }] : [];
+  });
+}
+
+/** Live comparison of the result's source versions and currencies with the current datasets. */
 export function deriveStatus(result: AnalysisResult, datasets: DatasetMeta[] | null, apiStatus?: ResultStatus): ResultStatus {
   if (!datasets) return apiStatus ?? 'current';
-  let stale = false;
+  let stale = currencyChanges(result, datasets).length > 0;
   for (const [id, version] of Object.entries(result.meta?.dataset_versions ?? {})) {
     const found = datasets.find((d) => d.id === id);
     if (!found) return 'missing';
@@ -108,8 +125,13 @@ export function deriveStatus(result: AnalysisResult, datasets: DatasetMeta[] | n
   return stale ? 'stale' : 'current';
 }
 
-export function staleLabel(status: ResultStatus, sources: SourceVersion[]): string {
+const currencyText = (c: CurrencyChange) => `${c.name} currency changed from ${c.from ?? 'none'} to ${c.to ?? 'none'}`;
+
+export function staleLabel(status: ResultStatus, sources: SourceVersion[], changes: CurrencyChange[] = []): string {
   if (status === 'missing') return 'Source deleted';
+  if (status === 'stale' && changes.length && !sources.some((s) => s.stale)) {
+    return changes.map(currencyText).join('; ');
+  }
   if (status === 'stale') {
     const names = sources.filter((s) => !s.missing).map((s) => s.name);
     return names.length ? `Based on an earlier version of ${names.join(', ')}` : 'Based on an earlier version of the data';

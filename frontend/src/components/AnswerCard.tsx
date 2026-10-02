@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import type { AnalysisResult, AnomalyFlag, ChartSpec, DatasetMeta, ResultStatus } from '../api/types';
 import { candidateChartTypes } from '../lib/figure';
 import { clock, currencyFor, formatWithUnit, shortId } from '../lib/format';
-import { contextItems, countChecks, detailItems, formatParam, sourceVersions, staleLabel, traceLine } from '../lib/resultView';
+import { contextItems, countChecks, currencyChanges, detailItems, formatParam, sourceVersions, staleLabel, traceLine } from '../lib/resultView';
 import { AnomalyPanel } from './AnomalyPanel';
 import { ChartFrame } from './ChartFrame';
 import { ResultTable } from './ResultTable';
@@ -46,7 +46,8 @@ export function AnswerCard(props: AnswerCardProps) {
   const ctx = useMemo(() => contextItems(result.spec), [result.spec]);
   const details = useMemo(() => detailItems(result, datasets), [result, datasets]);
   const types = useMemo(() => (table && chart ? candidateChartTypes(table, chart) : []), [table, chart]);
-  const stale = staleLabel(status, sources);
+  const changes = useMemo(() => currencyChanges(result, datasets), [result, datasets]);
+  const stale = staleLabel(status, sources, changes);
   const checks = countChecks(result);
   const [moreStatements, setMoreStatements] = useState(false);
   const sentences = result.answer_sentences;
