@@ -1,0 +1,2385 @@
+{
+  "case_set_sha256": "2dc52edeea1a8b43fae5115491a9e7ff7fdf60ff57d3c5b04702544c8464fc4b",
+  "cases": [
+    {
+      "diagnostics": {
+        "actual_result": {
+          "anomalies": null,
+          "answer_sentences": [
+            "The selected data: 12 distinct case ids."
+          ],
+          "chart": null,
+          "claims": [
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {},
+              "id": "c0",
+              "kind": "value",
+              "metric": "distinct_case_ids",
+              "period": null,
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "distinct_case_ids",
+                "row_key": {},
+                "type": "cell"
+              },
+              "unit": "count",
+              "value": 12.0
+            }
+          ],
+          "clarification": null,
+          "conversation_id": "0f0b3b046993469db5dd8e8c65e2a1c0",
+          "created_at": "2026-10-02T14:30:41.770169Z",
+          "id": "d82c6867cd8a4110a6dabe7ea7b1f3e4",
+          "message": null,
+          "meta": {
+            "caveats": [],
+            "currencies": {},
+            "dataset_versions": {
+              "6c89227b69e94c9f80a24df2c6f3c81e": 1
+            },
+            "elapsed_ms": 313,
+            "params": [],
+            "partial_period": null,
+            "row_count": 1,
+            "source_currencies": {
+              "6c89227b69e94c9f80a24df2c6f3c81e": null
+            },
+            "sql": "SELECT COUNT(DISTINCT \"t0\".\"case_id\") AS \"distinct_case_ids\" FROM \"t0\" LIMIT 1001",
+            "truncated": false
+          },
+          "outcome": "ok",
+          "owner_id": "ee81b182bf6b43b6a0bfc1aa30b252c2",
+          "question": "How many distinct case IDs are in support_cases?",
+          "spec": {
+            "base_dataset": "support_cases",
+            "dimensions": [],
+            "filters": [],
+            "joins": [],
+            "limit": null,
+            "metrics": [
+              {
+                "agg": "count_distinct",
+                "expr": {
+                  "kind": "col",
+                  "ref": {
+                    "column": "case_id",
+                    "dataset": "support_cases"
+                  }
+                },
+                "name": "distinct_case_ids"
+              }
+            ],
+            "sort": [],
+            "time_bucket": null
+          },
+          "suggested_questions": [
+            "Show this metric over time.",
+            "Check this metric for unusual values."
+          ],
+          "table": {
+            "columns": [
+              {
+                "dtype": "BIGINT",
+                "name": "distinct_case_ids",
+                "role": "metric"
+              }
+            ],
+            "rows": [
+              [
+                12
+              ]
+            ]
+          },
+          "trace": [
+            {
+              "args": {
+                "spec_json": "{\"base_dataset\": \"support_cases\", \"metrics\": [{\"name\": \"distinct_case_ids\", \"agg\": \"count_distinct\", \"expr\": {\"kind\": \"col\", \"ref\": {\"dataset\": \"support_cases\", \"column\": \"case_id\"}}}]}"
+              },
+              "step": 1,
+              "tool": "run_analysis"
+            },
+            {
+              "ok": true,
+              "summary": "Tool completed",
+              "tool": "run_analysis"
+            },
+            {
+              "args": {
+                "result_id": "d82c6867cd8a4110a6dabe7ea7b1f3e4"
+              },
+              "step": 2,
+              "tool": "finish"
+            },
+            {
+              "cache_hit": false,
+              "result_id": "d82c6867cd8a4110a6dabe7ea7b1f3e4",
+              "row_count": 1,
+              "tool": "run_analysis"
+            },
+            {
+              "provider_usage": {
+                "tokens": 6576,
+                "tool_calls": 2
+              }
+            }
+          ]
+        },
+        "expected_spec": {
+          "base_dataset": "support_cases",
+          "metrics": [
+            {
+              "agg": "count_distinct",
+              "expr": {
+                "kind": "col",
+                "ref": {
+                  "column": "case_id",
+                  "dataset": "support_cases"
+                }
+              },
+              "name": "cases"
+            }
+          ]
+        },
+        "expected_table": {
+          "columns": [
+            {
+              "dtype": "BIGINT",
+              "name": "cases",
+              "role": "metric"
+            }
+          ],
+          "rows": [
+            [
+              12
+            ]
+          ]
+        }
+      },
+      "http_status": 200,
+      "id": "distinct_cases",
+      "latency_ms": 6042,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 6576
+    },
+    {
+      "diagnostics": {
+        "actual_result": {
+          "anomalies": null,
+          "answer_sentences": [
+            "Beacon had the highest average resolution minutes: 59 among 2 returned groups.",
+            "Beacon: average resolution minutes was 59.",
+            "Atlas: average resolution minutes was 38.5."
+          ],
+          "chart": {
+            "series": null,
+            "title": "Results by group",
+            "type": "bar",
+            "x": "team",
+            "y": [
+              "average_resolution_minutes"
+            ]
+          },
+          "claims": [
+            {
+              "compared_to": null,
+              "direction": "highest",
+              "entity": {
+                "team": "Beacon"
+              },
+              "id": "c2",
+              "kind": "rank",
+              "metric": "average_resolution_minutes",
+              "period": null,
+              "periods_covered": null,
+              "rank": 1,
+              "rank_of": 2,
+              "source": {
+                "column": "average_resolution_minutes",
+                "row_key": {
+                  "team": "Beacon"
+                },
+                "type": "cell"
+              },
+              "unit": null,
+              "value": 59.0
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {
+                "team": "Beacon"
+              },
+              "id": "c0",
+              "kind": "value",
+              "metric": "average_resolution_minutes",
+              "period": null,
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "average_resolution_minutes",
+                "row_key": {
+                  "team": "Beacon"
+                },
+                "type": "cell"
+              },
+              "unit": null,
+              "value": 59.0
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {
+                "team": "Atlas"
+              },
+              "id": "c1",
+              "kind": "value",
+              "metric": "average_resolution_minutes",
+              "period": null,
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "average_resolution_minutes",
+                "row_key": {
+                  "team": "Atlas"
+                },
+                "type": "cell"
+              },
+              "unit": null,
+              "value": 38.5
+            }
+          ],
+          "clarification": null,
+          "conversation_id": "04ba05ae459c4e648500f3b8027e2080",
+          "created_at": "2026-10-02T14:30:49.518887Z",
+          "id": "46df873f8d6f435cbaa87f058b1ab049",
+          "message": null,
+          "meta": {
+            "caveats": [],
+            "currencies": {},
+            "dataset_versions": {
+              "6c89227b69e94c9f80a24df2c6f3c81e": 1
+            },
+            "elapsed_ms": 324,
+            "params": [],
+            "partial_period": null,
+            "row_count": 2,
+            "source_currencies": {
+              "6c89227b69e94c9f80a24df2c6f3c81e": null
+            },
+            "sql": "SELECT \"t0\".\"team\" AS \"team\", AVG(\"t0\".\"resolution_minutes\") AS \"average_resolution_minutes\" FROM \"t0\" GROUP BY \"t0\".\"team\" ORDER BY \"average_resolution_minutes\" DESC, \"team\" ASC LIMIT 1001",
+            "truncated": false
+          },
+          "outcome": "ok",
+          "owner_id": "ee81b182bf6b43b6a0bfc1aa30b252c2",
+          "question": "What is the average resolution_minutes by team in support_cases?",
+          "spec": {
+            "base_dataset": "support_cases",
+            "dimensions": [
+              {
+                "column": "team",
+                "dataset": "support_cases"
+              }
+            ],
+            "filters": [],
+            "joins": [],
+            "limit": null,
+            "metrics": [
+              {
+                "agg": "avg",
+                "expr": {
+                  "kind": "col",
+                  "ref": {
+                    "column": "resolution_minutes",
+                    "dataset": "support_cases"
+                  }
+                },
+                "name": "average_resolution_minutes"
+              }
+            ],
+            "sort": [],
+            "time_bucket": null
+          },
+          "suggested_questions": [
+            "Show this metric over time.",
+            "Compare these groups.",
+            "Check this metric for unusual values."
+          ],
+          "table": {
+            "columns": [
+              {
+                "dtype": "VARCHAR",
+                "name": "team",
+                "role": "dimension"
+              },
+              {
+                "dtype": "DOUBLE",
+                "name": "average_resolution_minutes",
+                "role": "metric"
+              }
+            ],
+            "rows": [
+              [
+                "Beacon",
+                59.0
+              ],
+              [
+                "Atlas",
+                38.5
+              ]
+            ]
+          },
+          "trace": [
+            {
+              "args": {
+                "spec_json": "{\"base_dataset\": \"support_cases\", \"metrics\": [{\"name\": \"average_resolution_minutes\", \"agg\": \"avg\", \"expr\": {\"kind\": \"col\", \"ref\": {\"dataset\": \"support_cases\", \"column\": \"resolution_minutes\"}}}], \"dimensions\": [{\"dataset\": \"support_cases\", \"column\": \"team\"}]}"
+              },
+              "step": 1,
+              "tool": "run_analysis"
+            },
+            {
+              "ok": true,
+              "summary": "Tool completed",
+              "tool": "run_analysis"
+            },
+            {
+              "args": {
+                "result_id": "46df873f8d6f435cbaa87f058b1ab049"
+              },
+              "step": 2,
+              "tool": "finish"
+            },
+            {
+              "cache_hit": false,
+              "result_id": "46df873f8d6f435cbaa87f058b1ab049",
+              "row_count": 2,
+              "tool": "run_analysis"
+            },
+            {
+              "provider_usage": {
+                "tokens": 6557,
+                "tool_calls": 2
+              }
+            }
+          ]
+        },
+        "expected_spec": {
+          "base_dataset": "support_cases",
+          "dimensions": [
+            {
+              "column": "team",
+              "dataset": "support_cases"
+            }
+          ],
+          "metrics": [
+            {
+              "agg": "avg",
+              "expr": {
+                "kind": "col",
+                "ref": {
+                  "column": "resolution_minutes",
+                  "dataset": "support_cases"
+                }
+              },
+              "name": "mean_minutes"
+            }
+          ]
+        },
+        "expected_table": {
+          "columns": [
+            {
+              "dtype": "VARCHAR",
+              "name": "team",
+              "role": "dimension"
+            },
+            {
+              "dtype": "DOUBLE",
+              "name": "mean_minutes",
+              "role": "metric"
+            }
+          ],
+          "rows": [
+            [
+              "Beacon",
+              59.0
+            ],
+            [
+              "Atlas",
+              38.5
+            ]
+          ]
+        }
+      },
+      "http_status": 200,
+      "id": "resolution_by_team",
+      "latency_ms": 6571,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 6557
+    },
+    {
+      "diagnostics": {
+        "actual_result": {
+          "anomalies": null,
+          "answer_sentences": [
+            "The selected data: row count changed by 0% in Feb 2026 versus the previous observed period."
+          ],
+          "chart": {
+            "series": null,
+            "title": "Results over time",
+            "type": "line",
+            "x": "period",
+            "y": [
+              "row_count"
+            ]
+          },
+          "claims": [
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {},
+              "id": "c0",
+              "kind": "value",
+              "metric": "row_count",
+              "period": "2026-01-01",
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "row_count",
+                "row_key": {
+                  "period": "2026-01-01"
+                },
+                "type": "cell"
+              },
+              "unit": "count",
+              "value": 4.0
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {},
+              "id": "c1",
+              "kind": "value",
+              "metric": "row_count",
+              "period": "2026-02-01",
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "row_count",
+                "row_key": {
+                  "period": "2026-02-01"
+                },
+                "type": "cell"
+              },
+              "unit": "count",
+              "value": 4.0
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {},
+              "id": "c2",
+              "kind": "value",
+              "metric": "row_count",
+              "period": "2026-03-01",
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "row_count",
+                "row_key": {
+                  "period": "2026-03-01"
+                },
+                "type": "cell"
+              },
+              "unit": "count",
+              "value": 4.0
+            },
+            {
+              "compared_to": "c0",
+              "direction": "flat",
+              "entity": {},
+              "id": "c3",
+              "kind": "comparison",
+              "metric": "row_count",
+              "period": "2026-02-01",
+              "periods_covered": 2,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "inputs": [
+                  "c1",
+                  "c0"
+                ],
+                "op": "pct_change",
+                "type": "calc"
+              },
+              "unit": "%",
+              "value": 0.0
+            }
+          ],
+          "clarification": null,
+          "conversation_id": "dfde6af58e7d4b4fa8f5bee4516a30cd",
+          "created_at": "2026-10-02T14:30:55.046649Z",
+          "id": "350fcced0f064d78a03ceae2b3acf76d",
+          "message": null,
+          "meta": {
+            "caveats": [
+              {
+                "code": "partial_period",
+                "count": null,
+                "message": "Mar 2026 only contains data up to 21 Mar 2026, so it is incomplete."
+              }
+            ],
+            "currencies": {},
+            "dataset_versions": {
+              "6c89227b69e94c9f80a24df2c6f3c81e": 1
+            },
+            "elapsed_ms": 325,
+            "params": [],
+            "partial_period": "2026-03-01",
+            "row_count": 3,
+            "source_currencies": {
+              "6c89227b69e94c9f80a24df2c6f3c81e": null
+            },
+            "sql": "SELECT CAST(DATE_TRUNC('month', \"t0\".\"opened_at\") AS DATE) AS \"period\", COUNT(*) AS \"row_count\" FROM \"t0\" GROUP BY CAST(DATE_TRUNC('month', \"t0\".\"opened_at\") AS DATE) ORDER BY \"period\" ASC LIMIT 1001",
+            "truncated": false
+          },
+          "outcome": "ok",
+          "owner_id": "ee81b182bf6b43b6a0bfc1aa30b252c2",
+          "question": "Show the number of support case rows by month using opened_at.",
+          "spec": {
+            "base_dataset": "support_cases",
+            "dimensions": [],
+            "filters": [],
+            "joins": [],
+            "limit": null,
+            "metrics": [
+              {
+                "agg": "count",
+                "expr": null,
+                "name": "row_count"
+              }
+            ],
+            "sort": [],
+            "time_bucket": {
+              "column": {
+                "column": "opened_at",
+                "dataset": "support_cases"
+              },
+              "grain": "month"
+            }
+          },
+          "suggested_questions": [
+            "Show this metric over time.",
+            "Check this metric for unusual values."
+          ],
+          "table": {
+            "columns": [
+              {
+                "dtype": "DATE",
+                "name": "period",
+                "role": "time"
+              },
+              {
+                "dtype": "BIGINT",
+                "name": "row_count",
+                "role": "metric"
+              }
+            ],
+            "rows": [
+              [
+                "2026-01-01",
+                4
+              ],
+              [
+                "2026-02-01",
+                4
+              ],
+              [
+                "2026-03-01",
+                4
+              ]
+            ]
+          },
+          "trace": [
+            {
+              "args": {
+                "spec_json": "{\"base_dataset\": \"support_cases\", \"metrics\": [{\"name\": \"row_count\", \"agg\": \"count\"}], \"time_bucket\": {\"column\": {\"dataset\": \"support_cases\", \"column\": \"opened_at\"}, \"grain\": \"month\"}}"
+              },
+              "step": 1,
+              "tool": "run_analysis"
+            },
+            {
+              "ok": true,
+              "summary": "Tool completed",
+              "tool": "run_analysis"
+            },
+            {
+              "args": {
+                "result_id": "350fcced0f064d78a03ceae2b3acf76d"
+              },
+              "step": 2,
+              "tool": "finish"
+            },
+            {
+              "cache_hit": false,
+              "result_id": "350fcced0f064d78a03ceae2b3acf76d",
+              "row_count": 3,
+              "tool": "run_analysis"
+            },
+            {
+              "provider_usage": {
+                "tokens": 6831,
+                "tool_calls": 2
+              }
+            }
+          ]
+        },
+        "expected_spec": {
+          "base_dataset": "support_cases",
+          "metrics": [
+            {
+              "agg": "count",
+              "name": "cases"
+            }
+          ],
+          "time_bucket": {
+            "column": {
+              "column": "opened_at",
+              "dataset": "support_cases"
+            },
+            "grain": "month"
+          }
+        },
+        "expected_table": {
+          "columns": [
+            {
+              "dtype": "DATE",
+              "name": "period",
+              "role": "time"
+            },
+            {
+              "dtype": "BIGINT",
+              "name": "cases",
+              "role": "metric"
+            }
+          ],
+          "rows": [
+            [
+              "2026-01-01",
+              4
+            ],
+            [
+              "2026-02-01",
+              4
+            ],
+            [
+              "2026-03-01",
+              4
+            ]
+          ]
+        }
+      },
+      "http_status": 200,
+      "id": "monthly_case_count",
+      "latency_ms": 6649,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 6831
+    },
+    {
+      "diagnostics": {
+        "actual_result": {
+          "anomalies": null,
+          "answer_sentences": [
+            "Pro had the highest sum monthly fee: 474 among 2 returned groups.",
+            "Pro: sum monthly fee was 474.",
+            "Basic: sum monthly fee was 174."
+          ],
+          "chart": {
+            "series": null,
+            "title": "Results by group",
+            "type": "bar",
+            "x": "plan",
+            "y": [
+              "sum_monthly_fee"
+            ]
+          },
+          "claims": [
+            {
+              "compared_to": null,
+              "direction": "highest",
+              "entity": {
+                "plan": "Pro"
+              },
+              "id": "c2",
+              "kind": "rank",
+              "metric": "sum_monthly_fee",
+              "period": null,
+              "periods_covered": null,
+              "rank": 1,
+              "rank_of": 2,
+              "source": {
+                "column": "sum_monthly_fee",
+                "row_key": {
+                  "plan": "Pro"
+                },
+                "type": "cell"
+              },
+              "unit": null,
+              "value": 474.0
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {
+                "plan": "Pro"
+              },
+              "id": "c0",
+              "kind": "value",
+              "metric": "sum_monthly_fee",
+              "period": null,
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "sum_monthly_fee",
+                "row_key": {
+                  "plan": "Pro"
+                },
+                "type": "cell"
+              },
+              "unit": null,
+              "value": 474.0
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {
+                "plan": "Basic"
+              },
+              "id": "c1",
+              "kind": "value",
+              "metric": "sum_monthly_fee",
+              "period": null,
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "sum_monthly_fee",
+                "row_key": {
+                  "plan": "Basic"
+                },
+                "type": "cell"
+              },
+              "unit": null,
+              "value": 174.0
+            }
+          ],
+          "clarification": null,
+          "conversation_id": "d6e6935ef66941bc9b57c26598cec965",
+          "created_at": "2026-10-02T14:31:02.606810Z",
+          "id": "49f2d9eb88174396bc873e6bbdae0c1f",
+          "message": null,
+          "meta": {
+            "caveats": [],
+            "currencies": {},
+            "dataset_versions": {
+              "2629992a05c14454946b8fb1324e0ff3": 1
+            },
+            "elapsed_ms": 313,
+            "params": [],
+            "partial_period": null,
+            "row_count": 2,
+            "source_currencies": {
+              "2629992a05c14454946b8fb1324e0ff3": null
+            },
+            "sql": "SELECT \"t0\".\"plan\" AS \"plan\", SUM(\"t0\".\"monthly_fee\") AS \"sum_monthly_fee\" FROM \"t0\" GROUP BY \"t0\".\"plan\" ORDER BY \"sum_monthly_fee\" DESC, \"plan\" ASC LIMIT 1001",
+            "truncated": false
+          },
+          "outcome": "ok",
+          "owner_id": "ee81b182bf6b43b6a0bfc1aa30b252c2",
+          "question": "What is the sum of monthly_fee by plan in subscriptions?",
+          "spec": {
+            "base_dataset": "subscriptions",
+            "dimensions": [
+              {
+                "column": "plan",
+                "dataset": "subscriptions"
+              }
+            ],
+            "filters": [],
+            "joins": [],
+            "limit": null,
+            "metrics": [
+              {
+                "agg": "sum",
+                "expr": {
+                  "kind": "col",
+                  "ref": {
+                    "column": "monthly_fee",
+                    "dataset": "subscriptions"
+                  }
+                },
+                "name": "sum_monthly_fee"
+              }
+            ],
+            "sort": [],
+            "time_bucket": null
+          },
+          "suggested_questions": [
+            "Show this metric over time.",
+            "Compare these groups.",
+            "Check this metric for unusual values."
+          ],
+          "table": {
+            "columns": [
+              {
+                "dtype": "VARCHAR",
+                "name": "plan",
+                "role": "dimension"
+              },
+              {
+                "dtype": "HUGEINT",
+                "name": "sum_monthly_fee",
+                "role": "metric"
+              }
+            ],
+            "rows": [
+              [
+                "Pro",
+                474
+              ],
+              [
+                "Basic",
+                174
+              ]
+            ]
+          },
+          "trace": [
+            {
+              "args": {
+                "spec_json": "{\"base_dataset\": \"subscriptions\", \"metrics\": [{\"name\": \"sum_monthly_fee\", \"agg\": \"sum\", \"expr\": {\"kind\": \"col\", \"ref\": {\"dataset\": \"subscriptions\", \"column\": \"monthly_fee\"}}}], \"dimensions\": [{\"dataset\": \"subscriptions\", \"column\": \"plan\"}]}"
+              },
+              "step": 1,
+              "tool": "run_analysis"
+            },
+            {
+              "ok": true,
+              "summary": "Tool completed",
+              "tool": "run_analysis"
+            },
+            {
+              "args": {
+                "result_id": "49f2d9eb88174396bc873e6bbdae0c1f"
+              },
+              "step": 2,
+              "tool": "finish"
+            },
+            {
+              "cache_hit": false,
+              "result_id": "49f2d9eb88174396bc873e6bbdae0c1f",
+              "row_count": 2,
+              "tool": "run_analysis"
+            },
+            {
+              "provider_usage": {
+                "tokens": 6644,
+                "tool_calls": 2
+              }
+            }
+          ]
+        },
+        "expected_spec": {
+          "base_dataset": "subscriptions",
+          "dimensions": [
+            {
+              "column": "plan",
+              "dataset": "subscriptions"
+            }
+          ],
+          "metrics": [
+            {
+              "agg": "sum",
+              "expr": {
+                "kind": "col",
+                "ref": {
+                  "column": "monthly_fee",
+                  "dataset": "subscriptions"
+                }
+              },
+              "name": "total_fee"
+            }
+          ]
+        },
+        "expected_table": {
+          "columns": [
+            {
+              "dtype": "VARCHAR",
+              "name": "plan",
+              "role": "dimension"
+            },
+            {
+              "dtype": "HUGEINT",
+              "name": "total_fee",
+              "role": "metric"
+            }
+          ],
+          "rows": [
+            [
+              "Pro",
+              474
+            ],
+            [
+              "Basic",
+              174
+            ]
+          ]
+        }
+      },
+      "http_status": 200,
+      "id": "fee_by_plan",
+      "latency_ms": 7065,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 6644
+    },
+    {
+      "diagnostics": {
+        "actual_result": {
+          "anomalies": null,
+          "answer_sentences": [
+            "Pro had the highest avg active seats: 8.83333333333 among 2 returned groups.",
+            "Pro: avg active seats was 8.83333333333.",
+            "Basic: avg active seats was 3.5."
+          ],
+          "chart": {
+            "series": null,
+            "title": "Results by group",
+            "type": "bar",
+            "x": "plan",
+            "y": [
+              "avg_active_seats"
+            ]
+          },
+          "claims": [
+            {
+              "compared_to": null,
+              "direction": "highest",
+              "entity": {
+                "plan": "Pro"
+              },
+              "id": "c2",
+              "kind": "rank",
+              "metric": "avg_active_seats",
+              "period": null,
+              "periods_covered": null,
+              "rank": 1,
+              "rank_of": 2,
+              "source": {
+                "column": "avg_active_seats",
+                "row_key": {
+                  "plan": "Pro"
+                },
+                "type": "cell"
+              },
+              "unit": null,
+              "value": 8.833333333333334
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {
+                "plan": "Pro"
+              },
+              "id": "c0",
+              "kind": "value",
+              "metric": "avg_active_seats",
+              "period": null,
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "avg_active_seats",
+                "row_key": {
+                  "plan": "Pro"
+                },
+                "type": "cell"
+              },
+              "unit": null,
+              "value": 8.833333333333334
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {
+                "plan": "Basic"
+              },
+              "id": "c1",
+              "kind": "value",
+              "metric": "avg_active_seats",
+              "period": null,
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "avg_active_seats",
+                "row_key": {
+                  "plan": "Basic"
+                },
+                "type": "cell"
+              },
+              "unit": null,
+              "value": 3.5
+            }
+          ],
+          "clarification": null,
+          "conversation_id": "ffb1071c27ae46faac9df6ab1b878b3d",
+          "created_at": "2026-10-02T14:31:08.801267Z",
+          "id": "73cdd7bc68c44375bed74311b1152d3e",
+          "message": null,
+          "meta": {
+            "caveats": [],
+            "currencies": {},
+            "dataset_versions": {
+              "2629992a05c14454946b8fb1324e0ff3": 1
+            },
+            "elapsed_ms": 337,
+            "params": [],
+            "partial_period": null,
+            "row_count": 2,
+            "source_currencies": {
+              "2629992a05c14454946b8fb1324e0ff3": null
+            },
+            "sql": "SELECT \"t0\".\"plan\" AS \"plan\", AVG(\"t0\".\"active_seats\") AS \"avg_active_seats\" FROM \"t0\" GROUP BY \"t0\".\"plan\" ORDER BY \"avg_active_seats\" DESC, \"plan\" ASC LIMIT 1001",
+            "truncated": false
+          },
+          "outcome": "ok",
+          "owner_id": "ee81b182bf6b43b6a0bfc1aa30b252c2",
+          "question": "What is the average active_seats by plan in subscriptions?",
+          "spec": {
+            "base_dataset": "subscriptions",
+            "dimensions": [
+              {
+                "column": "plan",
+                "dataset": "subscriptions"
+              }
+            ],
+            "filters": [],
+            "joins": [],
+            "limit": null,
+            "metrics": [
+              {
+                "agg": "avg",
+                "expr": {
+                  "kind": "col",
+                  "ref": {
+                    "column": "active_seats",
+                    "dataset": "subscriptions"
+                  }
+                },
+                "name": "avg_active_seats"
+              }
+            ],
+            "sort": [],
+            "time_bucket": null
+          },
+          "suggested_questions": [
+            "Show this metric over time.",
+            "Compare these groups.",
+            "Check this metric for unusual values."
+          ],
+          "table": {
+            "columns": [
+              {
+                "dtype": "VARCHAR",
+                "name": "plan",
+                "role": "dimension"
+              },
+              {
+                "dtype": "DOUBLE",
+                "name": "avg_active_seats",
+                "role": "metric"
+              }
+            ],
+            "rows": [
+              [
+                "Pro",
+                8.833333333333334
+              ],
+              [
+                "Basic",
+                3.5
+              ]
+            ]
+          },
+          "trace": [
+            {
+              "args": {
+                "spec_json": "{\"base_dataset\": \"subscriptions\", \"metrics\": [{\"name\": \"avg_active_seats\", \"agg\": \"avg\", \"expr\": {\"kind\": \"col\", \"ref\": {\"dataset\": \"subscriptions\", \"column\": \"active_seats\"}}}], \"dimensions\": [{\"dataset\": \"subscriptions\", \"column\": \"plan\"}]}"
+              },
+              "step": 1,
+              "tool": "run_analysis"
+            },
+            {
+              "ok": true,
+              "summary": "Tool completed",
+              "tool": "run_analysis"
+            },
+            {
+              "args": {
+                "result_id": "73cdd7bc68c44375bed74311b1152d3e"
+              },
+              "step": 2,
+              "tool": "finish"
+            },
+            {
+              "cache_hit": false,
+              "result_id": "73cdd7bc68c44375bed74311b1152d3e",
+              "row_count": 2,
+              "tool": "run_analysis"
+            },
+            {
+              "provider_usage": {
+                "tokens": 6601,
+                "tool_calls": 2
+              }
+            }
+          ]
+        },
+        "expected_spec": {
+          "base_dataset": "subscriptions",
+          "dimensions": [
+            {
+              "column": "plan",
+              "dataset": "subscriptions"
+            }
+          ],
+          "metrics": [
+            {
+              "agg": "avg",
+              "expr": {
+                "kind": "col",
+                "ref": {
+                  "column": "active_seats",
+                  "dataset": "subscriptions"
+                }
+              },
+              "name": "mean_seats"
+            }
+          ]
+        },
+        "expected_table": {
+          "columns": [
+            {
+              "dtype": "VARCHAR",
+              "name": "plan",
+              "role": "dimension"
+            },
+            {
+              "dtype": "DOUBLE",
+              "name": "mean_seats",
+              "role": "metric"
+            }
+          ],
+          "rows": [
+            [
+              "Pro",
+              8.833333333333334
+            ],
+            [
+              "Basic",
+              3.5
+            ]
+          ]
+        }
+      },
+      "http_status": 200,
+      "id": "seats_by_plan",
+      "latency_ms": 5077,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 6601
+    },
+    {
+      "diagnostics": {
+        "actual_result": {
+          "anomalies": null,
+          "answer_sentences": [
+            "The selected data: sum monthly fee changed by 0% in Feb 2026 versus the previous observed period."
+          ],
+          "chart": {
+            "series": null,
+            "title": "Results over time",
+            "type": "line",
+            "x": "period",
+            "y": [
+              "sum_monthly_fee"
+            ]
+          },
+          "claims": [
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {},
+              "id": "c0",
+              "kind": "value",
+              "metric": "sum_monthly_fee",
+              "period": "2026-01-01",
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "sum_monthly_fee",
+                "row_key": {
+                  "period": "2026-01-01"
+                },
+                "type": "cell"
+              },
+              "unit": null,
+              "value": 216.0
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {},
+              "id": "c1",
+              "kind": "value",
+              "metric": "sum_monthly_fee",
+              "period": "2026-02-01",
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "sum_monthly_fee",
+                "row_key": {
+                  "period": "2026-02-01"
+                },
+                "type": "cell"
+              },
+              "unit": null,
+              "value": 216.0
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {},
+              "id": "c2",
+              "kind": "value",
+              "metric": "sum_monthly_fee",
+              "period": "2026-03-01",
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "sum_monthly_fee",
+                "row_key": {
+                  "period": "2026-03-01"
+                },
+                "type": "cell"
+              },
+              "unit": null,
+              "value": 216.0
+            },
+            {
+              "compared_to": "c0",
+              "direction": "flat",
+              "entity": {},
+              "id": "c3",
+              "kind": "comparison",
+              "metric": "sum_monthly_fee",
+              "period": "2026-02-01",
+              "periods_covered": 2,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "inputs": [
+                  "c1",
+                  "c0"
+                ],
+                "op": "pct_change",
+                "type": "calc"
+              },
+              "unit": "%",
+              "value": 0.0
+            }
+          ],
+          "clarification": null,
+          "conversation_id": "984ed9a9b13e4612a279876a4e135727",
+          "created_at": "2026-10-02T14:31:14.905663Z",
+          "id": "8083a26e89914e9ca03125a299c0969e",
+          "message": null,
+          "meta": {
+            "caveats": [
+              {
+                "code": "partial_period",
+                "count": null,
+                "message": "Mar 2026 only contains data up to 27 Mar 2026, so it is incomplete."
+              }
+            ],
+            "currencies": {},
+            "dataset_versions": {
+              "2629992a05c14454946b8fb1324e0ff3": 1
+            },
+            "elapsed_ms": 319,
+            "params": [],
+            "partial_period": "2026-03-01",
+            "row_count": 3,
+            "source_currencies": {
+              "2629992a05c14454946b8fb1324e0ff3": null
+            },
+            "sql": "SELECT CAST(DATE_TRUNC('month', \"t0\".\"started_on\") AS DATE) AS \"period\", SUM(\"t0\".\"monthly_fee\") AS \"sum_monthly_fee\" FROM \"t0\" GROUP BY CAST(DATE_TRUNC('month', \"t0\".\"started_on\") AS DATE) ORDER BY \"period\" ASC LIMIT 1001",
+            "truncated": false
+          },
+          "outcome": "ok",
+          "owner_id": "ee81b182bf6b43b6a0bfc1aa30b252c2",
+          "question": "Show the sum of monthly_fee by month using started_on in subscriptions.",
+          "spec": {
+            "base_dataset": "subscriptions",
+            "dimensions": [],
+            "filters": [],
+            "joins": [],
+            "limit": null,
+            "metrics": [
+              {
+                "agg": "sum",
+                "expr": {
+                  "kind": "col",
+                  "ref": {
+                    "column": "monthly_fee",
+                    "dataset": "subscriptions"
+                  }
+                },
+                "name": "sum_monthly_fee"
+              }
+            ],
+            "sort": [],
+            "time_bucket": {
+              "column": {
+                "column": "started_on",
+                "dataset": "subscriptions"
+              },
+              "grain": "month"
+            }
+          },
+          "suggested_questions": [
+            "Show this metric over time.",
+            "Check this metric for unusual values."
+          ],
+          "table": {
+            "columns": [
+              {
+                "dtype": "DATE",
+                "name": "period",
+                "role": "time"
+              },
+              {
+                "dtype": "HUGEINT",
+                "name": "sum_monthly_fee",
+                "role": "metric"
+              }
+            ],
+            "rows": [
+              [
+                "2026-01-01",
+                216
+              ],
+              [
+                "2026-02-01",
+                216
+              ],
+              [
+                "2026-03-01",
+                216
+              ]
+            ]
+          },
+          "trace": [
+            {
+              "args": {
+                "spec_json": "{\"base_dataset\": \"subscriptions\", \"metrics\": [{\"name\": \"sum_monthly_fee\", \"agg\": \"sum\", \"expr\": {\"kind\": \"col\", \"ref\": {\"dataset\": \"subscriptions\", \"column\": \"monthly_fee\"}}}], \"time_bucket\": {\"column\": {\"dataset\": \"subscriptions\", \"column\": \"started_on\"}, \"grain\": \"month\"}}"
+              },
+              "step": 1,
+              "tool": "run_analysis"
+            },
+            {
+              "ok": true,
+              "summary": "Tool completed",
+              "tool": "run_analysis"
+            },
+            {
+              "args": {
+                "result_id": "8083a26e89914e9ca03125a299c0969e"
+              },
+              "step": 2,
+              "tool": "finish"
+            },
+            {
+              "cache_hit": false,
+              "result_id": "8083a26e89914e9ca03125a299c0969e",
+              "row_count": 3,
+              "tool": "run_analysis"
+            },
+            {
+              "provider_usage": {
+                "tokens": 6829,
+                "tool_calls": 2
+              }
+            }
+          ]
+        },
+        "expected_spec": {
+          "base_dataset": "subscriptions",
+          "metrics": [
+            {
+              "agg": "sum",
+              "expr": {
+                "kind": "col",
+                "ref": {
+                  "column": "monthly_fee",
+                  "dataset": "subscriptions"
+                }
+              },
+              "name": "total_fee"
+            }
+          ],
+          "time_bucket": {
+            "column": {
+              "column": "started_on",
+              "dataset": "subscriptions"
+            },
+            "grain": "month"
+          }
+        },
+        "expected_table": {
+          "columns": [
+            {
+              "dtype": "DATE",
+              "name": "period",
+              "role": "time"
+            },
+            {
+              "dtype": "HUGEINT",
+              "name": "total_fee",
+              "role": "metric"
+            }
+          ],
+          "rows": [
+            [
+              "2026-01-01",
+              216
+            ],
+            [
+              "2026-02-01",
+              216
+            ],
+            [
+              "2026-03-01",
+              216
+            ]
+          ]
+        }
+      },
+      "http_status": 200,
+      "id": "monthly_fee_total",
+      "latency_ms": 6817,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 6829
+    },
+    {
+      "diagnostics": {
+        "actual_result": {
+          "anomalies": null,
+          "answer_sentences": [],
+          "chart": null,
+          "claims": [],
+          "clarification": null,
+          "conversation_id": "405ba7a377914b6da808ea658a781634",
+          "created_at": "2026-10-02T14:31:22.926415Z",
+          "id": "a53e7871da224cabb378cdbf1fe6a790",
+          "message": "The selected data does not contain the information needed.",
+          "meta": null,
+          "outcome": "unsupported",
+          "owner_id": "ee81b182bf6b43b6a0bfc1aa30b252c2",
+          "question": "What is the salary of the support team?",
+          "spec": null,
+          "suggested_questions": [],
+          "table": null,
+          "trace": [
+            {
+              "args": {
+                "reason": "missing_data"
+              },
+              "step": 1,
+              "tool": "unsupported"
+            },
+            {
+              "provider_usage": {
+                "tokens": 3203,
+                "tool_calls": 1
+              }
+            }
+          ]
+        },
+        "expected_spec": null,
+        "expected_table": null
+      },
+      "http_status": 200,
+      "id": "support_unsupported",
+      "latency_ms": 4561,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": null,
+        "chart_valid": null,
+        "claims_valid": null,
+        "correct": true,
+        "outcome": "unsupported",
+        "outcome_correct": true,
+        "spec_correct": null,
+        "strict_correct": true,
+        "table_correct": null
+      },
+      "status": "completed",
+      "tokens": 3203
+    },
+    {
+      "diagnostics": {
+        "actual_result": {
+          "anomalies": null,
+          "answer_sentences": [
+            "Customer Success had the highest distinct cases: 6 among 2 returned groups.",
+            "Customer Success: 6 distinct cases.",
+            "Operations: 6 distinct cases."
+          ],
+          "chart": {
+            "series": null,
+            "title": "Results by group",
+            "type": "bar",
+            "x": "division",
+            "y": [
+              "distinct_cases"
+            ]
+          },
+          "claims": [
+            {
+              "compared_to": null,
+              "direction": "highest",
+              "entity": {
+                "division": "Customer Success"
+              },
+              "id": "c2",
+              "kind": "rank",
+              "metric": "distinct_cases",
+              "period": null,
+              "periods_covered": null,
+              "rank": 1,
+              "rank_of": 2,
+              "source": {
+                "column": "distinct_cases",
+                "row_key": {
+                  "division": "Customer Success"
+                },
+                "type": "cell"
+              },
+              "unit": "count",
+              "value": 6.0
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {
+                "division": "Customer Success"
+              },
+              "id": "c0",
+              "kind": "value",
+              "metric": "distinct_cases",
+              "period": null,
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "distinct_cases",
+                "row_key": {
+                  "division": "Customer Success"
+                },
+                "type": "cell"
+              },
+              "unit": "count",
+              "value": 6.0
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {
+                "division": "Operations"
+              },
+              "id": "c1",
+              "kind": "value",
+              "metric": "distinct_cases",
+              "period": null,
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "distinct_cases",
+                "row_key": {
+                  "division": "Operations"
+                },
+                "type": "cell"
+              },
+              "unit": "count",
+              "value": 6.0
+            }
+          ],
+          "clarification": null,
+          "conversation_id": "893687d381a345e69715541ec2f3196f",
+          "created_at": "2026-10-02T14:31:31.522264Z",
+          "id": "ff645402480b4f5b8b486c27c3396049",
+          "message": null,
+          "meta": {
+            "caveats": [],
+            "currencies": {},
+            "dataset_versions": {
+              "0eac6760796e43b08e5adfc5fd1e4fb0": 1,
+              "6c89227b69e94c9f80a24df2c6f3c81e": 1
+            },
+            "elapsed_ms": 286,
+            "params": [],
+            "partial_period": null,
+            "row_count": 2,
+            "source_currencies": {
+              "0eac6760796e43b08e5adfc5fd1e4fb0": null,
+              "6c89227b69e94c9f80a24df2c6f3c81e": null
+            },
+            "sql": "SELECT \"t1\".\"division\" AS \"division\", COUNT(DISTINCT \"t0\".\"case_id\") AS \"distinct_cases\" FROM \"t0\" LEFT JOIN \"t1\" ON \"t0\".\"team\" = \"t1\".\"team\" GROUP BY \"t1\".\"division\" ORDER BY \"distinct_cases\" DESC, \"division\" ASC LIMIT 1001",
+            "truncated": false
+          },
+          "outcome": "ok",
+          "owner_id": "ee81b182bf6b43b6a0bfc1aa30b252c2",
+          "question": "How many distinct support cases belong to each division? Join support_cases to support_teams by team.",
+          "spec": {
+            "base_dataset": "support_cases",
+            "dimensions": [
+              {
+                "column": "division",
+                "dataset": "support_teams"
+              }
+            ],
+            "filters": [],
+            "joins": [
+              {
+                "left": {
+                  "column": "team",
+                  "dataset": "support_cases"
+                },
+                "pre_aggregate": null,
+                "right": {
+                  "column": "team",
+                  "dataset": "support_teams"
+                }
+              }
+            ],
+            "limit": null,
+            "metrics": [
+              {
+                "agg": "count_distinct",
+                "expr": {
+                  "kind": "col",
+                  "ref": {
+                    "column": "case_id",
+                    "dataset": "support_cases"
+                  }
+                },
+                "name": "distinct_cases"
+              }
+            ],
+            "sort": [],
+            "time_bucket": null
+          },
+          "suggested_questions": [
+            "Show this metric over time.",
+            "Compare these groups.",
+            "Check this metric for unusual values."
+          ],
+          "table": {
+            "columns": [
+              {
+                "dtype": "VARCHAR",
+                "name": "division",
+                "role": "dimension"
+              },
+              {
+                "dtype": "BIGINT",
+                "name": "distinct_cases",
+                "role": "metric"
+              }
+            ],
+            "rows": [
+              [
+                "Customer Success",
+                6
+              ],
+              [
+                "Operations",
+                6
+              ]
+            ]
+          },
+          "trace": [
+            {
+              "args": {
+                "join_json": "{\"left\": {\"dataset\": \"support_cases\", \"column\": \"team\"}, \"right\": {\"dataset\": \"support_teams\", \"column\": \"team\"}}"
+              },
+              "step": 1,
+              "tool": "check_join"
+            },
+            {
+              "ok": true,
+              "summary": "Tool completed",
+              "tool": "check_join"
+            },
+            {
+              "args": {
+                "spec_json": "{\"base_dataset\": \"support_cases\", \"metrics\": [{\"name\": \"distinct_cases\", \"agg\": \"count_distinct\", \"expr\": {\"kind\": \"col\", \"ref\": {\"dataset\": \"support_cases\", \"column\": \"case_id\"}}}], \"dimensions\": [{\"dataset\": \"support_teams\", \"column\": \"division\"}], \"joins\": [{\"left\": {\"dataset\": \"support_cases\", \"column\": \"team\"}, \"right\": {\"dataset\": \"support_teams\", \"column\": \"team\"}}]}"
+              },
+              "step": 2,
+              "tool": "run_analysis"
+            },
+            {
+              "ok": true,
+              "summary": "Tool completed",
+              "tool": "run_analysis"
+            },
+            {
+              "args": {
+                "result_id": "ff645402480b4f5b8b486c27c3396049"
+              },
+              "step": 3,
+              "tool": "finish"
+            },
+            {
+              "cache_hit": false,
+              "result_id": "ff645402480b4f5b8b486c27c3396049",
+              "row_count": 2,
+              "tool": "run_analysis"
+            },
+            {
+              "provider_usage": {
+                "tokens": 10224,
+                "tool_calls": 3
+              }
+            }
+          ]
+        },
+        "expected_spec": {
+          "base_dataset": "support_cases",
+          "dimensions": [
+            {
+              "column": "division",
+              "dataset": "support_teams"
+            }
+          ],
+          "joins": [
+            {
+              "left": {
+                "column": "team",
+                "dataset": "support_cases"
+              },
+              "right": {
+                "column": "team",
+                "dataset": "support_teams"
+              }
+            }
+          ],
+          "metrics": [
+            {
+              "agg": "count_distinct",
+              "expr": {
+                "kind": "col",
+                "ref": {
+                  "column": "case_id",
+                  "dataset": "support_cases"
+                }
+              },
+              "name": "cases"
+            }
+          ]
+        },
+        "expected_table": {
+          "columns": [
+            {
+              "dtype": "VARCHAR",
+              "name": "division",
+              "role": "dimension"
+            },
+            {
+              "dtype": "BIGINT",
+              "name": "cases",
+              "role": "metric"
+            }
+          ],
+          "rows": [
+            [
+              "Customer Success",
+              6
+            ],
+            [
+              "Operations",
+              6
+            ]
+          ]
+        }
+      },
+      "http_status": 200,
+      "id": "cases_by_division",
+      "latency_ms": 10832,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 10224
+    },
+    {
+      "diagnostics": {
+        "actual_result": {
+          "anomalies": null,
+          "answer_sentences": [
+            "The selected data: 6 row count."
+          ],
+          "chart": null,
+          "claims": [
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {},
+              "id": "c0",
+              "kind": "value",
+              "metric": "row_count",
+              "period": null,
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "row_count",
+                "row_key": {},
+                "type": "cell"
+              },
+              "unit": "count",
+              "value": 6.0
+            }
+          ],
+          "clarification": null,
+          "conversation_id": "eae280a73d1446459d02def9b3c8f20b",
+          "created_at": "2026-10-02T14:31:38.261479Z",
+          "id": "3513219ac719404390f7652c9f445aa5",
+          "message": null,
+          "meta": {
+            "caveats": [],
+            "currencies": {},
+            "dataset_versions": {
+              "6c89227b69e94c9f80a24df2c6f3c81e": 1
+            },
+            "elapsed_ms": 313,
+            "params": [
+              "closed",
+              "Atlas"
+            ],
+            "partial_period": null,
+            "row_count": 1,
+            "source_currencies": {
+              "6c89227b69e94c9f80a24df2c6f3c81e": null
+            },
+            "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"t0\" WHERE \"t0\".\"status\" = ? AND \"t0\".\"team\" = ? LIMIT 1001",
+            "truncated": false
+          },
+          "outcome": "ok",
+          "owner_id": "ee81b182bf6b43b6a0bfc1aa30b252c2",
+          "question": "How many support case rows are closed and assigned to Atlas?",
+          "spec": {
+            "base_dataset": "support_cases",
+            "dimensions": [],
+            "filters": [
+              {
+                "column": {
+                  "column": "status",
+                  "dataset": "support_cases"
+                },
+                "op": "eq",
+                "value": "closed"
+              },
+              {
+                "column": {
+                  "column": "team",
+                  "dataset": "support_cases"
+                },
+                "op": "eq",
+                "value": "Atlas"
+              }
+            ],
+            "joins": [],
+            "limit": null,
+            "metrics": [
+              {
+                "agg": "count",
+                "expr": null,
+                "name": "row_count"
+              }
+            ],
+            "sort": [],
+            "time_bucket": null
+          },
+          "suggested_questions": [
+            "Show this metric over time.",
+            "Check this metric for unusual values."
+          ],
+          "table": {
+            "columns": [
+              {
+                "dtype": "BIGINT",
+                "name": "row_count",
+                "role": "metric"
+              }
+            ],
+            "rows": [
+              [
+                6
+              ]
+            ]
+          },
+          "trace": [
+            {
+              "args": {
+                "spec_json": "{\"base_dataset\": \"support_cases\", \"metrics\": [{\"name\": \"row_count\", \"agg\": \"count\"}], \"filters\": [{\"column\": {\"dataset\": \"support_cases\", \"column\": \"status\"}, \"op\": \"eq\", \"value\": \"closed\"}, {\"column\": {\"dataset\": \"support_cases\", \"column\": \"team\"}, \"op\": \"eq\", \"value\": \"Atlas\"}]}"
+              },
+              "step": 1,
+              "tool": "run_analysis"
+            },
+            {
+              "ok": true,
+              "summary": "Tool completed",
+              "tool": "run_analysis"
+            },
+            {
+              "args": {
+                "result_id": "3513219ac719404390f7652c9f445aa5"
+              },
+              "step": 2,
+              "tool": "finish"
+            },
+            {
+              "cache_hit": false,
+              "result_id": "3513219ac719404390f7652c9f445aa5",
+              "row_count": 1,
+              "tool": "run_analysis"
+            },
+            {
+              "provider_usage": {
+                "tokens": 6670,
+                "tool_calls": 2
+              }
+            }
+          ]
+        },
+        "expected_spec": {
+          "base_dataset": "support_cases",
+          "filters": [
+            {
+              "column": {
+                "column": "status",
+                "dataset": "support_cases"
+              },
+              "op": "eq",
+              "value": "closed"
+            },
+            {
+              "column": {
+                "column": "team",
+                "dataset": "support_cases"
+              },
+              "op": "eq",
+              "value": "Atlas"
+            }
+          ],
+          "metrics": [
+            {
+              "agg": "count",
+              "name": "cases"
+            }
+          ]
+        },
+        "expected_table": {
+          "columns": [
+            {
+              "dtype": "BIGINT",
+              "name": "cases",
+              "role": "metric"
+            }
+          ],
+          "rows": [
+            [
+              6
+            ]
+          ]
+        }
+      },
+      "http_status": 200,
+      "id": "closed_atlas_cases",
+      "latency_ms": 5596,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 6670
+    },
+    {
+      "diagnostics": {
+        "actual_result": {
+          "anomalies": null,
+          "answer_sentences": [
+            "Pro: total active seats was 53."
+          ],
+          "chart": {
+            "series": null,
+            "title": "Results by group",
+            "type": "bar",
+            "x": "plan",
+            "y": [
+              "total_active_seats"
+            ]
+          },
+          "claims": [
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {
+                "plan": "Pro"
+              },
+              "id": "c0",
+              "kind": "value",
+              "metric": "total_active_seats",
+              "period": null,
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "total_active_seats",
+                "row_key": {
+                  "plan": "Pro"
+                },
+                "type": "cell"
+              },
+              "unit": null,
+              "value": 53.0
+            }
+          ],
+          "clarification": null,
+          "conversation_id": "f84bb2ad23ad4e42acd461bbca7ca3f7",
+          "created_at": "2026-10-02T14:31:43.702664Z",
+          "id": "2edbf61084f240149b66f0d897d0bf3e",
+          "message": null,
+          "meta": {
+            "caveats": [],
+            "currencies": {},
+            "dataset_versions": {
+              "2629992a05c14454946b8fb1324e0ff3": 1
+            },
+            "elapsed_ms": 339,
+            "params": [],
+            "partial_period": null,
+            "row_count": 1,
+            "source_currencies": {
+              "2629992a05c14454946b8fb1324e0ff3": null
+            },
+            "sql": "SELECT \"t0\".\"plan\" AS \"plan\", SUM(\"t0\".\"active_seats\") AS \"total_active_seats\" FROM \"t0\" GROUP BY \"t0\".\"plan\" ORDER BY \"total_active_seats\" DESC, \"plan\" ASC LIMIT 2",
+            "truncated": false
+          },
+          "outcome": "ok",
+          "owner_id": "ee81b182bf6b43b6a0bfc1aa30b252c2",
+          "question": "Which plan has the highest total active_seats?",
+          "spec": {
+            "base_dataset": "subscriptions",
+            "dimensions": [
+              {
+                "column": "plan",
+                "dataset": "subscriptions"
+              }
+            ],
+            "filters": [],
+            "joins": [],
+            "limit": 1,
+            "metrics": [
+              {
+                "agg": "sum",
+                "expr": {
+                  "kind": "col",
+                  "ref": {
+                    "column": "active_seats",
+                    "dataset": "subscriptions"
+                  }
+                },
+                "name": "total_active_seats"
+              }
+            ],
+            "sort": [
+              {
+                "by": "total_active_seats",
+                "descending": true
+              }
+            ],
+            "time_bucket": null
+          },
+          "suggested_questions": [
+            "Show this metric over time.",
+            "Compare these groups.",
+            "Check this metric for unusual values."
+          ],
+          "table": {
+            "columns": [
+              {
+                "dtype": "VARCHAR",
+                "name": "plan",
+                "role": "dimension"
+              },
+              {
+                "dtype": "HUGEINT",
+                "name": "total_active_seats",
+                "role": "metric"
+              }
+            ],
+            "rows": [
+              [
+                "Pro",
+                53
+              ]
+            ]
+          },
+          "trace": [
+            {
+              "args": {
+                "spec_json": "{\"base_dataset\": \"subscriptions\", \"metrics\": [{\"name\": \"total_active_seats\", \"agg\": \"sum\", \"expr\": {\"kind\": \"col\", \"ref\": {\"dataset\": \"subscriptions\", \"column\": \"active_seats\"}}}], \"dimensions\": [{\"dataset\": \"subscriptions\", \"column\": \"plan\"}], \"sort\": [{\"by\": \"total_active_seats\", \"descending\": true}], \"limit\": 1}"
+              },
+              "step": 1,
+              "tool": "run_analysis"
+            },
+            {
+              "ok": true,
+              "summary": "Tool completed",
+              "tool": "run_analysis"
+            },
+            {
+              "args": {
+                "result_id": "2edbf61084f240149b66f0d897d0bf3e"
+              },
+              "step": 2,
+              "tool": "finish"
+            },
+            {
+              "cache_hit": false,
+              "result_id": "2edbf61084f240149b66f0d897d0bf3e",
+              "row_count": 1,
+              "tool": "run_analysis"
+            },
+            {
+              "provider_usage": {
+                "tokens": 6612,
+                "tool_calls": 2
+              }
+            }
+          ]
+        },
+        "expected_spec": {
+          "base_dataset": "subscriptions",
+          "dimensions": [
+            {
+              "column": "plan",
+              "dataset": "subscriptions"
+            }
+          ],
+          "limit": 1,
+          "metrics": [
+            {
+              "agg": "sum",
+              "expr": {
+                "kind": "col",
+                "ref": {
+                  "column": "active_seats",
+                  "dataset": "subscriptions"
+                }
+              },
+              "name": "seats"
+            }
+          ],
+          "sort": [
+            {
+              "by": "seats",
+              "descending": true
+            }
+          ]
+        },
+        "expected_table": {
+          "columns": [
+            {
+              "dtype": "VARCHAR",
+              "name": "plan",
+              "role": "dimension"
+            },
+            {
+              "dtype": "HUGEINT",
+              "name": "seats",
+              "role": "metric"
+            }
+          ],
+          "rows": [
+            [
+              "Pro",
+              53
+            ]
+          ]
+        }
+      },
+      "http_status": 200,
+      "id": "top_seat_plan",
+      "latency_ms": 5301,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 6612
+    }
+  ],
+  "correct": 10,
+  "cost": null,
+  "cost_note": "Provider billing rates were not available to this runner.",
+  "dirty_tree": false,
+  "fixture_sha256": {
+    "subscriptions.csv": "57941c3f4c09e84b4a8fe28e792fbc1e7b8e23f489571153b6d795ca351e2d1c",
+    "support_cases.csv": "e500a0fdae6c4dfd43e48bfde334545ca7402b824b99bcfcfd3ce7a6cfab94fa",
+    "support_teams.csv": "eea48752f79913f2bc51ba429f34b9b5d2a30d67130804d06f33cc6b4a1481d2"
+  },
+  "git_sha": "e67f20eb6c6dd5c6e48cba04d6c419454d88a628",
+  "llm_max_tokens": 2000,
+  "llm_turn_token_cap": 32000,
+  "llm_wall_s": 90.0,
+  "model": "gemini-2.5-flash",
+  "not_run": 0,
+  "prompt_config_sha256": "ff9214da1ca3c224ad9d2150e27d556b79056b5a7e840711ec398f37bf40a0b2",
+  "provider_mode": "real",
+  "reference_date": "not used",
+  "run_at": "2026-10-02T14:30:37.438904+00:00",
+  "strict_correct": 10,
+  "suite": "transfer",
+  "temperature": 0
+}
