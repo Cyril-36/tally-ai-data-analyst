@@ -1,0 +1,2919 @@
+{
+  "case_set_sha256": "fcd7603691bc6183ea5c98838f361f9b8cd935c2fb0138400b73c768c6cd1916",
+  "cases": [
+    {
+      "http_status": 200,
+      "id": "total_revenue",
+      "latency_ms": 11854,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 11717
+    },
+    {
+      "http_status": 200,
+      "id": "revenue_region",
+      "latency_ms": 9239,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 11336
+    },
+    {
+      "http_status": 200,
+      "id": "highest_region",
+      "latency_ms": 6668,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 7448
+    },
+    {
+      "http_status": 200,
+      "id": "lowest_region",
+      "latency_ms": 5072,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 7330
+    },
+    {
+      "http_status": 200,
+      "id": "orders_total",
+      "latency_ms": 5952,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 7134
+    },
+    {
+      "diagnostics": {
+        "actual_anomalies": null,
+        "actual_answer_sentences": [
+          "West had the highest order_count: 1,165 among 5 returned groups.",
+          "West: order_count was 1,165.",
+          "North: order_count was 1,083.",
+          "East: order_count was 941.",
+          "Central: order_count was 933.",
+          "South: order_count was 849."
+        ],
+        "actual_claims": [
+          {
+            "compared_to": null,
+            "direction": "highest",
+            "entity": {
+              "region": "West"
+            },
+            "id": "c5",
+            "kind": "rank",
+            "metric": "order_count",
+            "period": null,
+            "periods_covered": null,
+            "rank": 1,
+            "rank_of": 5,
+            "source": {
+              "column": "order_count",
+              "row_key": {
+                "region": "West"
+              },
+              "type": "cell"
+            },
+            "unit": "count",
+            "value": 1165.0
+          },
+          {
+            "compared_to": null,
+            "direction": null,
+            "entity": {
+              "region": "West"
+            },
+            "id": "c0",
+            "kind": "value",
+            "metric": "order_count",
+            "period": null,
+            "periods_covered": null,
+            "rank": null,
+            "rank_of": null,
+            "source": {
+              "column": "order_count",
+              "row_key": {
+                "region": "West"
+              },
+              "type": "cell"
+            },
+            "unit": "count",
+            "value": 1165.0
+          },
+          {
+            "compared_to": null,
+            "direction": null,
+            "entity": {
+              "region": "North"
+            },
+            "id": "c1",
+            "kind": "value",
+            "metric": "order_count",
+            "period": null,
+            "periods_covered": null,
+            "rank": null,
+            "rank_of": null,
+            "source": {
+              "column": "order_count",
+              "row_key": {
+                "region": "North"
+              },
+              "type": "cell"
+            },
+            "unit": "count",
+            "value": 1083.0
+          },
+          {
+            "compared_to": null,
+            "direction": null,
+            "entity": {
+              "region": "East"
+            },
+            "id": "c2",
+            "kind": "value",
+            "metric": "order_count",
+            "period": null,
+            "periods_covered": null,
+            "rank": null,
+            "rank_of": null,
+            "source": {
+              "column": "order_count",
+              "row_key": {
+                "region": "East"
+              },
+              "type": "cell"
+            },
+            "unit": "count",
+            "value": 941.0
+          },
+          {
+            "compared_to": null,
+            "direction": null,
+            "entity": {
+              "region": "Central"
+            },
+            "id": "c3",
+            "kind": "value",
+            "metric": "order_count",
+            "period": null,
+            "periods_covered": null,
+            "rank": null,
+            "rank_of": null,
+            "source": {
+              "column": "order_count",
+              "row_key": {
+                "region": "Central"
+              },
+              "type": "cell"
+            },
+            "unit": "count",
+            "value": 933.0
+          },
+          {
+            "compared_to": null,
+            "direction": null,
+            "entity": {
+              "region": "South"
+            },
+            "id": "c4",
+            "kind": "value",
+            "metric": "order_count",
+            "period": null,
+            "periods_covered": null,
+            "rank": null,
+            "rank_of": null,
+            "source": {
+              "column": "order_count",
+              "row_key": {
+                "region": "South"
+              },
+              "type": "cell"
+            },
+            "unit": "count",
+            "value": 849.0
+          }
+        ],
+        "actual_params": [],
+        "actual_result": {
+          "anomalies": null,
+          "answer_sentences": [
+            "West had the highest order_count: 1,165 among 5 returned groups.",
+            "West: order_count was 1,165.",
+            "North: order_count was 1,083.",
+            "East: order_count was 941.",
+            "Central: order_count was 933.",
+            "South: order_count was 849."
+          ],
+          "chart": {
+            "series": null,
+            "title": "Results by group",
+            "type": "bar",
+            "x": "region",
+            "y": [
+              "order_count"
+            ]
+          },
+          "claims": [
+            {
+              "compared_to": null,
+              "direction": "highest",
+              "entity": {
+                "region": "West"
+              },
+              "id": "c5",
+              "kind": "rank",
+              "metric": "order_count",
+              "period": null,
+              "periods_covered": null,
+              "rank": 1,
+              "rank_of": 5,
+              "source": {
+                "column": "order_count",
+                "row_key": {
+                  "region": "West"
+                },
+                "type": "cell"
+              },
+              "unit": "count",
+              "value": 1165.0
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {
+                "region": "West"
+              },
+              "id": "c0",
+              "kind": "value",
+              "metric": "order_count",
+              "period": null,
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "order_count",
+                "row_key": {
+                  "region": "West"
+                },
+                "type": "cell"
+              },
+              "unit": "count",
+              "value": 1165.0
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {
+                "region": "North"
+              },
+              "id": "c1",
+              "kind": "value",
+              "metric": "order_count",
+              "period": null,
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "order_count",
+                "row_key": {
+                  "region": "North"
+                },
+                "type": "cell"
+              },
+              "unit": "count",
+              "value": 1083.0
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {
+                "region": "East"
+              },
+              "id": "c2",
+              "kind": "value",
+              "metric": "order_count",
+              "period": null,
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "order_count",
+                "row_key": {
+                  "region": "East"
+                },
+                "type": "cell"
+              },
+              "unit": "count",
+              "value": 941.0
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {
+                "region": "Central"
+              },
+              "id": "c3",
+              "kind": "value",
+              "metric": "order_count",
+              "period": null,
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "order_count",
+                "row_key": {
+                  "region": "Central"
+                },
+                "type": "cell"
+              },
+              "unit": "count",
+              "value": 933.0
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {
+                "region": "South"
+              },
+              "id": "c4",
+              "kind": "value",
+              "metric": "order_count",
+              "period": null,
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "order_count",
+                "row_key": {
+                  "region": "South"
+                },
+                "type": "cell"
+              },
+              "unit": "count",
+              "value": 849.0
+            }
+          ],
+          "clarification": null,
+          "conversation_id": "e0f54d89e5934703b057d1bf5f5c53f0",
+          "created_at": "2026-10-02T10:00:57.984329Z",
+          "id": "2bb5ed68bc3f4b21abb4be841d4d3ad9",
+          "message": null,
+          "meta": {
+            "caveats": [],
+            "dataset_versions": {
+              "e55b02c797e1433bad3eccc0b05f55d2": 1
+            },
+            "elapsed_ms": 320,
+            "params": [],
+            "partial_period": null,
+            "row_count": 5,
+            "sql": "SELECT \"t0\".\"region\" AS \"region\", COUNT(\"t0\".\"order_id\") AS \"order_count\" FROM \"t0\" GROUP BY \"t0\".\"region\" ORDER BY \"order_count\" DESC, \"region\" ASC LIMIT 1001",
+            "truncated": false
+          },
+          "outcome": "ok",
+          "owner_id": "d66c31bccc8a426ea209beb06a80aa7c",
+          "question": "How many orders came from each region?",
+          "spec": {
+            "base_dataset": "orders",
+            "dimensions": [
+              {
+                "column": "region",
+                "dataset": "orders"
+              }
+            ],
+            "filters": [],
+            "joins": [],
+            "limit": null,
+            "metrics": [
+              {
+                "agg": "count",
+                "expr": {
+                  "kind": "col",
+                  "ref": {
+                    "column": "order_id",
+                    "dataset": "orders"
+                  }
+                },
+                "name": "order_count"
+              }
+            ],
+            "sort": [],
+            "time_bucket": null
+          },
+          "suggested_questions": [
+            "Show this metric over time.",
+            "Compare these groups.",
+            "Check this metric for unusual values."
+          ],
+          "table": {
+            "columns": [
+              {
+                "dtype": "VARCHAR",
+                "name": "region",
+                "role": "dimension"
+              },
+              {
+                "dtype": "BIGINT",
+                "name": "order_count",
+                "role": "metric"
+              }
+            ],
+            "rows": [
+              [
+                "West",
+                1165
+              ],
+              [
+                "North",
+                1083
+              ],
+              [
+                "East",
+                941
+              ],
+              [
+                "Central",
+                933
+              ],
+              [
+                "South",
+                849
+              ]
+            ]
+          },
+          "trace": [
+            {
+              "args": {
+                "spec_json": "{\"base_dataset\": \"orders\", \"metrics\": [{\"name\": \"order_count\", \"agg\": \"count\", \"expr\": {\"kind\": \"col\", \"ref\": {\"dataset\": \"orders\", \"column\": \"order_id\"}}}], \"dimensions\": [{\"dataset\": \"orders\", \"column\": \"region\"}]}"
+              },
+              "step": 1,
+              "tool": "run_analysis"
+            },
+            {
+              "ok": true,
+              "summary": "Tool completed",
+              "tool": "run_analysis"
+            },
+            {
+              "args": {
+                "result_id": "2bb5ed68bc3f4b21abb4be841d4d3ad9"
+              },
+              "step": 2,
+              "tool": "finish"
+            },
+            {
+              "cache_hit": false,
+              "result_id": "2bb5ed68bc3f4b21abb4be841d4d3ad9",
+              "row_count": 5,
+              "tool": "run_analysis"
+            },
+            {
+              "provider_usage": {
+                "tokens": 7133,
+                "tool_calls": 2
+              }
+            }
+          ]
+        },
+        "actual_spec": {
+          "base_dataset": "orders",
+          "dimensions": [
+            {
+              "column": "region",
+              "dataset": "orders"
+            }
+          ],
+          "filters": [],
+          "joins": [],
+          "limit": null,
+          "metrics": [
+            {
+              "agg": "count",
+              "expr": {
+                "kind": "col",
+                "ref": {
+                  "column": "order_id",
+                  "dataset": "orders"
+                }
+              },
+              "name": "order_count"
+            }
+          ],
+          "sort": [],
+          "time_bucket": null
+        },
+        "actual_sql": "SELECT \"t0\".\"region\" AS \"region\", COUNT(\"t0\".\"order_id\") AS \"order_count\" FROM \"t0\" GROUP BY \"t0\".\"region\" ORDER BY \"order_count\" DESC, \"region\" ASC LIMIT 1001",
+        "actual_table": {
+          "columns": [
+            {
+              "dtype": "VARCHAR",
+              "name": "region",
+              "role": "dimension"
+            },
+            {
+              "dtype": "BIGINT",
+              "name": "order_count",
+              "role": "metric"
+            }
+          ],
+          "rows": [
+            [
+              "West",
+              1165
+            ],
+            [
+              "North",
+              1083
+            ],
+            [
+              "East",
+              941
+            ],
+            [
+              "Central",
+              933
+            ],
+            [
+              "South",
+              849
+            ]
+          ]
+        },
+        "clarification": null,
+        "expected_spec": {
+          "base_dataset": "orders",
+          "dimensions": [
+            {
+              "column": "region",
+              "dataset": "orders"
+            }
+          ],
+          "metrics": [
+            {
+              "agg": "count_distinct",
+              "expr": {
+                "kind": "col",
+                "ref": {
+                  "column": "order_id",
+                  "dataset": "orders"
+                }
+              },
+              "name": "orders"
+            }
+          ]
+        },
+        "expected_table": {
+          "columns": [
+            {
+              "dtype": "VARCHAR",
+              "name": "region",
+              "role": "dimension"
+            },
+            {
+              "dtype": "BIGINT",
+              "name": "orders",
+              "role": "metric"
+            }
+          ],
+          "rows": [
+            [
+              "West",
+              1165
+            ],
+            [
+              "North",
+              1083
+            ],
+            [
+              "East",
+              941
+            ],
+            [
+              "Central",
+              932
+            ],
+            [
+              "South",
+              849
+            ]
+          ]
+        },
+        "trace_tools": [
+          "run_analysis",
+          "run_analysis",
+          "finish",
+          "run_analysis"
+        ]
+      },
+      "http_status": 200,
+      "id": "orders_region",
+      "latency_ms": 7188,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": false,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": false,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": false,
+        "strict_correct": false,
+        "table_correct": false
+      },
+      "status": "completed",
+      "tokens": 7133
+    },
+    {
+      "http_status": 200,
+      "id": "units_total",
+      "latency_ms": 6571,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 7118
+    },
+    {
+      "http_status": 200,
+      "id": "units_region",
+      "latency_ms": 5097,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 7105
+    },
+    {
+      "http_status": 200,
+      "id": "avg_units",
+      "latency_ms": 5122,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 7095
+    },
+    {
+      "http_status": 200,
+      "id": "unique_customers",
+      "latency_ms": 5352,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 7034
+    },
+    {
+      "diagnostics": {
+        "actual_anomalies": null,
+        "actual_answer_sentences": null,
+        "actual_claims": null,
+        "actual_params": null,
+        "actual_result": {
+          "message": "The AI provider failed or returned an invalid response. Try again.",
+          "outcome": "provider_failed"
+        },
+        "actual_spec": null,
+        "actual_sql": null,
+        "actual_table": null,
+        "clarification": null,
+        "expected_spec": null,
+        "expected_table": null,
+        "trace_tools": []
+      },
+      "http_status": 502,
+      "id": "avg_order_revenue_ambiguous",
+      "latency_ms": 21952,
+      "message": "The AI provider failed or returned an invalid response. Try again.",
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": null,
+        "chart_valid": null,
+        "claims_valid": null,
+        "correct": false,
+        "outcome": "provider_failed",
+        "outcome_correct": false,
+        "spec_correct": null,
+        "strict_correct": false,
+        "table_correct": null
+      },
+      "status": "http_error",
+      "tokens": null
+    },
+    {
+      "http_status": 200,
+      "id": "avg_order_line_revenue",
+      "latency_ms": 13562,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 12286
+    },
+    {
+      "http_status": 200,
+      "id": "monthly_revenue",
+      "latency_ms": 11529,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": false,
+        "strict_correct": false,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 11455
+    },
+    {
+      "diagnostics": {
+        "actual_anomalies": null,
+        "actual_answer_sentences": [
+          "The selected data: order_count increased by 51 from 2025-02-01 to 2026-09-01, across 20 periods.",
+          "The selected data: order_count in 2025-02-01 was 234.",
+          "The selected data: order_count in 2025-03-01 was 222.",
+          "The selected data: order_count in 2025-04-01 was 209.",
+          "The selected data: order_count in 2025-05-01 was 200.",
+          "The selected data: order_count in 2025-06-01 was 199.",
+          "The selected data: order_count in 2025-07-01 was 207.",
+          "The selected data: order_count in 2026-08-01 was 266.",
+          "The selected data: order_count in 2026-09-01 was 285.",
+          "The selected data: order_count increased by 7.14% in 2026-09-01 versus the previous observed period."
+        ],
+        "actual_claims": [
+          {
+            "compared_to": null,
+            "direction": "up",
+            "entity": {},
+            "id": "c6",
+            "kind": "trend",
+            "metric": "order_count",
+            "period": "2025-02-01 to 2026-09-01",
+            "periods_covered": 20,
+            "rank": null,
+            "rank_of": null,
+            "source": {
+              "column": "order_count",
+              "row_key": {
+                "period": "2026-09-01"
+              },
+              "type": "cell"
+            },
+            "unit": "count",
+            "value": 51.0
+          },
+          {
+            "compared_to": null,
+            "direction": null,
+            "entity": {},
+            "id": "c0",
+            "kind": "value",
+            "metric": "order_count",
+            "period": "2025-02-01",
+            "periods_covered": null,
+            "rank": null,
+            "rank_of": null,
+            "source": {
+              "column": "order_count",
+              "row_key": {
+                "period": "2025-02-01"
+              },
+              "type": "cell"
+            },
+            "unit": "count",
+            "value": 234.0
+          },
+          {
+            "compared_to": null,
+            "direction": null,
+            "entity": {},
+            "id": "c1",
+            "kind": "value",
+            "metric": "order_count",
+            "period": "2025-03-01",
+            "periods_covered": null,
+            "rank": null,
+            "rank_of": null,
+            "source": {
+              "column": "order_count",
+              "row_key": {
+                "period": "2025-03-01"
+              },
+              "type": "cell"
+            },
+            "unit": "count",
+            "value": 222.0
+          },
+          {
+            "compared_to": null,
+            "direction": null,
+            "entity": {},
+            "id": "c2",
+            "kind": "value",
+            "metric": "order_count",
+            "period": "2025-04-01",
+            "periods_covered": null,
+            "rank": null,
+            "rank_of": null,
+            "source": {
+              "column": "order_count",
+              "row_key": {
+                "period": "2025-04-01"
+              },
+              "type": "cell"
+            },
+            "unit": "count",
+            "value": 209.0
+          },
+          {
+            "compared_to": null,
+            "direction": null,
+            "entity": {},
+            "id": "c3",
+            "kind": "value",
+            "metric": "order_count",
+            "period": "2025-05-01",
+            "periods_covered": null,
+            "rank": null,
+            "rank_of": null,
+            "source": {
+              "column": "order_count",
+              "row_key": {
+                "period": "2025-05-01"
+              },
+              "type": "cell"
+            },
+            "unit": "count",
+            "value": 200.0
+          },
+          {
+            "compared_to": null,
+            "direction": null,
+            "entity": {},
+            "id": "c4",
+            "kind": "value",
+            "metric": "order_count",
+            "period": "2025-06-01",
+            "periods_covered": null,
+            "rank": null,
+            "rank_of": null,
+            "source": {
+              "column": "order_count",
+              "row_key": {
+                "period": "2025-06-01"
+              },
+              "type": "cell"
+            },
+            "unit": "count",
+            "value": 199.0
+          },
+          {
+            "compared_to": null,
+            "direction": null,
+            "entity": {},
+            "id": "c5",
+            "kind": "value",
+            "metric": "order_count",
+            "period": "2025-07-01",
+            "periods_covered": null,
+            "rank": null,
+            "rank_of": null,
+            "source": {
+              "column": "order_count",
+              "row_key": {
+                "period": "2025-07-01"
+              },
+              "type": "cell"
+            },
+            "unit": "count",
+            "value": 207.0
+          },
+          {
+            "compared_to": null,
+            "direction": null,
+            "entity": {},
+            "id": "c7",
+            "kind": "value",
+            "metric": "order_count",
+            "period": "2026-08-01",
+            "periods_covered": null,
+            "rank": null,
+            "rank_of": null,
+            "source": {
+              "column": "order_count",
+              "row_key": {
+                "period": "2026-08-01"
+              },
+              "type": "cell"
+            },
+            "unit": "count",
+            "value": 266.0
+          },
+          {
+            "compared_to": null,
+            "direction": null,
+            "entity": {},
+            "id": "c8",
+            "kind": "value",
+            "metric": "order_count",
+            "period": "2026-09-01",
+            "periods_covered": null,
+            "rank": null,
+            "rank_of": null,
+            "source": {
+              "column": "order_count",
+              "row_key": {
+                "period": "2026-09-01"
+              },
+              "type": "cell"
+            },
+            "unit": "count",
+            "value": 285.0
+          },
+          {
+            "compared_to": "c7",
+            "direction": "up",
+            "entity": {},
+            "id": "c9",
+            "kind": "comparison",
+            "metric": "order_count",
+            "period": "2026-09-01",
+            "periods_covered": 2,
+            "rank": null,
+            "rank_of": null,
+            "source": {
+              "inputs": [
+                "c8",
+                "c7"
+              ],
+              "op": "pct_change",
+              "type": "calc"
+            },
+            "unit": "%",
+            "value": 7.142857142857142
+          }
+        ],
+        "actual_params": [],
+        "actual_result": {
+          "anomalies": null,
+          "answer_sentences": [
+            "The selected data: order_count increased by 51 from 2025-02-01 to 2026-09-01, across 20 periods.",
+            "The selected data: order_count in 2025-02-01 was 234.",
+            "The selected data: order_count in 2025-03-01 was 222.",
+            "The selected data: order_count in 2025-04-01 was 209.",
+            "The selected data: order_count in 2025-05-01 was 200.",
+            "The selected data: order_count in 2025-06-01 was 199.",
+            "The selected data: order_count in 2025-07-01 was 207.",
+            "The selected data: order_count in 2026-08-01 was 266.",
+            "The selected data: order_count in 2026-09-01 was 285.",
+            "The selected data: order_count increased by 7.14% in 2026-09-01 versus the previous observed period."
+          ],
+          "chart": {
+            "series": null,
+            "title": "Results over time",
+            "type": "line",
+            "x": "period",
+            "y": [
+              "order_count"
+            ]
+          },
+          "claims": [
+            {
+              "compared_to": null,
+              "direction": "up",
+              "entity": {},
+              "id": "c6",
+              "kind": "trend",
+              "metric": "order_count",
+              "period": "2025-02-01 to 2026-09-01",
+              "periods_covered": 20,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "order_count",
+                "row_key": {
+                  "period": "2026-09-01"
+                },
+                "type": "cell"
+              },
+              "unit": "count",
+              "value": 51.0
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {},
+              "id": "c0",
+              "kind": "value",
+              "metric": "order_count",
+              "period": "2025-02-01",
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "order_count",
+                "row_key": {
+                  "period": "2025-02-01"
+                },
+                "type": "cell"
+              },
+              "unit": "count",
+              "value": 234.0
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {},
+              "id": "c1",
+              "kind": "value",
+              "metric": "order_count",
+              "period": "2025-03-01",
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "order_count",
+                "row_key": {
+                  "period": "2025-03-01"
+                },
+                "type": "cell"
+              },
+              "unit": "count",
+              "value": 222.0
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {},
+              "id": "c2",
+              "kind": "value",
+              "metric": "order_count",
+              "period": "2025-04-01",
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "order_count",
+                "row_key": {
+                  "period": "2025-04-01"
+                },
+                "type": "cell"
+              },
+              "unit": "count",
+              "value": 209.0
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {},
+              "id": "c3",
+              "kind": "value",
+              "metric": "order_count",
+              "period": "2025-05-01",
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "order_count",
+                "row_key": {
+                  "period": "2025-05-01"
+                },
+                "type": "cell"
+              },
+              "unit": "count",
+              "value": 200.0
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {},
+              "id": "c4",
+              "kind": "value",
+              "metric": "order_count",
+              "period": "2025-06-01",
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "order_count",
+                "row_key": {
+                  "period": "2025-06-01"
+                },
+                "type": "cell"
+              },
+              "unit": "count",
+              "value": 199.0
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {},
+              "id": "c5",
+              "kind": "value",
+              "metric": "order_count",
+              "period": "2025-07-01",
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "order_count",
+                "row_key": {
+                  "period": "2025-07-01"
+                },
+                "type": "cell"
+              },
+              "unit": "count",
+              "value": 207.0
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {},
+              "id": "c7",
+              "kind": "value",
+              "metric": "order_count",
+              "period": "2026-08-01",
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "order_count",
+                "row_key": {
+                  "period": "2026-08-01"
+                },
+                "type": "cell"
+              },
+              "unit": "count",
+              "value": 266.0
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {},
+              "id": "c8",
+              "kind": "value",
+              "metric": "order_count",
+              "period": "2026-09-01",
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "order_count",
+                "row_key": {
+                  "period": "2026-09-01"
+                },
+                "type": "cell"
+              },
+              "unit": "count",
+              "value": 285.0
+            },
+            {
+              "compared_to": "c7",
+              "direction": "up",
+              "entity": {},
+              "id": "c9",
+              "kind": "comparison",
+              "metric": "order_count",
+              "period": "2026-09-01",
+              "periods_covered": 2,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "inputs": [
+                  "c8",
+                  "c7"
+                ],
+                "op": "pct_change",
+                "type": "calc"
+              },
+              "unit": "%",
+              "value": 7.142857142857142
+            }
+          ],
+          "clarification": null,
+          "conversation_id": "11a16c4ba20c483890d9361240b53062",
+          "created_at": "2026-10-02T10:02:14.944419Z",
+          "id": "4799592256a24a949359e7c556f9e2ca",
+          "message": null,
+          "meta": {
+            "caveats": [
+              {
+                "code": "partial_period",
+                "count": null,
+                "message": "2026-10 only contains data up to 2026-10-02, so it is incomplete."
+              }
+            ],
+            "dataset_versions": {
+              "e55b02c797e1433bad3eccc0b05f55d2": 1
+            },
+            "elapsed_ms": 308,
+            "params": [],
+            "partial_period": "2026-10-01",
+            "row_count": 21,
+            "sql": "SELECT CAST(DATE_TRUNC('month', \"t0\".\"order_date\") AS DATE) AS \"period\", COUNT(\"t0\".\"order_id\") AS \"order_count\" FROM \"t0\" GROUP BY CAST(DATE_TRUNC('month', \"t0\".\"order_date\") AS DATE) ORDER BY \"period\" ASC LIMIT 1001",
+            "truncated": false
+          },
+          "outcome": "ok",
+          "owner_id": "d66c31bccc8a426ea209beb06a80aa7c",
+          "question": "Show the monthly order count.",
+          "spec": {
+            "base_dataset": "orders",
+            "dimensions": [],
+            "filters": [],
+            "joins": [],
+            "limit": null,
+            "metrics": [
+              {
+                "agg": "count",
+                "expr": {
+                  "kind": "col",
+                  "ref": {
+                    "column": "order_id",
+                    "dataset": "orders"
+                  }
+                },
+                "name": "order_count"
+              }
+            ],
+            "sort": [
+              {
+                "by": "time_bucket",
+                "descending": false
+              }
+            ],
+            "time_bucket": {
+              "column": {
+                "column": "order_date",
+                "dataset": "orders"
+              },
+              "grain": "month"
+            }
+          },
+          "suggested_questions": [
+            "Show this metric over time.",
+            "Check this metric for unusual values."
+          ],
+          "table": {
+            "columns": [
+              {
+                "dtype": "DATE",
+                "name": "period",
+                "role": "time"
+              },
+              {
+                "dtype": "BIGINT",
+                "name": "order_count",
+                "role": "metric"
+              }
+            ],
+            "rows": [
+              [
+                "2025-02-01",
+                234
+              ],
+              [
+                "2025-03-01",
+                222
+              ],
+              [
+                "2025-04-01",
+                209
+              ],
+              [
+                "2025-05-01",
+                200
+              ],
+              [
+                "2025-06-01",
+                199
+              ],
+              [
+                "2025-07-01",
+                207
+              ],
+              [
+                "2025-08-01",
+                192
+              ],
+              [
+                "2025-09-01",
+                246
+              ],
+              [
+                "2025-10-01",
+                268
+              ],
+              [
+                "2025-11-01",
+                286
+              ],
+              [
+                "2025-12-01",
+                296
+              ],
+              [
+                "2026-01-01",
+                295
+              ],
+              [
+                "2026-02-01",
+                285
+              ],
+              [
+                "2026-03-01",
+                269
+              ],
+              [
+                "2026-04-01",
+                258
+              ],
+              [
+                "2026-05-01",
+                244
+              ],
+              [
+                "2026-06-01",
+                240
+              ],
+              [
+                "2026-07-01",
+                249
+              ],
+              [
+                "2026-08-01",
+                266
+              ],
+              [
+                "2026-09-01",
+                285
+              ],
+              [
+                "2026-10-01",
+                21
+              ]
+            ]
+          },
+          "trace": [
+            {
+              "args": {
+                "spec_json": "{\"base_dataset\": \"orders\", \"metrics\": [{\"name\": \"order_count\", \"agg\": \"count\", \"expr\": {\"kind\": \"col\", \"ref\": {\"dataset\": \"orders\", \"column\": \"order_id\"}}}], \"time_bucket\": {\"column\": {\"dataset\": \"orders\", \"column\": \"order_date\"}, \"grain\": \"month\"}, \"sort\": [{\"by\": \"time_bucket\", \"descending\": false}]}"
+              },
+              "step": 1,
+              "tool": "run_analysis"
+            },
+            {
+              "ok": true,
+              "summary": "Tool completed",
+              "tool": "run_analysis"
+            },
+            {
+              "args": {
+                "result_id": "4799592256a24a949359e7c556f9e2ca"
+              },
+              "step": 2,
+              "tool": "finish"
+            },
+            {
+              "cache_hit": false,
+              "result_id": "4799592256a24a949359e7c556f9e2ca",
+              "row_count": 21,
+              "tool": "run_analysis"
+            },
+            {
+              "provider_usage": {
+                "tokens": 7246,
+                "tool_calls": 2
+              }
+            }
+          ]
+        },
+        "actual_spec": {
+          "base_dataset": "orders",
+          "dimensions": [],
+          "filters": [],
+          "joins": [],
+          "limit": null,
+          "metrics": [
+            {
+              "agg": "count",
+              "expr": {
+                "kind": "col",
+                "ref": {
+                  "column": "order_id",
+                  "dataset": "orders"
+                }
+              },
+              "name": "order_count"
+            }
+          ],
+          "sort": [
+            {
+              "by": "time_bucket",
+              "descending": false
+            }
+          ],
+          "time_bucket": {
+            "column": {
+              "column": "order_date",
+              "dataset": "orders"
+            },
+            "grain": "month"
+          }
+        },
+        "actual_sql": "SELECT CAST(DATE_TRUNC('month', \"t0\".\"order_date\") AS DATE) AS \"period\", COUNT(\"t0\".\"order_id\") AS \"order_count\" FROM \"t0\" GROUP BY CAST(DATE_TRUNC('month', \"t0\".\"order_date\") AS DATE) ORDER BY \"period\" ASC LIMIT 1001",
+        "actual_table": {
+          "columns": [
+            {
+              "dtype": "DATE",
+              "name": "period",
+              "role": "time"
+            },
+            {
+              "dtype": "BIGINT",
+              "name": "order_count",
+              "role": "metric"
+            }
+          ],
+          "rows": [
+            [
+              "2025-02-01",
+              234
+            ],
+            [
+              "2025-03-01",
+              222
+            ],
+            [
+              "2025-04-01",
+              209
+            ],
+            [
+              "2025-05-01",
+              200
+            ],
+            [
+              "2025-06-01",
+              199
+            ],
+            [
+              "2025-07-01",
+              207
+            ],
+            [
+              "2025-08-01",
+              192
+            ],
+            [
+              "2025-09-01",
+              246
+            ],
+            [
+              "2025-10-01",
+              268
+            ],
+            [
+              "2025-11-01",
+              286
+            ],
+            [
+              "2025-12-01",
+              296
+            ],
+            [
+              "2026-01-01",
+              295
+            ],
+            [
+              "2026-02-01",
+              285
+            ],
+            [
+              "2026-03-01",
+              269
+            ],
+            [
+              "2026-04-01",
+              258
+            ],
+            [
+              "2026-05-01",
+              244
+            ],
+            [
+              "2026-06-01",
+              240
+            ],
+            [
+              "2026-07-01",
+              249
+            ],
+            [
+              "2026-08-01",
+              266
+            ],
+            [
+              "2026-09-01",
+              285
+            ],
+            [
+              "2026-10-01",
+              21
+            ]
+          ]
+        },
+        "clarification": null,
+        "expected_spec": {
+          "base_dataset": "orders",
+          "metrics": [
+            {
+              "agg": "count_distinct",
+              "expr": {
+                "kind": "col",
+                "ref": {
+                  "column": "order_id",
+                  "dataset": "orders"
+                }
+              },
+              "name": "orders"
+            }
+          ],
+          "time_bucket": {
+            "column": {
+              "column": "order_date",
+              "dataset": "orders"
+            },
+            "grain": "month"
+          }
+        },
+        "expected_table": {
+          "columns": [
+            {
+              "dtype": "DATE",
+              "name": "period",
+              "role": "time"
+            },
+            {
+              "dtype": "BIGINT",
+              "name": "orders",
+              "role": "metric"
+            }
+          ],
+          "rows": [
+            [
+              "2025-02-01",
+              234
+            ],
+            [
+              "2025-03-01",
+              222
+            ],
+            [
+              "2025-04-01",
+              209
+            ],
+            [
+              "2025-05-01",
+              200
+            ],
+            [
+              "2025-06-01",
+              199
+            ],
+            [
+              "2025-07-01",
+              207
+            ],
+            [
+              "2025-08-01",
+              192
+            ],
+            [
+              "2025-09-01",
+              246
+            ],
+            [
+              "2025-10-01",
+              268
+            ],
+            [
+              "2025-11-01",
+              286
+            ],
+            [
+              "2025-12-01",
+              296
+            ],
+            [
+              "2026-01-01",
+              295
+            ],
+            [
+              "2026-02-01",
+              285
+            ],
+            [
+              "2026-03-01",
+              269
+            ],
+            [
+              "2026-04-01",
+              258
+            ],
+            [
+              "2026-05-01",
+              244
+            ],
+            [
+              "2026-06-01",
+              240
+            ],
+            [
+              "2026-07-01",
+              249
+            ],
+            [
+              "2026-08-01",
+              265
+            ],
+            [
+              "2026-09-01",
+              285
+            ],
+            [
+              "2026-10-01",
+              21
+            ]
+          ]
+        },
+        "trace_tools": [
+          "run_analysis",
+          "run_analysis",
+          "finish",
+          "run_analysis"
+        ]
+      },
+      "http_status": 200,
+      "id": "monthly_orders",
+      "latency_ms": 4924,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": false,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": false,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": false,
+        "strict_correct": false,
+        "table_correct": false
+      },
+      "status": "completed",
+      "tokens": 7246
+    },
+    {
+      "http_status": 200,
+      "id": "monthly_units",
+      "latency_ms": 5658,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 7336
+    },
+    {
+      "http_status": 200,
+      "id": "quarterly_revenue",
+      "latency_ms": 9837,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 11572
+    },
+    {
+      "http_status": 200,
+      "id": "west_monthly",
+      "latency_ms": 6908,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 7642
+    },
+    {
+      "diagnostics": {
+        "actual_anomalies": null,
+        "actual_answer_sentences": null,
+        "actual_claims": null,
+        "actual_params": null,
+        "actual_result": {
+          "message": "The question could not be resolved after bounded corrections.",
+          "outcome": "execution_failed"
+        },
+        "actual_spec": null,
+        "actual_sql": null,
+        "actual_table": null,
+        "clarification": null,
+        "expected_spec": {
+          "base_dataset": "orders",
+          "filters": [
+            {
+              "column": {
+                "column": "region",
+                "dataset": "orders"
+              },
+              "op": "eq",
+              "value": "East"
+            }
+          ],
+          "metrics": [
+            {
+              "agg": "sum",
+              "expr": {
+                "kind": "binop",
+                "left": {
+                  "kind": "binop",
+                  "left": {
+                    "kind": "col",
+                    "ref": {
+                      "column": "quantity",
+                      "dataset": "orders"
+                    }
+                  },
+                  "op": "*",
+                  "right": {
+                    "kind": "col",
+                    "ref": {
+                      "column": "unit_price",
+                      "dataset": "orders"
+                    }
+                  }
+                },
+                "op": "-",
+                "right": {
+                  "kind": "col",
+                  "ref": {
+                    "column": "discount_amount",
+                    "dataset": "orders"
+                  }
+                }
+              },
+              "name": "revenue"
+            }
+          ],
+          "time_bucket": {
+            "column": {
+              "column": "order_date",
+              "dataset": "orders"
+            },
+            "grain": "month"
+          }
+        },
+        "expected_table": {
+          "columns": [
+            {
+              "dtype": "DATE",
+              "name": "period",
+              "role": "time"
+            },
+            {
+              "dtype": "DOUBLE",
+              "name": "revenue",
+              "role": "metric"
+            }
+          ],
+          "rows": [
+            [
+              "2025-02-01",
+              4220.610000000001
+            ],
+            [
+              "2025-03-01",
+              3950.81
+            ],
+            [
+              "2025-04-01",
+              4180.970000000001
+            ],
+            [
+              "2025-05-01",
+              4503.170000000001
+            ],
+            [
+              "2025-06-01",
+              4033.3999999999987
+            ],
+            [
+              "2025-07-01",
+              4020.8900000000003
+            ],
+            [
+              "2025-08-01",
+              3443.589999999999
+            ],
+            [
+              "2025-09-01",
+              5567.09
+            ],
+            [
+              "2025-10-01",
+              6730.330000000001
+            ],
+            [
+              "2025-11-01",
+              5932.660000000001
+            ],
+            [
+              "2025-12-01",
+              4701.509999999999
+            ],
+            [
+              "2026-01-01",
+              5358.85
+            ],
+            [
+              "2026-02-01",
+              7466.41
+            ],
+            [
+              "2026-03-01",
+              4270.42
+            ],
+            [
+              "2026-04-01",
+              6705.509999999999
+            ],
+            [
+              "2026-05-01",
+              5815.039999999998
+            ],
+            [
+              "2026-06-01",
+              3312.4400000000005
+            ],
+            [
+              "2026-07-01",
+              4069.5
+            ],
+            [
+              "2026-08-01",
+              5792.28
+            ],
+            [
+              "2026-09-01",
+              4511.530000000002
+            ],
+            [
+              "2026-10-01",
+              266.2
+            ]
+          ]
+        },
+        "trace_tools": []
+      },
+      "http_status": 500,
+      "id": "east_followup",
+      "latency_ms": 23988,
+      "message": "The question could not be resolved after bounded corrections.",
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": false,
+        "chart_valid": false,
+        "claims_valid": false,
+        "correct": false,
+        "outcome": "execution_failed",
+        "outcome_correct": false,
+        "spec_correct": false,
+        "strict_correct": false,
+        "table_correct": false
+      },
+      "status": "http_error",
+      "tokens": null
+    },
+    {
+      "http_status": 200,
+      "id": "west_revenue",
+      "latency_ms": 10024,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 11380
+    },
+    {
+      "http_status": 200,
+      "id": "revenue_2026",
+      "latency_ms": 5221,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 7347
+    },
+    {
+      "http_status": 200,
+      "id": "monthly_2026",
+      "latency_ms": 10593,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 11872
+    },
+    {
+      "http_status": 200,
+      "id": "top_customers",
+      "latency_ms": 15252,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 15734
+    },
+    {
+      "http_status": 200,
+      "id": "customer_segment",
+      "latency_ms": 15266,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 15777
+    },
+    {
+      "http_status": 200,
+      "id": "revenue_product",
+      "latency_ms": 10364,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 11355
+    },
+    {
+      "http_status": 200,
+      "id": "revenue_category",
+      "latency_ms": 15214,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 15718
+    },
+    {
+      "http_status": 200,
+      "id": "top_products",
+      "latency_ms": 10978,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 11530
+    },
+    {
+      "http_status": 200,
+      "id": "underperforming_ambiguous",
+      "latency_ms": 2266,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": null,
+        "chart_valid": null,
+        "claims_valid": null,
+        "correct": true,
+        "outcome": "needs_clarification",
+        "outcome_correct": true,
+        "spec_correct": null,
+        "strict_correct": true,
+        "table_correct": null
+      },
+      "status": "completed",
+      "tokens": 3471
+    },
+    {
+      "diagnostics": {
+        "actual_anomalies": null,
+        "actual_answer_sentences": [
+          "West had the highest revenue: \u00a3135,306.20 among 5 returned groups.",
+          "West: revenue was \u00a3135,306.20.",
+          "North: revenue was \u00a3109,146.55.",
+          "Central: revenue was \u00a3103,225.51.",
+          "East: revenue was \u00a398,853.21.",
+          "South: revenue was \u00a390,165.96."
+        ],
+        "actual_claims": [
+          {
+            "compared_to": null,
+            "direction": "highest",
+            "entity": {
+              "region": "West"
+            },
+            "id": "c5",
+            "kind": "rank",
+            "metric": "revenue",
+            "period": null,
+            "periods_covered": null,
+            "rank": 1,
+            "rank_of": 5,
+            "source": {
+              "column": "revenue",
+              "row_key": {
+                "region": "West"
+              },
+              "type": "cell"
+            },
+            "unit": "GBP",
+            "value": 135306.1999999999
+          },
+          {
+            "compared_to": null,
+            "direction": null,
+            "entity": {
+              "region": "West"
+            },
+            "id": "c0",
+            "kind": "value",
+            "metric": "revenue",
+            "period": null,
+            "periods_covered": null,
+            "rank": null,
+            "rank_of": null,
+            "source": {
+              "column": "revenue",
+              "row_key": {
+                "region": "West"
+              },
+              "type": "cell"
+            },
+            "unit": "GBP",
+            "value": 135306.1999999999
+          },
+          {
+            "compared_to": null,
+            "direction": null,
+            "entity": {
+              "region": "North"
+            },
+            "id": "c1",
+            "kind": "value",
+            "metric": "revenue",
+            "period": null,
+            "periods_covered": null,
+            "rank": null,
+            "rank_of": null,
+            "source": {
+              "column": "revenue",
+              "row_key": {
+                "region": "North"
+              },
+              "type": "cell"
+            },
+            "unit": "GBP",
+            "value": 109146.54999999983
+          },
+          {
+            "compared_to": null,
+            "direction": null,
+            "entity": {
+              "region": "Central"
+            },
+            "id": "c2",
+            "kind": "value",
+            "metric": "revenue",
+            "period": null,
+            "periods_covered": null,
+            "rank": null,
+            "rank_of": null,
+            "source": {
+              "column": "revenue",
+              "row_key": {
+                "region": "Central"
+              },
+              "type": "cell"
+            },
+            "unit": "GBP",
+            "value": 103225.51000000007
+          },
+          {
+            "compared_to": null,
+            "direction": null,
+            "entity": {
+              "region": "East"
+            },
+            "id": "c3",
+            "kind": "value",
+            "metric": "revenue",
+            "period": null,
+            "periods_covered": null,
+            "rank": null,
+            "rank_of": null,
+            "source": {
+              "column": "revenue",
+              "row_key": {
+                "region": "East"
+              },
+              "type": "cell"
+            },
+            "unit": "GBP",
+            "value": 98853.2099999999
+          },
+          {
+            "compared_to": null,
+            "direction": null,
+            "entity": {
+              "region": "South"
+            },
+            "id": "c4",
+            "kind": "value",
+            "metric": "revenue",
+            "period": null,
+            "periods_covered": null,
+            "rank": null,
+            "rank_of": null,
+            "source": {
+              "column": "revenue",
+              "row_key": {
+                "region": "South"
+              },
+              "type": "cell"
+            },
+            "unit": "GBP",
+            "value": 90165.95999999977
+          }
+        ],
+        "actual_params": [],
+        "actual_result": {
+          "anomalies": null,
+          "answer_sentences": [
+            "West had the highest revenue: \u00a3135,306.20 among 5 returned groups.",
+            "West: revenue was \u00a3135,306.20.",
+            "North: revenue was \u00a3109,146.55.",
+            "Central: revenue was \u00a3103,225.51.",
+            "East: revenue was \u00a398,853.21.",
+            "South: revenue was \u00a390,165.96."
+          ],
+          "chart": {
+            "series": null,
+            "title": "Results by group",
+            "type": "bar",
+            "x": "region",
+            "y": [
+              "revenue"
+            ]
+          },
+          "claims": [
+            {
+              "compared_to": null,
+              "direction": "highest",
+              "entity": {
+                "region": "West"
+              },
+              "id": "c5",
+              "kind": "rank",
+              "metric": "revenue",
+              "period": null,
+              "periods_covered": null,
+              "rank": 1,
+              "rank_of": 5,
+              "source": {
+                "column": "revenue",
+                "row_key": {
+                  "region": "West"
+                },
+                "type": "cell"
+              },
+              "unit": "GBP",
+              "value": 135306.1999999999
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {
+                "region": "West"
+              },
+              "id": "c0",
+              "kind": "value",
+              "metric": "revenue",
+              "period": null,
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "revenue",
+                "row_key": {
+                  "region": "West"
+                },
+                "type": "cell"
+              },
+              "unit": "GBP",
+              "value": 135306.1999999999
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {
+                "region": "North"
+              },
+              "id": "c1",
+              "kind": "value",
+              "metric": "revenue",
+              "period": null,
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "revenue",
+                "row_key": {
+                  "region": "North"
+                },
+                "type": "cell"
+              },
+              "unit": "GBP",
+              "value": 109146.54999999983
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {
+                "region": "Central"
+              },
+              "id": "c2",
+              "kind": "value",
+              "metric": "revenue",
+              "period": null,
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "revenue",
+                "row_key": {
+                  "region": "Central"
+                },
+                "type": "cell"
+              },
+              "unit": "GBP",
+              "value": 103225.51000000007
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {
+                "region": "East"
+              },
+              "id": "c3",
+              "kind": "value",
+              "metric": "revenue",
+              "period": null,
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "revenue",
+                "row_key": {
+                  "region": "East"
+                },
+                "type": "cell"
+              },
+              "unit": "GBP",
+              "value": 98853.2099999999
+            },
+            {
+              "compared_to": null,
+              "direction": null,
+              "entity": {
+                "region": "South"
+              },
+              "id": "c4",
+              "kind": "value",
+              "metric": "revenue",
+              "period": null,
+              "periods_covered": null,
+              "rank": null,
+              "rank_of": null,
+              "source": {
+                "column": "revenue",
+                "row_key": {
+                  "region": "South"
+                },
+                "type": "cell"
+              },
+              "unit": "GBP",
+              "value": 90165.95999999977
+            }
+          ],
+          "clarification": null,
+          "conversation_id": "c2dc1160cb9741fa8c88dbc470ca5bfe",
+          "created_at": "2026-10-02T10:04:48.321043Z",
+          "id": "6169d046d62c45d88047edb72e2959b5",
+          "message": null,
+          "meta": {
+            "caveats": [
+              {
+                "code": "derived_metric",
+                "count": null,
+                "message": "'revenue' is calculated as sum(((orders.quantity * orders.unit_price) - orders.discount_amount))."
+              }
+            ],
+            "dataset_versions": {
+              "e55b02c797e1433bad3eccc0b05f55d2": 1
+            },
+            "elapsed_ms": 319,
+            "params": [],
+            "partial_period": null,
+            "row_count": 5,
+            "sql": "SELECT \"t0\".\"region\" AS \"region\", SUM((\"t0\".\"quantity\" * \"t0\".\"unit_price\") - \"t0\".\"discount_amount\") AS \"revenue\" FROM \"t0\" GROUP BY \"t0\".\"region\" ORDER BY \"revenue\" DESC, \"region\" ASC LIMIT 1001",
+            "truncated": false
+          },
+          "outcome": "ok",
+          "owner_id": "d66c31bccc8a426ea209beb06a80aa7c",
+          "question": "Which region performed best?",
+          "spec": {
+            "base_dataset": "orders",
+            "dimensions": [
+              {
+                "column": "region",
+                "dataset": "orders"
+              }
+            ],
+            "filters": [],
+            "joins": [],
+            "limit": null,
+            "metrics": [
+              {
+                "agg": "sum",
+                "expr": {
+                  "kind": "binop",
+                  "left": {
+                    "kind": "binop",
+                    "left": {
+                      "kind": "col",
+                      "ref": {
+                        "column": "quantity",
+                        "dataset": "orders"
+                      }
+                    },
+                    "op": "*",
+                    "right": {
+                      "kind": "col",
+                      "ref": {
+                        "column": "unit_price",
+                        "dataset": "orders"
+                      }
+                    }
+                  },
+                  "op": "-",
+                  "right": {
+                    "kind": "col",
+                    "ref": {
+                      "column": "discount_amount",
+                      "dataset": "orders"
+                    }
+                  }
+                },
+                "name": "revenue"
+              }
+            ],
+            "sort": [
+              {
+                "by": "revenue",
+                "descending": true
+              }
+            ],
+            "time_bucket": null
+          },
+          "suggested_questions": [
+            "Show this metric over time.",
+            "Compare these groups.",
+            "Check this metric for unusual values."
+          ],
+          "table": {
+            "columns": [
+              {
+                "dtype": "VARCHAR",
+                "name": "region",
+                "role": "dimension"
+              },
+              {
+                "dtype": "DOUBLE",
+                "name": "revenue",
+                "role": "metric"
+              }
+            ],
+            "rows": [
+              [
+                "West",
+                135306.1999999999
+              ],
+              [
+                "North",
+                109146.54999999983
+              ],
+              [
+                "Central",
+                103225.51000000007
+              ],
+              [
+                "East",
+                98853.2099999999
+              ],
+              [
+                "South",
+                90165.95999999977
+              ]
+            ]
+          },
+          "trace": [
+            {
+              "args": {
+                "spec_json": "{\"base_dataset\": \"orders\", \"metrics\": [{\"name\": \"revenue\", \"agg\": \"sum\", \"expr\": {\"kind\": \"binop\", \"op\": \"-\", \"left\": {\"kind\": \"binop\", \"op\": \"*\", \"left\": {\"kind\": \"col\", \"ref\": {\"dataset\": \"orders\", \"column\": \"quantity\"}}, \"right\": {\"kind\": \"col\", \"ref\": {\"dataset\": \"orders\", \"column\": \"unit_price\"}}}, \"right\": {\"kind\": \"col\", \"ref\": {\"dataset\": \"orders\", \"column\": \"discount_amount\"}}}}], \"dimensions\": [{\"dataset\": \"orders\", \"column\": \"region\"}], \"sort\": [{\"by\": \"revenue\", \"descending\": true}]}"
+              },
+              "step": 1,
+              "tool": "run_analysis"
+            },
+            {
+              "ok": true,
+              "summary": "Tool completed",
+              "tool": "run_analysis"
+            },
+            {
+              "args": {
+                "result_id": "6169d046d62c45d88047edb72e2959b5"
+              },
+              "step": 2,
+              "tool": "finish"
+            },
+            {
+              "cache_hit": false,
+              "result_id": "6169d046d62c45d88047edb72e2959b5",
+              "row_count": 5,
+              "tool": "run_analysis"
+            },
+            {
+              "provider_usage": {
+                "tokens": 7545,
+                "tool_calls": 2
+              }
+            }
+          ]
+        },
+        "actual_spec": {
+          "base_dataset": "orders",
+          "dimensions": [
+            {
+              "column": "region",
+              "dataset": "orders"
+            }
+          ],
+          "filters": [],
+          "joins": [],
+          "limit": null,
+          "metrics": [
+            {
+              "agg": "sum",
+              "expr": {
+                "kind": "binop",
+                "left": {
+                  "kind": "binop",
+                  "left": {
+                    "kind": "col",
+                    "ref": {
+                      "column": "quantity",
+                      "dataset": "orders"
+                    }
+                  },
+                  "op": "*",
+                  "right": {
+                    "kind": "col",
+                    "ref": {
+                      "column": "unit_price",
+                      "dataset": "orders"
+                    }
+                  }
+                },
+                "op": "-",
+                "right": {
+                  "kind": "col",
+                  "ref": {
+                    "column": "discount_amount",
+                    "dataset": "orders"
+                  }
+                }
+              },
+              "name": "revenue"
+            }
+          ],
+          "sort": [
+            {
+              "by": "revenue",
+              "descending": true
+            }
+          ],
+          "time_bucket": null
+        },
+        "actual_sql": "SELECT \"t0\".\"region\" AS \"region\", SUM((\"t0\".\"quantity\" * \"t0\".\"unit_price\") - \"t0\".\"discount_amount\") AS \"revenue\" FROM \"t0\" GROUP BY \"t0\".\"region\" ORDER BY \"revenue\" DESC, \"region\" ASC LIMIT 1001",
+        "actual_table": {
+          "columns": [
+            {
+              "dtype": "VARCHAR",
+              "name": "region",
+              "role": "dimension"
+            },
+            {
+              "dtype": "DOUBLE",
+              "name": "revenue",
+              "role": "metric"
+            }
+          ],
+          "rows": [
+            [
+              "West",
+              135306.1999999999
+            ],
+            [
+              "North",
+              109146.54999999983
+            ],
+            [
+              "Central",
+              103225.51000000007
+            ],
+            [
+              "East",
+              98853.2099999999
+            ],
+            [
+              "South",
+              90165.95999999977
+            ]
+          ]
+        },
+        "clarification": null,
+        "expected_spec": null,
+        "expected_table": null,
+        "trace_tools": [
+          "run_analysis",
+          "run_analysis",
+          "finish",
+          "run_analysis"
+        ]
+      },
+      "http_status": 200,
+      "id": "best_ambiguous",
+      "latency_ms": 6319,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": null,
+        "chart_valid": null,
+        "claims_valid": null,
+        "correct": false,
+        "outcome": "ok",
+        "outcome_correct": false,
+        "spec_correct": null,
+        "strict_correct": false,
+        "table_correct": null
+      },
+      "status": "completed",
+      "tokens": 7545
+    },
+    {
+      "http_status": 200,
+      "id": "unsupported_employees",
+      "latency_ms": 1947,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": null,
+        "chart_valid": null,
+        "claims_valid": null,
+        "correct": true,
+        "outcome": "unsupported",
+        "outcome_correct": true,
+        "spec_correct": null,
+        "strict_correct": true,
+        "table_correct": null
+      },
+      "status": "completed",
+      "tokens": 3402
+    },
+    {
+      "http_status": 200,
+      "id": "sql_request",
+      "latency_ms": 10393,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 11554
+    },
+    {
+      "http_status": 200,
+      "id": "monthly_anomalies",
+      "latency_ms": 5525,
+      "message": null,
+      "score": {
+        "anomaly_evidence_valid": true,
+        "anomaly_precision": 1.0,
+        "anomaly_recall": 1.0,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 7629
+    }
+  ],
+  "correct": 26,
+  "cost": null,
+  "cost_note": "Provider billing rates were not available to this runner.",
+  "dirty_tree": true,
+  "fixture_sha256": {
+    "customers.csv": "cc4f9454e24069c08aa04572e22e318bd2609025ba04022960ad842990c419ac",
+    "orders.csv": "29a6d83fc3c35567723d02d821eb3170f86231085f1bbc27de068a15f907d00c",
+    "products.csv": "44199f7b3cda030273cf62e700098a95d6797d9cae0d1b254df7b67430032c67"
+  },
+  "git_sha": "c4ed6d92a2288224fed127031f1e6f1769462014",
+  "llm_max_tokens": 2000,
+  "llm_turn_token_cap": 32000,
+  "llm_wall_s": 90.0,
+  "model": "gemini-2.5-flash",
+  "not_run": 0,
+  "prompt_config_sha256": "fa8eab125385422072a643f4a02fb21a3f5b48c8aae15f6f922b7ff6ba22cfeb",
+  "provider_mode": "real",
+  "reference_date": "2026-10-02",
+  "run_at": "2026-10-02T10:00:11.804650+00:00",
+  "strict_correct": 25,
+  "temperature": 0
+}

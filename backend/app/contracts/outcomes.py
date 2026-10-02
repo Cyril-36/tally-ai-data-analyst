@@ -15,6 +15,7 @@ class Outcome(StrEnum):
     insufficient_data = "insufficient_data"
     execution_failed = "execution_failed"
     provider_failed = "provider_failed"
+    budget_exhausted = "budget_exhausted"
     narrative_unverified = "narrative_unverified"
     invalid_input = "invalid_input"
 
@@ -26,6 +27,7 @@ HTTP_STATUS = {
     Outcome.unsupported: 422,
     Outcome.execution_failed: 500,
     Outcome.provider_failed: 502,
+    Outcome.budget_exhausted: 422,
 }
 
 

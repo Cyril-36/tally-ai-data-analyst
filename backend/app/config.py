@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     llm_timeout_s: float = 60.0
     llm_wall_s: float = 90.0
     llm_max_tokens: int = 2000
-    llm_turn_token_cap: int = 12000
+    llm_turn_token_cap: int = 32000
     max_user_active_turns: int = 2
     max_active_turns: int = 16
     executor_socket: str = ""
@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     demo_reference_date: str = ""
     # Docker overrides this; the default is data/sample at the repository root.
     sample_dir: Path = Path(__file__).resolve().parents[2] / "data" / "sample"
+    frontend_dist: Path | None = None
 
     admin_email: str = ""
     admin_password: str = ""

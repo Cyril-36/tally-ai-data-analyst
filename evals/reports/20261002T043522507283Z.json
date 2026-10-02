@@ -1,0 +1,159 @@
+{
+  "cases": [
+    {
+      "http_status": 200,
+      "id": "total_revenue",
+      "latency_ms": 6271,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 7023
+    },
+    {
+      "diagnostics": {
+        "clarification": null,
+        "spec": {
+          "base_dataset": "orders",
+          "dimensions": [
+            {
+              "column": "region",
+              "dataset": "orders"
+            }
+          ],
+          "filters": [],
+          "joins": [],
+          "limit": null,
+          "metrics": [
+            {
+              "agg": "count",
+              "expr": {
+                "kind": "col",
+                "ref": {
+                  "column": "order_id",
+                  "dataset": "orders"
+                }
+              },
+              "name": "order_count"
+            }
+          ],
+          "sort": [],
+          "time_bucket": null
+        },
+        "table_columns": [
+          {
+            "dtype": "VARCHAR",
+            "name": "region",
+            "role": "dimension"
+          },
+          {
+            "dtype": "BIGINT",
+            "name": "order_count",
+            "role": "metric"
+          }
+        ],
+        "table_rows_first_5": [
+          [
+            "West",
+            1165
+          ],
+          [
+            "North",
+            1083
+          ],
+          [
+            "East",
+            941
+          ],
+          [
+            "Central",
+            933
+          ],
+          [
+            "South",
+            849
+          ]
+        ],
+        "trace_tools": [
+          "run_analysis",
+          "run_analysis",
+          "finish",
+          "run_analysis"
+        ]
+      },
+      "http_status": 200,
+      "id": "orders_region",
+      "latency_ms": 7107,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": false,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": false,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 6959
+    },
+    {
+      "diagnostics": {
+        "clarification": {
+          "options": [],
+          "question": "Which metric or criterion should I use?"
+        },
+        "spec": null,
+        "table_columns": null,
+        "table_rows_first_5": [],
+        "trace_tools": [
+          "clarify"
+        ]
+      },
+      "http_status": 200,
+      "id": "quarterly_revenue",
+      "latency_ms": 4142,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "chart_valid": false,
+        "claims_valid": false,
+        "correct": false,
+        "outcome": "needs_clarification",
+        "outcome_correct": false,
+        "spec_correct": false,
+        "table_correct": false
+      },
+      "status": "completed",
+      "tokens": 3342
+    }
+  ],
+  "correct": 1,
+  "cost": null,
+  "cost_note": "Provider billing rates were not available to this runner.",
+  "dirty_tree": true,
+  "fixture_sha256": {
+    "customers.csv": "cc4f9454e24069c08aa04572e22e318bd2609025ba04022960ad842990c419ac",
+    "orders.csv": "29a6d83fc3c35567723d02d821eb3170f86231085f1bbc27de068a15f907d00c",
+    "products.csv": "44199f7b3cda030273cf62e700098a95d6797d9cae0d1b254df7b67430032c67"
+  },
+  "git_sha": "c4ed6d92a2288224fed127031f1e6f1769462014",
+  "model": "gemini-2.5-flash",
+  "not_run": 0,
+  "prompt_config_sha256": "fb0ca24add57e1be19e719fb532937c041df7eb38d747a14d6a283da8e8fb22a",
+  "reference_date": "2026-10-02",
+  "run_at": "2026-10-02T04:35:03.070044+00:00",
+  "temperature": 0
+}

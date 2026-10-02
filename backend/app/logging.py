@@ -5,7 +5,10 @@ import json
 import logging
 import sys
 
-FIELDS = ("request_id", "method", "path", "status", "latency_ms", "user_id")
+FIELDS = (
+    "request_id", "method", "path", "status", "latency_ms", "user_id",
+    "reason", "tokens", "tool_calls", "repairs", "tools", "last_outcome",
+)
 
 
 class JsonFormatter(logging.Formatter):

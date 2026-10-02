@@ -2,8 +2,8 @@
 
 from datetime import UTC, datetime
 
-from cases import Case
-from run_live import _same_table, _score
+from cases import REGION, Case, spec
+from run_live import _answer_table_matches, _same_spec, _same_table, _score
 
 from app.agent.composer import compose
 from app.charts.builder import default_chart
@@ -50,6 +50,41 @@ def test_score_binds_numbers_to_rows_and_sentences():
     wrong_claim = {**actual, "claims": [*actual["claims"]]}
     wrong_claim["claims"][0] = {**wrong_claim["claims"][0], "value": 999.0}
     assert _score(case, wrong_claim, expected, {})["claims_valid"] is False
+
+
+def test_answer_score_accepts_extra_metrics_but_rejects_wrong_calculation():
+    expected_spec = spec("revenue", dimensions=REGION)
+    expected = {
+        "columns": [
+            {"name": "region", "role": "dimension"},
+            {"name": "revenue", "role": "metric"},
+        ],
+        "rows": [["East", 80.0], ["West", 100.0]],
+    }
+    actual_spec = {**expected_spec, "metrics": [
+        {**expected_spec["metrics"][0], "name": "sales"},
+        {"name": "units", "agg": "sum", "expr": {"kind": "col", "ref": {
+            "dataset": "orders", "column": "quantity",
+        }}},
+    ]}
+    actual = {
+        "spec": actual_spec,
+        "table": {"columns": [
+            {"name": "region", "role": "dimension"},
+            {"name": "sales", "role": "metric"},
+            {"name": "units", "role": "metric"},
+        ], "rows": [["West", 100.0, 7], ["East", 80.0, 4]]},
+    }
+    assert _same_spec(actual_spec, expected_spec) is False
+    assert _answer_table_matches(actual, expected_spec, expected) is True
+    wrong = {**actual, "table": {**actual["table"], "rows": [
+        ["West", 80.0, 7], ["East", 100.0, 4],
+    ]}}
+    assert _answer_table_matches(wrong, expected_spec, expected) is False
+    wrong_metric = {**actual, "spec": {**actual_spec, "metrics": [
+        {**actual_spec["metrics"][0], "agg": "avg"}, actual_spec["metrics"][1],
+    ]}}
+    assert _answer_table_matches(wrong_metric, expected_spec, expected) is False
 
 
 def test_anomaly_score_requires_complete_flags_with_correct_row_values():

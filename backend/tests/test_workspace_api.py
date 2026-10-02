@@ -214,3 +214,139 @@ def test_provider_failure_releases_turn_and_same_key_can_retry(make_client, monk
         json={"question": "Revenue by region", "request_key": "retry"},
     )
     assert retried.status_code == 200 and retried.json()["outcome"] == "unsupported"
+
+
+def test_ai_token_budget_is_not_reported_as_provider_outage(make_client, monkeypatch):
+    from app.config import get_settings
+
+    owner = make_client()
+    _, conversation_id = _setup(owner)
+    monkeypatch.setenv("LLM_TURN_TOKEN_CAP", "300")
+    get_settings.cache_clear()
+
+    class ExpensiveProvider:
+        def complete(self, messages, remaining_s, max_tokens):
+            assert max_tokens == 300
+            return Reply([ToolCall("end", "unsupported", {"reason": "operation"})], tokens=301)
+
+    monkeypatch.setattr("app.agent.provider.get_provider", lambda: ExpensiveProvider())
+    response = owner.post(
+        f"/api/conversations/{conversation_id}/ask",
+        json={"question": "Complex analysis", "request_key": "budget"},
+    )
+    assert response.status_code == 422
+    assert response.json()["outcome"] == "budget_exhausted"
+    assert "token budget" in response.json()["message"]
+
+
+def test_agent_stops_repeating_successful_analyses(make_client, monkeypatch):
+    owner = make_client()
+    _, conversation_id = _setup(owner)
+
+    class RepeatingProvider:
+        def complete(self, messages, remaining_s, max_tokens):
+            observations = [
+                json.loads(message["content"])
+                for message in messages
+                if message["role"] == "tool"
+            ]
+            if len(observations) < 3:
+                call = ToolCall(
+                    f"a-{len(observations)}", "run_analysis", {"spec_json": json.dumps(SPEC)}
+                )
+            else:
+                assert observations[-1]["outcome"] == "invalid_input"
+                call = ToolCall("finish", "finish", {"result_id": observations[-2]["result_id"]})
+            return Reply([call], tokens=100)
+
+    monkeypatch.setattr("app.agent.provider.get_provider", lambda: RepeatingProvider())
+    response = owner.post(
+        f"/api/conversations/{conversation_id}/ask",
+        json={"question": "Revenue by region", "request_key": "repeated"},
+    )
+    assert response.status_code == 200, response.text
+    assert response.json()["outcome"] == "ok"
+    assert response.json()["table"]["rows"] == [["East", 20.0], ["West", 15.0]]
+
+
+def test_explicit_metric_question_recovers_from_needless_metric_clarification(
+    make_client, monkeypatch
+):
+    owner = make_client()
+    uploaded = owner.post(
+        "/api/datasets",
+        files={
+            "files": ("support.csv", b"team,resolution_minutes\nAtlas,20\nBeacon,30\n", "text/csv")
+        },
+    )
+    assert uploaded.status_code == 201
+    created = owner.post(
+        "/api/conversations",
+        json={"title": "Support", "dataset_ids": [uploaded.json()[0]["id"]]},
+    )
+    assert created.status_code == 201
+    conversation_id = created.json()["id"]
+    spec = {
+        "base_dataset": "support",
+        "dimensions": [{"dataset": "support", "column": "team"}],
+        "metrics": [{"name": "minutes", "agg": "sum", "expr": {
+            "kind": "col", "ref": {"dataset": "support", "column": "resolution_minutes"}
+        }}],
+    }
+
+    class ClarifyThenAnalyze:
+        def complete(self, messages, remaining_s, max_tokens):
+            observations = [
+                json.loads(message["content"])
+                for message in messages
+                if message["role"] == "tool"
+            ]
+            if not observations:
+                call = ToolCall("clarify", "clarify", {"reason": "metric"})
+            elif observations[-1].get("outcome") == "invalid_input":
+                call = ToolCall("analyze", "run_analysis", {"spec_json": json.dumps(spec)})
+            else:
+                call = ToolCall("finish", "finish", {"result_id": observations[-1]["result_id"]})
+            return Reply([call], tokens=100)
+
+    monkeypatch.setattr("app.agent.provider.get_provider", lambda: ClarifyThenAnalyze())
+    response = owner.post(
+        f"/api/conversations/{conversation_id}/ask",
+        json={"question": "Show total resolution_minutes by team",
+              "request_key": "explicit-metric"},
+    )
+    assert response.status_code == 200, response.text
+    assert response.json()["outcome"] == "ok"
+
+
+def test_single_metric_anomaly_tool_accepts_generic_metric_name(make_client, monkeypatch):
+    owner = make_client()
+    _, conversation_id = _setup(owner)
+    aliased = {**SPEC, "metrics": [{**SPEC["metrics"][0], "name": "gross_sales"}]}
+
+    class GenericMetricProvider:
+        def complete(self, messages, remaining_s, max_tokens):
+            observations = [
+                json.loads(message["content"])
+                for message in messages
+                if message["role"] == "tool"
+            ]
+            if not observations:
+                call = ToolCall("analyze", "run_analysis", {"spec_json": json.dumps(aliased)})
+            else:
+                call = ToolCall(
+                    "detect", "detect_anomalies",
+                    {"result_id": observations[-1]["result_id"], "metric": "revenue"},
+                )
+            return Reply([call], tokens=100)
+
+    monkeypatch.setattr("app.agent.provider.get_provider", lambda: GenericMetricProvider())
+    response = owner.post(
+        f"/api/conversations/{conversation_id}/ask",
+        json={"question": "Check unusual revenue", "request_key": "metric-alias"},
+    )
+    assert response.status_code == 200, response.text
+    result = response.json()
+    assert result["outcome"] == "ok"
+    assert result["anomalies"]["status"] == "insufficient_data"
+    assert any(sentence.startswith("Anomaly check:") for sentence in result["answer_sentences"])

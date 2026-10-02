@@ -1,4 +1,4 @@
-.PHONY: test lint eval eval-check smoke
+.PHONY: test lint eval eval-check eval-transfer eval-transfer-check smoke
 
 test:
 	cd backend && .venv/bin/python -m pytest -q tests ../evals/test_scoring.py
@@ -12,6 +12,12 @@ eval:
 
 eval-check:
 	backend/.venv/bin/python evals/run_live.py --check
+
+eval-transfer:
+	backend/.venv/bin/python evals/run_transfer.py
+
+eval-transfer-check:
+	backend/.venv/bin/python evals/run_transfer.py --check
 
 smoke:
 	backend/.venv/bin/python scripts/smoke_backend.py

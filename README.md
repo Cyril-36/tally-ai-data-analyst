@@ -1,6 +1,6 @@
 # AI Data Analyst
 
-This repository contains the backend for an AI-powered CSV analyst. An authenticated user can upload CSV files, ask questions in natural language, inspect the exact SQL and bound parameters used, see validated summaries and charts, check anomalies, pin results, and export reports. The frontend is being built separately and has not been integrated into this checkout.
+This repository contains a React frontend and FastAPI backend for an AI-powered CSV analyst. An authenticated user can upload CSV files, ask questions in natural language, inspect the exact SQL and bound parameters used, see validated summaries and charts, check anomalies, pin results, and export reports.
 
 The AI provider chooses bounded analysis tools and fills a structured `AnalysisSpec`. Backend code validates that spec, computes the result in DuckDB, checks ownership again, and renders factual sentences from verified result cells. The model never supplies SQL or numbers shown as facts.
 
@@ -14,7 +14,7 @@ uv sync --frozen
 uv run uvicorn app.main:app --host 127.0.0.1 --port 8768
 ```
 
-Open [API documentation](http://127.0.0.1:8768/docs). Set `LLM_API_KEY` for natural-language questions; the deterministic `/analyze` endpoint, uploads, quality reports, saved results, and exports work without a provider. Copy `.env.example` to `.env` and set the provider endpoint, key, and model. Do not commit `.env`. The current adapter uses an OpenAI-compatible tool-calling endpoint; a live provider and quota have **not** been verified in this checkout.
+Open [API documentation](http://127.0.0.1:8768/docs). Set `LLM_API_KEY` for natural-language questions; the deterministic `/analyze` endpoint, uploads, quality reports, saved results, and exports work without a provider. Copy `.env.example` to `.env` and set the provider endpoint, key, and model. Do not commit `.env`. The OpenAI-compatible adapter was tested with Gemini 2.5 Flash through AiCredits; its measured live evaluation is below.
 
 For a local demo, use a temporary data directory and fictional accounts:
 
@@ -30,13 +30,13 @@ Accounts: `analyst1@example.com`, `analyst2@example.com`, `admin@example.com`, w
 
 ## Docker
 
-`docker compose up --build -d` starts the backend at `http://localhost:8768`; `docker compose down` stops it while retaining the `analyst-data` volume. Pass provider and optional admin seed variables through the shell or a local `.env`. `docker compose config --quiet` validates the deployment file. The image runs as a non-root user with a read-only root filesystem, dedicated writable data volume, dropped capabilities, process/memory limits, and an isolated temporary directory. `/api/health` is liveness; `/api/ready` checks the metadata store and reports whether an AI key is configured. The image was built and a disposable two-worker Compose instance passed readiness, sign-up, upload, analysis and cross-user isolation checks locally.
+`docker compose up --build -d` starts the combined frontend and backend at `http://localhost:8768`; `docker compose down` stops it while retaining the `analyst-data` volume. Pass provider and optional admin seed variables through the shell or a local `.env`. `docker compose config --quiet` validates the deployment file. The image runs as a non-root user with a read-only root filesystem, dedicated writable data volume, dropped capabilities, process/memory limits, and an isolated temporary directory. `/api/health` is liveness; `/api/ready` checks the metadata store and reports whether an AI key is configured. The rebuilt local image passed all 24 Playwright browser flows with the fake provider. No public deployment has been tested.
 
 The current executor achieves **Tier A** isolation: a fresh subprocess per query, an environment without the API key, private copies of selected Parquet files, DuckDB external access disabled and settings locked, resource limits where the OS supports them, a wall-clock kill, and temporary-file cleanup. It executes only backend-generated SQL from validated specs. A separate network-isolated executor service (Tier B) is planned hardening and is not part of this Compose deployment. TLS, backups, and external monitoring must be configured by the deployment environment before public use.
 
 ## Frontend
 
-React 18 + TypeScript + Vite in `frontend/`. The dev server proxies `/api` to the backend on `http://localhost:8000`.
+React 18 + TypeScript + Vite in `frontend/`. The dev server proxies `/api` to the backend on `http://localhost:8000`; the Docker image serves the compiled frontend and API from one origin.
 
 ```bash
 cd frontend
@@ -54,7 +54,7 @@ npm run e2e        # Playwright; starts the backend (LLM_PROVIDER=fake) and Vite
 
 ```mermaid
 flowchart LR
-    Client[API client] --> API[FastAPI auth and ownership checks]
+    Client[React browser app] --> API[FastAPI auth and ownership checks]
     API --> Ingest[CSV validation and Parquet versions]
     API --> Agent[Bounded tool-calling planner]
     Agent --> Spec[AnalysisSpec validator and SQL compiler]
@@ -89,12 +89,14 @@ uv run pytest
 uv run ruff check .
 uv run vulture app --min-confidence 80
 cd .. && backend/.venv/bin/python scripts/smoke_backend.py
-make eval-check  # validates all 30 golden baselines without AI calls
-make eval        # runs all 30 natural-language cases; requires LLM_API_KEY
+make eval-check           # validates 31 retail baselines without AI calls
+make eval                 # runs 31 retail questions; requires LLM_API_KEY
+make eval-transfer-check  # validates 10 unrelated holdout baselines offline
+make eval-transfer        # runs the holdout through the live model
 ```
 
-Offline tests cover CSV validation, unauthorized access, admin separation, join fan-out refusal, bound SQL values, executor escapes and limits, anomalies, claim tampering, chart/report consistency, idempotent HTTP turns, SSE clarification, and provider failure. The 30-case frozen evaluation validates every deterministic baseline with `make eval-check`; `make eval` scores a configured live model against those baselines and writes JSON/Markdown reports in `evals/reports/`. Provider tests use a fake; real model quality, quota, and latency remain unverified until a configured live evaluation runs. The backend currently emits SQL rather than Pandas code, which satisfies the assignment’s “SQL and/or Pandas” requirement. Forecasting, sharing, semantic search, PDF export, and Tier B executor isolation are future work.
+Offline tests cover CSV validation, unauthorized access, admin separation, join fan-out refusal, bound SQL values, executor escapes and limits, anomalies, claim tampering, chart/report consistency, idempotent HTTP turns, SSE clarification, and provider failure. All 31 retail and 10 transfer baselines pass without AI. On 2026-10-02, Gemini 2.5 Flash scored **28/31** on the revised retail questions ([report](evals/reports/20261002T101036976055Z.md)) and **10/10** on an independent support/subscription suite with different schemas, a checked join, filters, and ranking ([report](evals/reports/20261002T101204854191Z.md)). Both used the same prompt and model; neither skipped a case. The original retail run was **19/30** ([report](evals/reports/20261002T043241262867Z.md)); its case definitions changed to resolve ambiguous order-count/average expectations, so the scores are not a controlled before/after comparison. Another run of the revised retail suite scored 26/31, showing model variation. Remaining failures include invalid tool arguments and an ambiguous average answered without clarification. These small fixtures do not establish reliability on arbitrary data or production-ready answer accuracy. The latest retail median response time was 6.9 seconds (p90 10.1 seconds); provider cost is not independently known. The frontend passed 30 component tests and 24 Playwright flows against both local dev servers and the rebuilt combined Docker image, using the fake provider. The production build places the 4.78 MB Plotly library in a separate chunk (1.47 MB gzip); chart-heavy pages should be checked on slower devices. The backend emits SQL rather than Pandas code, which satisfies the assignment's “SQL and/or Pandas” requirement. Forecasting, sharing, semantic search, PDF export, and Tier B executor isolation are future work.
 
-The assignment also requires a GitHub link and a 10–30 second demo video, plus screenshots and a video or live link in this README. Those need the frontend integration and are not claimed as complete here.
+The assignment also requires a GitHub link and a 10–30 second demo video, plus screenshots and a video or live link in this README. These submission artifacts and any public deployment remain pending.
 
 The feature-by-feature check against the supplied assignment is in [docs/ASSIGNMENT_CHECK.md](docs/ASSIGNMENT_CHECK.md).

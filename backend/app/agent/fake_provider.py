@@ -72,7 +72,7 @@ _PLANS = {
     "monthly": ["run_analysis", "finish"],
     "customers": ["check_join", "run_analysis", "finish"],
     "products": ["check_join", "run_analysis", "finish"],
-    "anomalies": ["run_analysis", "detect_anomalies", "finish"],
+    "anomalies": ["run_analysis", "detect_anomalies"],
 }
 _NEEDS = {"customers": {"orders", "customers"}, "products": {"orders", "products"}}
 # Topics the sample data cannot answer; a real model would decline with `unsupported`.

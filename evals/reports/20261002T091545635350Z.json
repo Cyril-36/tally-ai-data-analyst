@@ -1,0 +1,556 @@
+{
+  "cases": [
+    {
+      "diagnostics": {
+        "actual_params": [
+          "West"
+        ],
+        "actual_spec": {
+          "base_dataset": "orders",
+          "dimensions": [],
+          "filters": [
+            {
+              "column": {
+                "column": "region",
+                "dataset": "orders"
+              },
+              "op": "eq",
+              "value": "West"
+            }
+          ],
+          "joins": [],
+          "limit": null,
+          "metrics": [
+            {
+              "agg": "sum",
+              "expr": {
+                "kind": "binop",
+                "left": {
+                  "kind": "binop",
+                  "left": {
+                    "kind": "col",
+                    "ref": {
+                      "column": "quantity",
+                      "dataset": "orders"
+                    }
+                  },
+                  "op": "*",
+                  "right": {
+                    "kind": "col",
+                    "ref": {
+                      "column": "unit_price",
+                      "dataset": "orders"
+                    }
+                  }
+                },
+                "op": "-",
+                "right": {
+                  "kind": "col",
+                  "ref": {
+                    "column": "discount_amount",
+                    "dataset": "orders"
+                  }
+                }
+              },
+              "name": "revenue"
+            }
+          ],
+          "sort": [
+            {
+              "by": "time_bucket",
+              "descending": false
+            }
+          ],
+          "time_bucket": {
+            "column": {
+              "column": "order_date",
+              "dataset": "orders"
+            },
+            "grain": "month"
+          }
+        },
+        "actual_sql": "SELECT CAST(DATE_TRUNC('month', \"t0\".\"order_date\") AS DATE) AS \"period\", SUM((\"t0\".\"quantity\" * \"t0\".\"unit_price\") - \"t0\".\"discount_amount\") AS \"revenue\" FROM \"t0\" WHERE \"t0\".\"region\" = ? GROUP BY CAST(DATE_TRUNC('month', \"t0\".\"order_date\") AS DATE) ORDER BY \"period\" ASC LIMIT 1001",
+        "actual_table": {
+          "columns": [
+            {
+              "dtype": "DATE",
+              "name": "period",
+              "role": "time"
+            },
+            {
+              "dtype": "DOUBLE",
+              "name": "revenue",
+              "role": "metric"
+            }
+          ],
+          "rows": [
+            [
+              "2025-02-01",
+              5101.67
+            ],
+            [
+              "2025-03-01",
+              4867.949999999999
+            ],
+            [
+              "2025-04-01",
+              4477.5
+            ],
+            [
+              "2025-05-01",
+              5781.160000000003
+            ],
+            [
+              "2025-06-01",
+              3471.23
+            ],
+            [
+              "2025-07-01",
+              5142.33
+            ],
+            [
+              "2025-08-01",
+              4987.099999999999
+            ],
+            [
+              "2025-09-01",
+              5091.239999999999
+            ],
+            [
+              "2025-10-01",
+              8206.019999999999
+            ],
+            [
+              "2025-11-01",
+              8046.309999999999
+            ],
+            [
+              "2025-12-01",
+              6830.259999999998
+            ],
+            [
+              "2026-01-01",
+              18846.06
+            ],
+            [
+              "2026-02-01",
+              5516.030000000001
+            ],
+            [
+              "2026-03-01",
+              7401.24
+            ],
+            [
+              "2026-04-01",
+              6768.399999999999
+            ],
+            [
+              "2026-05-01",
+              6317.279999999999
+            ],
+            [
+              "2026-06-01",
+              6144.04
+            ],
+            [
+              "2026-07-01",
+              6164.240000000001
+            ],
+            [
+              "2026-08-01",
+              7091.9800000000005
+            ],
+            [
+              "2026-09-01",
+              7945.279999999999
+            ],
+            [
+              "2026-10-01",
+              1108.88
+            ]
+          ]
+        },
+        "clarification": null,
+        "expected_spec": {
+          "base_dataset": "orders",
+          "filters": [
+            {
+              "column": {
+                "column": "region",
+                "dataset": "orders"
+              },
+              "op": "eq",
+              "value": "West"
+            }
+          ],
+          "metrics": [
+            {
+              "agg": "sum",
+              "expr": {
+                "kind": "binop",
+                "left": {
+                  "kind": "binop",
+                  "left": {
+                    "kind": "col",
+                    "ref": {
+                      "column": "quantity",
+                      "dataset": "orders"
+                    }
+                  },
+                  "op": "*",
+                  "right": {
+                    "kind": "col",
+                    "ref": {
+                      "column": "unit_price",
+                      "dataset": "orders"
+                    }
+                  }
+                },
+                "op": "-",
+                "right": {
+                  "kind": "col",
+                  "ref": {
+                    "column": "discount_amount",
+                    "dataset": "orders"
+                  }
+                }
+              },
+              "name": "revenue"
+            }
+          ],
+          "time_bucket": {
+            "column": {
+              "column": "order_date",
+              "dataset": "orders"
+            },
+            "grain": "month"
+          }
+        },
+        "expected_table": {
+          "columns": [
+            {
+              "dtype": "DATE",
+              "name": "period",
+              "role": "time"
+            },
+            {
+              "dtype": "DOUBLE",
+              "name": "revenue",
+              "role": "metric"
+            }
+          ],
+          "rows": [
+            [
+              "2025-02-01",
+              5101.67
+            ],
+            [
+              "2025-03-01",
+              4867.949999999999
+            ],
+            [
+              "2025-04-01",
+              4477.5
+            ],
+            [
+              "2025-05-01",
+              5781.160000000003
+            ],
+            [
+              "2025-06-01",
+              3471.23
+            ],
+            [
+              "2025-07-01",
+              5142.33
+            ],
+            [
+              "2025-08-01",
+              4987.099999999999
+            ],
+            [
+              "2025-09-01",
+              5091.239999999999
+            ],
+            [
+              "2025-10-01",
+              8206.019999999999
+            ],
+            [
+              "2025-11-01",
+              8046.309999999999
+            ],
+            [
+              "2025-12-01",
+              6830.259999999998
+            ],
+            [
+              "2026-01-01",
+              18846.06
+            ],
+            [
+              "2026-02-01",
+              5516.030000000001
+            ],
+            [
+              "2026-03-01",
+              7401.24
+            ],
+            [
+              "2026-04-01",
+              6768.399999999999
+            ],
+            [
+              "2026-05-01",
+              6317.279999999999
+            ],
+            [
+              "2026-06-01",
+              6144.04
+            ],
+            [
+              "2026-07-01",
+              6164.240000000001
+            ],
+            [
+              "2026-08-01",
+              7091.9800000000005
+            ],
+            [
+              "2026-09-01",
+              7945.279999999999
+            ],
+            [
+              "2026-10-01",
+              1108.88
+            ]
+          ]
+        },
+        "trace_tools": [
+          "run_analysis",
+          "run_analysis",
+          "finish",
+          "run_analysis"
+        ]
+      },
+      "http_status": 200,
+      "id": "west_monthly",
+      "latency_ms": 8714,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": false,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": false,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 8030
+    },
+    {
+      "diagnostics": {
+        "actual_params": null,
+        "actual_spec": null,
+        "actual_sql": null,
+        "actual_table": null,
+        "clarification": null,
+        "expected_spec": {
+          "base_dataset": "orders",
+          "filters": [
+            {
+              "column": {
+                "column": "region",
+                "dataset": "orders"
+              },
+              "op": "eq",
+              "value": "East"
+            }
+          ],
+          "metrics": [
+            {
+              "agg": "sum",
+              "expr": {
+                "kind": "binop",
+                "left": {
+                  "kind": "binop",
+                  "left": {
+                    "kind": "col",
+                    "ref": {
+                      "column": "quantity",
+                      "dataset": "orders"
+                    }
+                  },
+                  "op": "*",
+                  "right": {
+                    "kind": "col",
+                    "ref": {
+                      "column": "unit_price",
+                      "dataset": "orders"
+                    }
+                  }
+                },
+                "op": "-",
+                "right": {
+                  "kind": "col",
+                  "ref": {
+                    "column": "discount_amount",
+                    "dataset": "orders"
+                  }
+                }
+              },
+              "name": "revenue"
+            }
+          ],
+          "time_bucket": {
+            "column": {
+              "column": "order_date",
+              "dataset": "orders"
+            },
+            "grain": "month"
+          }
+        },
+        "expected_table": {
+          "columns": [
+            {
+              "dtype": "DATE",
+              "name": "period",
+              "role": "time"
+            },
+            {
+              "dtype": "DOUBLE",
+              "name": "revenue",
+              "role": "metric"
+            }
+          ],
+          "rows": [
+            [
+              "2025-02-01",
+              4220.610000000001
+            ],
+            [
+              "2025-03-01",
+              3950.81
+            ],
+            [
+              "2025-04-01",
+              4180.970000000001
+            ],
+            [
+              "2025-05-01",
+              4503.170000000001
+            ],
+            [
+              "2025-06-01",
+              4033.3999999999987
+            ],
+            [
+              "2025-07-01",
+              4020.8900000000003
+            ],
+            [
+              "2025-08-01",
+              3443.589999999999
+            ],
+            [
+              "2025-09-01",
+              5567.09
+            ],
+            [
+              "2025-10-01",
+              6730.330000000001
+            ],
+            [
+              "2025-11-01",
+              5932.660000000001
+            ],
+            [
+              "2025-12-01",
+              4701.509999999999
+            ],
+            [
+              "2026-01-01",
+              5358.85
+            ],
+            [
+              "2026-02-01",
+              7466.41
+            ],
+            [
+              "2026-03-01",
+              4270.42
+            ],
+            [
+              "2026-04-01",
+              6705.509999999999
+            ],
+            [
+              "2026-05-01",
+              5815.039999999998
+            ],
+            [
+              "2026-06-01",
+              3312.4400000000005
+            ],
+            [
+              "2026-07-01",
+              4069.5
+            ],
+            [
+              "2026-08-01",
+              5792.28
+            ],
+            [
+              "2026-09-01",
+              4511.530000000002
+            ],
+            [
+              "2026-10-01",
+              266.2
+            ]
+          ]
+        },
+        "trace_tools": []
+      },
+      "http_status": 422,
+      "id": "east_followup",
+      "latency_ms": 20648,
+      "message": "The analysis reached its time or token budget. Simplify the question or select fewer datasets.",
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "chart_valid": false,
+        "claims_valid": false,
+        "correct": false,
+        "outcome": "budget_exhausted",
+        "outcome_correct": false,
+        "spec_correct": false,
+        "table_correct": false
+      },
+      "status": "http_error",
+      "tokens": null
+    }
+  ],
+  "correct": 0,
+  "cost": null,
+  "cost_note": "Provider billing rates were not available to this runner.",
+  "dirty_tree": true,
+  "fixture_sha256": {
+    "customers.csv": "cc4f9454e24069c08aa04572e22e318bd2609025ba04022960ad842990c419ac",
+    "orders.csv": "29a6d83fc3c35567723d02d821eb3170f86231085f1bbc27de068a15f907d00c",
+    "products.csv": "44199f7b3cda030273cf62e700098a95d6797d9cae0d1b254df7b67430032c67"
+  },
+  "git_sha": "c4ed6d92a2288224fed127031f1e6f1769462014",
+  "llm_max_tokens": 2000,
+  "llm_turn_token_cap": 24000,
+  "llm_wall_s": 90.0,
+  "model": "gemini-2.5-flash",
+  "not_run": 0,
+  "prompt_config_sha256": "129e4a46fa49c37ac321598add51b6ae5b7c9ad4e88287205cbd199e59fdde94",
+  "reference_date": "2026-10-02",
+  "run_at": "2026-10-02T09:15:14.936438+00:00",
+  "temperature": 0
+}

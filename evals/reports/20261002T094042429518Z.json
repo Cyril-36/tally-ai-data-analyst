@@ -1,0 +1,1435 @@
+{
+  "case_set_sha256": "fcd7603691bc6183ea5c98838f361f9b8cd935c2fb0138400b73c768c6cd1916",
+  "cases": [
+    {
+      "http_status": 200,
+      "id": "total_revenue",
+      "latency_ms": 9624,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": false,
+        "strict_correct": false,
+        "table_correct": false
+      },
+      "status": "completed",
+      "tokens": 11368
+    },
+    {
+      "http_status": 200,
+      "id": "revenue_region",
+      "latency_ms": 4867,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 7344
+    },
+    {
+      "http_status": 200,
+      "id": "highest_region",
+      "latency_ms": 13934,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 15657
+    },
+    {
+      "http_status": 200,
+      "id": "lowest_region",
+      "latency_ms": 7332,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 7427
+    },
+    {
+      "http_status": 200,
+      "id": "orders_total",
+      "latency_ms": 5127,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 7158
+    },
+    {
+      "http_status": 200,
+      "id": "orders_region",
+      "latency_ms": 4484,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 7126
+    },
+    {
+      "http_status": 200,
+      "id": "units_total",
+      "latency_ms": 5635,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 7157
+    },
+    {
+      "http_status": 200,
+      "id": "units_region",
+      "latency_ms": 4759,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 7124
+    },
+    {
+      "http_status": 200,
+      "id": "avg_units",
+      "latency_ms": 4766,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 7154
+    },
+    {
+      "http_status": 200,
+      "id": "unique_customers",
+      "latency_ms": 5278,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 7133
+    },
+    {
+      "http_status": 200,
+      "id": "avg_order_revenue_ambiguous",
+      "latency_ms": 2260,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": null,
+        "chart_valid": null,
+        "claims_valid": null,
+        "correct": true,
+        "outcome": "needs_clarification",
+        "outcome_correct": true,
+        "spec_correct": null,
+        "strict_correct": true,
+        "table_correct": null
+      },
+      "status": "completed",
+      "tokens": 3496
+    },
+    {
+      "http_status": 200,
+      "id": "avg_order_line_revenue",
+      "latency_ms": 11335,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 11878
+    },
+    {
+      "http_status": 200,
+      "id": "monthly_revenue",
+      "latency_ms": 11082,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": false,
+        "strict_correct": false,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 11610
+    },
+    {
+      "http_status": 200,
+      "id": "monthly_orders",
+      "latency_ms": 7376,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 7302
+    },
+    {
+      "http_status": 200,
+      "id": "monthly_units",
+      "latency_ms": 4856,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 7278
+    },
+    {
+      "diagnostics": {
+        "actual_anomalies": null,
+        "actual_answer_sentences": [],
+        "actual_claims": [],
+        "actual_params": null,
+        "actual_result": {
+          "anomalies": null,
+          "answer_sentences": [],
+          "chart": null,
+          "claims": [],
+          "clarification": {
+            "options": [],
+            "question": "Which metric or criterion should I use?"
+          },
+          "conversation_id": "4c25dc55cb60476db3480cbaa44f163e",
+          "created_at": "2026-10-02T09:38:32.989707Z",
+          "id": "e874a82d08b84378b566f506b076ff6e",
+          "message": null,
+          "meta": null,
+          "outcome": "needs_clarification",
+          "owner_id": "38926c806d3541e6a801727f53043ec9",
+          "question": "Show revenue by quarter.",
+          "spec": null,
+          "suggested_questions": [],
+          "table": null,
+          "trace": [
+            {
+              "args": {
+                "reason": "metric"
+              },
+              "step": 1,
+              "tool": "clarify"
+            },
+            {
+              "provider_usage": {
+                "tokens": 3451,
+                "tool_calls": 1
+              }
+            }
+          ]
+        },
+        "actual_spec": null,
+        "actual_sql": null,
+        "actual_table": null,
+        "clarification": {
+          "options": [],
+          "question": "Which metric or criterion should I use?"
+        },
+        "expected_spec": {
+          "base_dataset": "orders",
+          "metrics": [
+            {
+              "agg": "sum",
+              "expr": {
+                "kind": "binop",
+                "left": {
+                  "kind": "binop",
+                  "left": {
+                    "kind": "col",
+                    "ref": {
+                      "column": "quantity",
+                      "dataset": "orders"
+                    }
+                  },
+                  "op": "*",
+                  "right": {
+                    "kind": "col",
+                    "ref": {
+                      "column": "unit_price",
+                      "dataset": "orders"
+                    }
+                  }
+                },
+                "op": "-",
+                "right": {
+                  "kind": "col",
+                  "ref": {
+                    "column": "discount_amount",
+                    "dataset": "orders"
+                  }
+                }
+              },
+              "name": "revenue"
+            }
+          ],
+          "time_bucket": {
+            "column": {
+              "column": "order_date",
+              "dataset": "orders"
+            },
+            "grain": "quarter"
+          }
+        },
+        "expected_table": {
+          "columns": [
+            {
+              "dtype": "DATE",
+              "name": "period",
+              "role": "time"
+            },
+            {
+              "dtype": "DOUBLE",
+              "name": "revenue",
+              "role": "metric"
+            }
+          ],
+          "rows": [
+            [
+              "2025-01-01",
+              45549.19000000003
+            ],
+            [
+              "2025-04-01",
+              65175.18999999995
+            ],
+            [
+              "2025-07-01",
+              65504.47999999999
+            ],
+            [
+              "2025-10-01",
+              92038.53999999998
+            ],
+            [
+              "2026-01-01",
+              104230.66
+            ],
+            [
+              "2026-04-01",
+              77030.87999999996
+            ],
+            [
+              "2026-07-01",
+              85316.87999999984
+            ],
+            [
+              "2026-10-01",
+              1851.6099999999997
+            ]
+          ]
+        },
+        "trace_tools": [
+          "clarify"
+        ]
+      },
+      "http_status": 200,
+      "id": "quarterly_revenue",
+      "latency_ms": 2869,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": false,
+        "chart_valid": false,
+        "claims_valid": false,
+        "correct": false,
+        "outcome": "needs_clarification",
+        "outcome_correct": false,
+        "spec_correct": false,
+        "strict_correct": false,
+        "table_correct": false
+      },
+      "status": "completed",
+      "tokens": 3451
+    },
+    {
+      "http_status": 200,
+      "id": "west_monthly",
+      "latency_ms": 5527,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 7617
+    },
+    {
+      "http_status": 200,
+      "id": "east_followup",
+      "latency_ms": 11079,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 12718
+    },
+    {
+      "http_status": 200,
+      "id": "west_revenue",
+      "latency_ms": 11630,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 11298
+    },
+    {
+      "http_status": 200,
+      "id": "revenue_2026",
+      "latency_ms": 5911,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 7373
+    },
+    {
+      "http_status": 200,
+      "id": "monthly_2026",
+      "latency_ms": 5434,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 7572
+    },
+    {
+      "http_status": 200,
+      "id": "top_customers",
+      "latency_ms": 10898,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 11354
+    },
+    {
+      "http_status": 200,
+      "id": "customer_segment",
+      "latency_ms": 8390,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 11132
+    },
+    {
+      "http_status": 200,
+      "id": "revenue_product",
+      "latency_ms": 13041,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 15730
+    },
+    {
+      "http_status": 200,
+      "id": "revenue_category",
+      "latency_ms": 12936,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 15480
+    },
+    {
+      "http_status": 200,
+      "id": "top_products",
+      "latency_ms": 10728,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 11591
+    },
+    {
+      "http_status": 200,
+      "id": "underperforming_ambiguous",
+      "latency_ms": 2182,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": null,
+        "chart_valid": null,
+        "claims_valid": null,
+        "correct": true,
+        "outcome": "needs_clarification",
+        "outcome_correct": true,
+        "spec_correct": null,
+        "strict_correct": true,
+        "table_correct": null
+      },
+      "status": "completed",
+      "tokens": 3381
+    },
+    {
+      "http_status": 200,
+      "id": "best_ambiguous",
+      "latency_ms": 2115,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": null,
+        "chart_valid": null,
+        "claims_valid": null,
+        "correct": true,
+        "outcome": "needs_clarification",
+        "outcome_correct": true,
+        "spec_correct": null,
+        "strict_correct": true,
+        "table_correct": null
+      },
+      "status": "completed",
+      "tokens": 3437
+    },
+    {
+      "http_status": 200,
+      "id": "unsupported_employees",
+      "latency_ms": 2030,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": null,
+        "chart_valid": null,
+        "claims_valid": null,
+        "correct": true,
+        "outcome": "unsupported",
+        "outcome_correct": true,
+        "spec_correct": null,
+        "strict_correct": true,
+        "table_correct": null
+      },
+      "status": "completed",
+      "tokens": 3398
+    },
+    {
+      "http_status": 200,
+      "id": "sql_request",
+      "latency_ms": 9960,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 11808
+    },
+    {
+      "diagnostics": {
+        "actual_anomalies": null,
+        "actual_answer_sentences": null,
+        "actual_claims": null,
+        "actual_params": null,
+        "actual_result": {
+          "message": "The question could not be resolved after bounded corrections.",
+          "outcome": "execution_failed"
+        },
+        "actual_spec": null,
+        "actual_sql": null,
+        "actual_table": null,
+        "clarification": null,
+        "expected_spec": {
+          "base_dataset": "orders",
+          "dimensions": [
+            {
+              "column": "region",
+              "dataset": "orders"
+            }
+          ],
+          "metrics": [
+            {
+              "agg": "sum",
+              "expr": {
+                "kind": "binop",
+                "left": {
+                  "kind": "binop",
+                  "left": {
+                    "kind": "col",
+                    "ref": {
+                      "column": "quantity",
+                      "dataset": "orders"
+                    }
+                  },
+                  "op": "*",
+                  "right": {
+                    "kind": "col",
+                    "ref": {
+                      "column": "unit_price",
+                      "dataset": "orders"
+                    }
+                  }
+                },
+                "op": "-",
+                "right": {
+                  "kind": "col",
+                  "ref": {
+                    "column": "discount_amount",
+                    "dataset": "orders"
+                  }
+                }
+              },
+              "name": "revenue"
+            }
+          ],
+          "time_bucket": {
+            "column": {
+              "column": "order_date",
+              "dataset": "orders"
+            },
+            "grain": "month"
+          }
+        },
+        "expected_table": {
+          "columns": [
+            {
+              "dtype": "DATE",
+              "name": "period",
+              "role": "time"
+            },
+            {
+              "dtype": "VARCHAR",
+              "name": "region",
+              "role": "dimension"
+            },
+            {
+              "dtype": "DOUBLE",
+              "name": "revenue",
+              "role": "metric"
+            }
+          ],
+          "rows": [
+            [
+              "2025-02-01",
+              "Central",
+              5647.050000000001
+            ],
+            [
+              "2025-02-01",
+              "East",
+              4220.610000000001
+            ],
+            [
+              "2025-02-01",
+              "North",
+              4842.089999999999
+            ],
+            [
+              "2025-02-01",
+              "South",
+              5020.990000000001
+            ],
+            [
+              "2025-02-01",
+              "West",
+              5101.67
+            ],
+            [
+              "2025-03-01",
+              "Central",
+              3464.350000000001
+            ],
+            [
+              "2025-03-01",
+              "East",
+              3950.81
+            ],
+            [
+              "2025-03-01",
+              "North",
+              4653.53
+            ],
+            [
+              "2025-03-01",
+              "South",
+              3780.1400000000003
+            ],
+            [
+              "2025-03-01",
+              "West",
+              4867.949999999999
+            ],
+            [
+              "2025-04-01",
+              "Central",
+              3501.94
+            ],
+            [
+              "2025-04-01",
+              "East",
+              4180.970000000001
+            ],
+            [
+              "2025-04-01",
+              "North",
+              4598.88
+            ],
+            [
+              "2025-04-01",
+              "South",
+              4917.09
+            ],
+            [
+              "2025-04-01",
+              "West",
+              4477.5
+            ],
+            [
+              "2025-05-01",
+              "Central",
+              4042.4500000000007
+            ],
+            [
+              "2025-05-01",
+              "East",
+              4503.170000000001
+            ],
+            [
+              "2025-05-01",
+              "North",
+              3841.1200000000003
+            ],
+            [
+              "2025-05-01",
+              "South",
+              4554.619999999999
+            ],
+            [
+              "2025-05-01",
+              "West",
+              5781.160000000003
+            ],
+            [
+              "2025-06-01",
+              "Central",
+              4709.87
+            ],
+            [
+              "2025-06-01",
+              "East",
+              4033.3999999999987
+            ],
+            [
+              "2025-06-01",
+              "North",
+              5395.460000000001
+            ],
+            [
+              "2025-06-01",
+              "South",
+              3166.33
+            ],
+            [
+              "2025-06-01",
+              "West",
+              3471.23
+            ],
+            [
+              "2025-07-01",
+              "Central",
+              3139.3100000000013
+            ],
+            [
+              "2025-07-01",
+              "East",
+              4020.8900000000003
+            ],
+            [
+              "2025-07-01",
+              "North",
+              3662.65
+            ],
+            [
+              "2025-07-01",
+              "South",
+              3932.539999999999
+            ],
+            [
+              "2025-07-01",
+              "West",
+              5142.33
+            ],
+            [
+              "2025-08-01",
+              "Central",
+              4197.31
+            ],
+            [
+              "2025-08-01",
+              "East",
+              3443.589999999999
+            ],
+            [
+              "2025-08-01",
+              "North",
+              5740.8
+            ],
+            [
+              "2025-08-01",
+              "South",
+              183.64
+            ],
+            [
+              "2025-08-01",
+              "West",
+              4987.099999999999
+            ],
+            [
+              "2025-09-01",
+              "Central",
+              6584.549999999998
+            ],
+            [
+              "2025-09-01",
+              "East",
+              5567.09
+            ],
+            [
+              "2025-09-01",
+              "North",
+              4595.700000000001
+            ],
+            [
+              "2025-09-01",
+              "South",
+              5215.74
+            ],
+            [
+              "2025-09-01",
+              "West",
+              5091.239999999999
+            ],
+            [
+              "2025-10-01",
+              "Central",
+              4986.7699999999995
+            ],
+            [
+              "2025-10-01",
+              "East",
+              6730.330000000001
+            ],
+            [
+              "2025-10-01",
+              "North",
+              6193.990000000001
+            ],
+            [
+              "2025-10-01",
+              "South",
+              4443.119999999998
+            ],
+            [
+              "2025-10-01",
+              "West",
+              8206.019999999999
+            ],
+            [
+              "2025-11-01",
+              "Central",
+              4975.250000000001
+            ],
+            [
+              "2025-11-01",
+              "East",
+              5932.660000000001
+            ],
+            [
+              "2025-11-01",
+              "North",
+              6181.660000000001
+            ],
+            [
+              "2025-11-01",
+              "South",
+              4683.64
+            ],
+            [
+              "2025-11-01",
+              "West",
+              8046.309999999999
+            ],
+            [
+              "2025-12-01",
+              "Central",
+              7012.0599999999995
+            ],
+            [
+              "2025-12-01",
+              "East",
+              4701.509999999999
+            ],
+            [
+              "2025-12-01",
+              "North",
+              8104.200000000002
+            ],
+            [
+              "2025-12-01",
+              "South",
+              5010.759999999999
+            ],
+            [
+              "2025-12-01",
+              "West",
+              6830.259999999998
+            ],
+            [
+              "2026-01-01",
+              "Central",
+              8440.039999999999
+            ],
+            [
+              "2026-01-01",
+              "East",
+              5358.85
+            ],
+            [
+              "2026-01-01",
+              "North",
+              5990.309999999998
+            ],
+            [
+              "2026-01-01",
+              "South",
+              6969.940000000001
+            ],
+            [
+              "2026-01-01",
+              "West",
+              18846.06
+            ],
+            [
+              "2026-02-01",
+              "Central",
+              4916.159999999999
+            ],
+            [
+              "2026-02-01",
+              "East",
+              7466.41
+            ],
+            [
+              "2026-02-01",
+              "North",
+              6944.179999999999
+            ],
+            [
+              "2026-02-01",
+              "South",
+              6791.3
+            ],
+            [
+              "2026-02-01",
+              "West",
+              5516.030000000001
+            ],
+            [
+              "2026-03-01",
+              "Central",
+              4787.51
+            ],
+            [
+              "2026-03-01",
+              "East",
+              4270.42
+            ],
+            [
+              "2026-03-01",
+              "North",
+              5566.43
+            ],
+            [
+              "2026-03-01",
+              "South",
+              4965.78
+            ],
+            [
+              "2026-03-01",
+              "West",
+              7401.24
+            ],
+            [
+              "2026-04-01",
+              "Central",
+              4978.91
+            ],
+            [
+              "2026-04-01",
+              "East",
+              6705.509999999999
+            ],
+            [
+              "2026-04-01",
+              "North",
+              4694.9800000000005
+            ],
+            [
+              "2026-04-01",
+              "South",
+              4542.2300000000005
+            ],
+            [
+              "2026-04-01",
+              "West",
+              6768.399999999999
+            ],
+            [
+              "2026-05-01",
+              "Central",
+              6584.4800000000005
+            ],
+            [
+              "2026-05-01",
+              "East",
+              5815.039999999998
+            ],
+            [
+              "2026-05-01",
+              "North",
+              5650.1799999999985
+            ],
+            [
+              "2026-05-01",
+              "South",
+              2781.5599999999986
+            ],
+            [
+              "2026-05-01",
+              "West",
+              6317.279999999999
+            ],
+            [
+              "2026-06-01",
+              "Central",
+              4408.54
+            ],
+            [
+              "2026-06-01",
+              "East",
+              3312.4400000000005
+            ],
+            [
+              "2026-06-01",
+              "North",
+              4584.98
+            ],
+            [
+              "2026-06-01",
+              "South",
+              3742.31
+            ],
+            [
+              "2026-06-01",
+              "West",
+              6144.04
+            ],
+            [
+              "2026-07-01",
+              "Central",
+              5762.49
+            ],
+            [
+              "2026-07-01",
+              "East",
+              4069.5
+            ],
+            [
+              "2026-07-01",
+              "North",
+              6641.829999999999
+            ],
+            [
+              "2026-07-01",
+              "South",
+              4354.91
+            ],
+            [
+              "2026-07-01",
+              "West",
+              6164.240000000001
+            ],
+            [
+              "2026-08-01",
+              "Central",
+              5873.709999999997
+            ],
+            [
+              "2026-08-01",
+              "East",
+              5792.28
+            ],
+            [
+              "2026-08-01",
+              "North",
+              4880.379999999999
+            ],
+            [
+              "2026-08-01",
+              "South",
+              6250.799999999997
+            ],
+            [
+              "2026-08-01",
+              "West",
+              7091.9800000000005
+            ],
+            [
+              "2026-09-01",
+              "Central",
+              5183.640000000001
+            ],
+            [
+              "2026-09-01",
+              "East",
+              4511.530000000002
+            ],
+            [
+              "2026-09-01",
+              "North",
+              6266.270000000002
+            ],
+            [
+              "2026-09-01",
+              "South",
+              4528.039999999999
+            ],
+            [
+              "2026-09-01",
+              "West",
+              7945.279999999999
+            ],
+            [
+              "2026-10-01",
+              "Central",
+              29.12
+            ],
+            [
+              "2026-10-01",
+              "East",
+              266.2
+            ],
+            [
+              "2026-10-01",
+              "North",
+              116.93
+            ],
+            [
+              "2026-10-01",
+              "South",
+              330.47999999999996
+            ],
+            [
+              "2026-10-01",
+              "West",
+              1108.88
+            ]
+          ]
+        },
+        "trace_tools": []
+      },
+      "http_status": 500,
+      "id": "monthly_anomalies",
+      "latency_ms": 12099,
+      "message": "The question could not be resolved after bounded corrections.",
+      "score": {
+        "anomaly_evidence_valid": false,
+        "anomaly_precision": 0.0,
+        "anomaly_recall": 0.0,
+        "answer_table_correct": false,
+        "chart_valid": false,
+        "claims_valid": false,
+        "correct": false,
+        "outcome": "execution_failed",
+        "outcome_correct": false,
+        "spec_correct": false,
+        "strict_correct": false,
+        "table_correct": false
+      },
+      "status": "http_error",
+      "tokens": null
+    }
+  ],
+  "correct": 29,
+  "cost": null,
+  "cost_note": "Provider billing rates were not available to this runner.",
+  "dirty_tree": true,
+  "fixture_sha256": {
+    "customers.csv": "cc4f9454e24069c08aa04572e22e318bd2609025ba04022960ad842990c419ac",
+    "orders.csv": "29a6d83fc3c35567723d02d821eb3170f86231085f1bbc27de068a15f907d00c",
+    "products.csv": "44199f7b3cda030273cf62e700098a95d6797d9cae0d1b254df7b67430032c67"
+  },
+  "git_sha": "c4ed6d92a2288224fed127031f1e6f1769462014",
+  "llm_max_tokens": 2000,
+  "llm_turn_token_cap": 32000,
+  "llm_wall_s": 90.0,
+  "model": "gemini-2.5-flash",
+  "not_run": 0,
+  "prompt_config_sha256": "653d45399f3e9cd21b963d399656d9317a520ca92261b2c88731e65374455feb",
+  "provider_mode": "real",
+  "reference_date": "2026-10-02",
+  "run_at": "2026-10-02T09:36:41.125335+00:00",
+  "strict_correct": 27,
+  "temperature": 0
+}

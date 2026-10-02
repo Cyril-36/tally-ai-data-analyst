@@ -177,10 +177,9 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
   const loadSample = useCallback(async () => {
     try {
-      const created = await dsApi.sample();
-      const list = Array.isArray(created) ? created : [];
+      const { created } = await dsApi.sample();
       await refreshDatasets({ selectNew: true });
-      toast(list.length ? `Sample data loaded: ${list.map((d) => d.filename ?? d.name).join(', ')}.` : 'Sample data is already loaded.');
+      toast(created.length ? `Sample data loaded: ${created.map((d) => d.filename ?? d.name).join(', ')}.` : 'Sample data is already loaded.');
     } catch (e) {
       toast(`Could not load the sample data: ${message(e)}`, { tone: 'error', ms: 7000 });
     }

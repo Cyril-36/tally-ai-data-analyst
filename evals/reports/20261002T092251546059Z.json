@@ -1,0 +1,151 @@
+{
+  "case_set_sha256": "387abb7390b14a2f0340ff0636b1ad42fc27d7b0b8b54dd3ae0545eefc2cacea",
+  "cases": [
+    {
+      "http_status": 200,
+      "id": "orders_total",
+      "latency_ms": 5344,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 7111
+    },
+    {
+      "http_status": 200,
+      "id": "avg_order_revenue_ambiguous",
+      "latency_ms": 2513,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": null,
+        "chart_valid": null,
+        "claims_valid": null,
+        "correct": true,
+        "outcome": "needs_clarification",
+        "outcome_correct": true,
+        "spec_correct": null,
+        "strict_correct": true,
+        "table_correct": null
+      },
+      "status": "completed",
+      "tokens": 3496
+    },
+    {
+      "http_status": 200,
+      "id": "avg_order_line_revenue",
+      "latency_ms": 14714,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 12479
+    },
+    {
+      "http_status": 200,
+      "id": "monthly_orders",
+      "latency_ms": 5100,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": false,
+        "strict_correct": false,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 7216
+    },
+    {
+      "http_status": 200,
+      "id": "west_monthly",
+      "latency_ms": 6867,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": false,
+        "strict_correct": false,
+        "table_correct": false
+      },
+      "status": "completed",
+      "tokens": 7658
+    },
+    {
+      "http_status": 200,
+      "id": "east_followup",
+      "latency_ms": 15947,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": false,
+        "strict_correct": false,
+        "table_correct": false
+      },
+      "status": "completed",
+      "tokens": 18067
+    }
+  ],
+  "correct": 6,
+  "cost": null,
+  "cost_note": "Provider billing rates were not available to this runner.",
+  "dirty_tree": true,
+  "fixture_sha256": {
+    "customers.csv": "cc4f9454e24069c08aa04572e22e318bd2609025ba04022960ad842990c419ac",
+    "orders.csv": "29a6d83fc3c35567723d02d821eb3170f86231085f1bbc27de068a15f907d00c",
+    "products.csv": "44199f7b3cda030273cf62e700098a95d6797d9cae0d1b254df7b67430032c67"
+  },
+  "git_sha": "c4ed6d92a2288224fed127031f1e6f1769462014",
+  "llm_max_tokens": 2000,
+  "llm_turn_token_cap": 24000,
+  "llm_wall_s": 90.0,
+  "model": "gemini-2.5-flash",
+  "not_run": 0,
+  "prompt_config_sha256": "56145f3f6b6b22b67bb8ad0ec410a31a7fc7a440245b6545e33efce9ee3ff2a8",
+  "reference_date": "2026-10-02",
+  "run_at": "2026-10-02T09:21:58.597212+00:00",
+  "strict_correct": 3,
+  "temperature": 0
+}

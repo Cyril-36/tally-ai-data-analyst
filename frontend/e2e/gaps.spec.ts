@@ -37,6 +37,7 @@ test.describe('backend gap endpoints', () => {
   test('load the sample data without duplicating it', async ({ page }) => {
     await signUpFresh(page);
     await page.getByRole('button', { name: /Try a retail sample/ }).click();
+    await expect(page.getByRole('status').filter({ hasText: /Sample data loaded:.*orders\.csv/ })).toBeVisible();
     const side = page.getByRole('complementary', { name: 'Workspace' });
     for (const f of ['orders.csv', 'customers.csv', 'products.csv', 'payments.csv']) {
       await expect(side.getByText(new RegExp(`^${f.replace('.', '\\.')} · `))).toBeVisible({ timeout: 30_000 });

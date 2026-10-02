@@ -34,7 +34,11 @@ REVENUE = {
 }
 METRICS = {
     "revenue": {"name": "revenue", "agg": "sum", "expr": REVENUE},
-    "orders": {"name": "orders", "agg": "count"},
+    "orders": {
+        "name": "orders",
+        "agg": "count_distinct",
+        "expr": col("orders", "order_id"),
+    },
     "units": {"name": "units", "agg": "sum", "expr": col("orders", "quantity")},
     "avg_units": {"name": "avg_units", "agg": "avg", "expr": col("orders", "quantity")},
     "customers": {
@@ -108,9 +112,12 @@ CASES = [
     Case(
         "units_region", "How many units were sold in each region?", spec("units", dimensions=REGION)
     ),
-    Case("avg_units", "What is the average number of units per order?", spec("avg_units")),
+    Case("avg_units", "What is the average number of units per order row?", spec("avg_units")),
     Case("unique_customers", "How many distinct customers placed orders?", spec("customers")),
-    Case("avg_order_revenue", "What is average revenue per order?", spec("avg_order_revenue")),
+    Case("avg_order_revenue_ambiguous", "What is average revenue per order?",
+         outcome="needs_clarification"),
+    Case("avg_order_line_revenue", "What is average revenue per order line?",
+         spec("avg_order_revenue")),
     Case(
         "monthly_revenue", "Show monthly sales revenue trends.", spec("revenue", time_bucket=MONTH)
     ),

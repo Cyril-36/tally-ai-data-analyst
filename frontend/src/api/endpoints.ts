@@ -12,6 +12,7 @@ import type {
   ProviderTest,
   QualityReport,
   RowsPage,
+  SampleLoadResult,
   StoredResult,
   SystemSettings,
   User,
@@ -45,7 +46,7 @@ export const datasets = {
   dependents: (datasetId: string) => get<Dependents>(`/api/datasets/${id(datasetId)}/dependents`),
   rename: (datasetId: string, name: string) => patch<DatasetMeta>(`/api/datasets/${id(datasetId)}`, { name }),
   remove: (datasetId: string) => del<{ deleted: string }>(`/api/datasets/${id(datasetId)}?confirm=true`),
-  sample: () => post<DatasetMeta[]>('/api/datasets/sample'),
+  sample: () => post<SampleLoadResult>('/api/datasets/sample'),
 };
 
 /* ---- conversations, results, pins ---- */

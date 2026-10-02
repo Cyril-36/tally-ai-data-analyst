@@ -122,11 +122,12 @@ def test_anomaly_run_detects_the_planted_spike_and_drop(workspace, question):
     result = ask(client, conversation_id, question).json()
     assert result["outcome"] == "ok", result
     assert result["anomalies"]["status"] == "completed_found"
+    assert any(sentence.startswith("Anomaly check:") for sentence in result["answer_sentences"])
     flagged = {(f["row_key"]["region"], str(f["row_key"]["period"])[:7])
                for f in result["anomalies"]["flags"]}
     assert ("West", "2026-01") in flagged and ("South", "2025-08") in flagged
     assert [s["tool"] for s in result["trace"] if "tool" in s][::2] == [
-        "run_analysis", "detect_anomalies", "finish"]
+        "run_analysis", "detect_anomalies"]
 
 
 def test_underperforming_asks_for_a_criterion(workspace):

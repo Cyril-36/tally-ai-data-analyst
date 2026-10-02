@@ -1,0 +1,13 @@
+case_id,opened_at,team,resolution_minutes,status
+C01,2026-01-03,Atlas,35,closed
+C02,2026-01-05,Beacon,54,closed
+C03,2026-01-11,Atlas,42,closed
+C04,2026-01-16,Beacon,60,closed
+C05,2026-02-02,Atlas,28,closed
+C06,2026-02-08,Beacon,72,closed
+C07,2026-02-11,Atlas,50,closed
+C08,2026-02-19,Beacon,48,closed
+C09,2026-03-01,Atlas,30,closed
+C10,2026-03-06,Beacon,64,closed
+C11,2026-03-14,Atlas,46,closed
+C12,2026-03-21,Beacon,56,closed

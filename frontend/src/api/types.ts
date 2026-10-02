@@ -9,6 +9,7 @@ export type Outcome =
   | 'insufficient_data'
   | 'execution_failed'
   | 'provider_failed'
+  | 'budget_exhausted'
   | 'narrative_unverified'
   | 'invalid_input';
 
@@ -190,6 +191,11 @@ export interface DatasetMeta {
   row_count: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface SampleLoadResult {
+  created: DatasetMeta[];
+  existing: DatasetMeta[];
 }
 
 export interface ProfileColumn {

@@ -1,0 +1,69 @@
+{
+  "case_set_sha256": "fcd7603691bc6183ea5c98838f361f9b8cd935c2fb0138400b73c768c6cd1916",
+  "cases": [
+    {
+      "http_status": 200,
+      "id": "quarterly_revenue",
+      "latency_ms": 7687,
+      "message": null,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": false,
+        "strict_correct": false,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 7863
+    },
+    {
+      "http_status": 200,
+      "id": "monthly_anomalies",
+      "latency_ms": 7851,
+      "message": null,
+      "score": {
+        "anomaly_evidence_valid": true,
+        "anomaly_precision": 1.0,
+        "anomaly_recall": 1.0,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed",
+      "tokens": 8184
+    }
+  ],
+  "correct": 2,
+  "cost": null,
+  "cost_note": "Provider billing rates were not available to this runner.",
+  "dirty_tree": true,
+  "fixture_sha256": {
+    "customers.csv": "cc4f9454e24069c08aa04572e22e318bd2609025ba04022960ad842990c419ac",
+    "orders.csv": "29a6d83fc3c35567723d02d821eb3170f86231085f1bbc27de068a15f907d00c",
+    "products.csv": "44199f7b3cda030273cf62e700098a95d6797d9cae0d1b254df7b67430032c67"
+  },
+  "git_sha": "c4ed6d92a2288224fed127031f1e6f1769462014",
+  "llm_max_tokens": 2000,
+  "llm_turn_token_cap": 32000,
+  "llm_wall_s": 90.0,
+  "model": "gemini-2.5-flash",
+  "not_run": 0,
+  "prompt_config_sha256": "653d45399f3e9cd21b963d399656d9317a520ca92261b2c88731e65374455feb",
+  "provider_mode": "real",
+  "reference_date": "2026-10-02",
+  "run_at": "2026-10-02T09:45:26.155126+00:00",
+  "strict_correct": 1,
+  "temperature": 0
+}

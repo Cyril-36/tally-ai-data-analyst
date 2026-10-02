@@ -50,10 +50,11 @@ test.describe('sign-in', () => {
     const email = await signUpFresh(page);
     await page.getByTestId('file-input').setInputFiles([sample('products.csv')]);
     await page.getByRole('dialog', { name: 'Upload CSV files' }).getByRole('button', { name: 'Done' }).click();
-    await context.clearCookies(); // server no longer recognises us
     const box = page.getByLabel('Ask a question about your data');
     await box.fill('Show revenue for each region.');
-    await box.press('Enter');
+    await context.clearCookies(); // server no longer recognises us
+    // A background request may discover the expired session before Enter is pressed.
+    if (await box.isVisible()) await box.press('Enter');
     const prompt = page.getByRole('dialog', { name: 'Sign in to continue' });
     await expect(prompt).toBeVisible();
     await expect(prompt.getByText(email)).toBeVisible();

@@ -9,7 +9,11 @@ backend/.ruff_cache
 .env
 .env.*
 !.env.example
-frontend
+frontend/node_modules
+frontend/dist
+frontend/playwright-report
+frontend/test-results
+frontend/e2e
 data/*
 !data/sample
 docs

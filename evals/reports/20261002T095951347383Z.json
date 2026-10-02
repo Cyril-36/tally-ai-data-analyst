@@ -1,0 +1,217 @@
+{
+  "case_set_sha256": "2dc52edeea1a8b43fae5115491a9e7ff7fdf60ff57d3c5b04702544c8464fc4b",
+  "cases": [
+    {
+      "http_status": 200,
+      "id": "distinct_cases",
+      "latency_ms": 5514,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed"
+    },
+    {
+      "http_status": 200,
+      "id": "resolution_by_team",
+      "latency_ms": 5000,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed"
+    },
+    {
+      "http_status": 200,
+      "id": "monthly_case_count",
+      "latency_ms": 6119,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed"
+    },
+    {
+      "http_status": 200,
+      "id": "fee_by_plan",
+      "latency_ms": 4829,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed"
+    },
+    {
+      "http_status": 200,
+      "id": "seats_by_plan",
+      "latency_ms": 4796,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed"
+    },
+    {
+      "http_status": 200,
+      "id": "monthly_fee_total",
+      "latency_ms": 5438,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": false,
+        "strict_correct": false,
+        "table_correct": true
+      },
+      "status": "completed"
+    },
+    {
+      "http_status": 200,
+      "id": "support_unsupported",
+      "latency_ms": 2557,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": null,
+        "chart_valid": null,
+        "claims_valid": null,
+        "correct": true,
+        "outcome": "unsupported",
+        "outcome_correct": true,
+        "spec_correct": null,
+        "strict_correct": true,
+        "table_correct": null
+      },
+      "status": "completed"
+    },
+    {
+      "http_status": 200,
+      "id": "cases_by_division",
+      "latency_ms": 7907,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed"
+    },
+    {
+      "http_status": 200,
+      "id": "closed_atlas_cases",
+      "latency_ms": 5295,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed"
+    },
+    {
+      "http_status": 200,
+      "id": "top_seat_plan",
+      "latency_ms": 6233,
+      "score": {
+        "anomaly_precision": null,
+        "anomaly_recall": null,
+        "answer_table_correct": true,
+        "chart_valid": true,
+        "claims_valid": true,
+        "correct": true,
+        "outcome": "ok",
+        "outcome_correct": true,
+        "spec_correct": true,
+        "strict_correct": true,
+        "table_correct": true
+      },
+      "status": "completed"
+    }
+  ],
+  "correct": 10,
+  "cost": null,
+  "cost_note": "Provider billing rates were not available to this runner.",
+  "dirty_tree": true,
+  "fixture_sha256": {
+    "subscriptions.csv": "57941c3f4c09e84b4a8fe28e792fbc1e7b8e23f489571153b6d795ca351e2d1c",
+    "support_cases.csv": "e500a0fdae6c4dfd43e48bfde334545ca7402b824b99bcfcfd3ce7a6cfab94fa",
+    "support_teams.csv": "eea48752f79913f2bc51ba429f34b9b5d2a30d67130804d06f33cc6b4a1481d2"
+  },
+  "git_sha": "c4ed6d92a2288224fed127031f1e6f1769462014",
+  "llm_max_tokens": 2000,
+  "llm_turn_token_cap": 32000,
+  "llm_wall_s": 90.0,
+  "model": "gemini-2.5-flash",
+  "not_run": 0,
+  "prompt_config_sha256": "fa8eab125385422072a643f4a02fb21a3f5b48c8aae15f6f922b7ff6ba22cfeb",
+  "provider_mode": "real",
+  "reference_date": "2026-10-02",
+  "run_at": "2026-10-02T09:58:54.090650+00:00",
+  "strict_correct": 9,
+  "suite": "transfer",
+  "temperature": 0
+}

@@ -6,6 +6,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.admin.router import read_system_settings
 from app.admin.router import router as admin_router
@@ -26,6 +28,20 @@ ROUTERS = [auth_router, admin_router, datasets_router, workspace_router, agent_r
 
 log = logging.getLogger("app.request")
 STATE_CHANGING = {"POST", "PUT", "PATCH", "DELETE"}
+
+
+class FrontendFiles(StaticFiles):
+    """Serve the built app on deep links without masking missing API routes or assets."""
+
+    async def get_response(self, path: str, scope):
+        if path == "api" or path.startswith("api/"):
+            return _error(Outcome.not_found, "Not found.", 404)
+        try:
+            return await super().get_response(path, scope)
+        except StarletteHTTPException as exc:
+            if exc.status_code != 404 or "." in path.rsplit("/", 1)[-1]:
+                raise
+            return await super().get_response("index.html", scope)
 
 
 def _error(outcome: Outcome, message: str, status: int) -> JSONResponse:
@@ -115,6 +131,9 @@ def create_app() -> FastAPI:
 
     for router in ROUTERS:
         app.include_router(router)
+    frontend_dist = get_settings().frontend_dist
+    if frontend_dist is not None:
+        app.mount("/", FrontendFiles(directory=frontend_dist, html=True), name="frontend")
     return app
 
 

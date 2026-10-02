@@ -8,6 +8,7 @@ export type NoticeVariant =
   | 'refused'
   | 'failed'
   | 'provider'
+  | 'budget'
   | 'forbidden'
   | 'invalid'
   | 'network'
@@ -72,6 +73,14 @@ const DEFAULTS: Record<NoticeVariant, Omit<NoticeCopy, 'variant' | 'body'> & { b
     next: 'Retry shortly. Uploads, data quality, anomalies and the dashboard keep working.',
     actions: ['retry', 'edit'],
   },
+  budget: {
+    tag: 'Analysis limit reached',
+    tone: 'warn',
+    title: 'This analysis needs a smaller question',
+    body: 'The analysis reached its time or token budget.',
+    next: 'Try fewer datasets or a narrower time period.',
+    actions: ['edit'],
+  },
   forbidden: {
     tag: 'Unavailable',
     tone: 'neutral',
@@ -118,6 +127,8 @@ export function variantFor(outcome: Outcome | 'network', message: string | null 
       return 'failed';
     case 'provider_failed':
       return 'provider';
+    case 'budget_exhausted':
+      return 'budget';
     case 'permission_denied':
     case 'not_found':
       return 'forbidden';
