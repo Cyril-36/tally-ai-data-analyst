@@ -10,6 +10,7 @@ export type Outcome =
   | 'execution_failed'
   | 'provider_failed'
   | 'budget_exhausted'
+  | 'ai_disabled'
   | 'narrative_unverified'
   | 'invalid_input';
 

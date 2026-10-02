@@ -98,3 +98,12 @@ def test_report_does_not_modify_data(tmp_path):
     before = hashlib.sha256(out.read_bytes()).hexdigest()
     quality_report(out, profile, REF)
     assert hashlib.sha256(out.read_bytes()).hexdigest() == before
+
+
+def test_one_duplicate_in_many_rows_never_scores_100(tmp_path):
+    rows = "\n".join(f"{i},{i * 2}" for i in range(5000))
+    data = f"id,amount\n{rows}\n0,0\n".encode()  # exactly one duplicate row
+    profile = ingest_csv(data, "big.csv", tmp_path / "v1.parquet")
+    report = quality_report(tmp_path / "v1.parquet", profile, REF)
+    assert report["duplicate_rows"] == 1
+    assert report["score"] == 99

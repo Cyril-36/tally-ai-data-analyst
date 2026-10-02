@@ -53,8 +53,8 @@ def result() -> AnalysisResult:
 def test_composer_claims_and_validator_rederive_row_identity_and_period():
     composed = compose(result())
     assert len(composed.claims) == 2
+    # No time grain in this spec-less result, so the period is shown as a plain date.
     assert composed.answer_sentences[0].startswith("<West>: revenue in 2026-01-01 was ")
-    assert "2026-01-01" in composed.answer_sentences[0]
     assert validate_claims(composed) == composed.claims
 
     original = composed.claims[0]
@@ -146,3 +146,11 @@ def test_reports_escape_html_protect_csv_formulas_and_show_sql_caveats_status():
     exported = csv_report(csv_data)
     assert "'=cmd|x" in exported
     assert "SELECT '<script>'" not in exported  # CSV is a table export, not a report.
+
+
+def test_csv_export_has_no_binary_float_noise():
+    from app.reports.builder import csv_report
+
+    data = result()
+    data.table.rows = [["West", datetime(2026, 1, 1).date(), 135306.1999999999]]
+    assert csv_report(data).splitlines()[1] == "West,2026-01-01,135306.2"

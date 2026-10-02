@@ -96,4 +96,8 @@ def _safe(value):
         value.lstrip().startswith(("=", "+", "-", "@")) or value.startswith(("\t", "\r", "\n"))
     ):
         return "'" + value
+    if isinstance(value, float):
+        # 12 significant digits drops binary noise (135306.1999999999 -> 135306.2)
+        # without rounding any real figure in these tables.
+        return format(value, ".12g")
     return value

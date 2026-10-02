@@ -239,7 +239,8 @@ def dashboard(user: CurrentUser, conn: Conn) -> list[dict]:
 
 @router.post("/api/pins", status_code=201)
 def create_pin(body: PinCreate, user: CurrentUser, conn: Conn) -> dict:
-    store.load_result(conn, user, body.result_id)
+    pinned = store.load_result(conn, user, body.result_id)
+    title = pinned.question.strip()[:200]  # a card is named by the question it answers
     # A retry with the same key returns its original pin only for the same result.
     if body.idempotency_key is not None:
         existing = conn.execute(
@@ -257,8 +258,8 @@ def create_pin(body: PinCreate, user: CurrentUser, conn: Conn) -> dict:
     try:
         conn.execute(
             "INSERT INTO pins (id, owner_id, result_id, idempotency_key, created_at, title,"
-            " position) VALUES (?, ?, ?, ?, datetime('now'), '', ?)",
-            (pin_id, user.id, body.result_id, body.idempotency_key, result),
+            " position) VALUES (?, ?, ?, ?, datetime('now'), ?, ?)",
+            (pin_id, user.id, body.result_id, body.idempotency_key, title, result),
         )
     except sqlite3.IntegrityError:
         if body.idempotency_key is None:

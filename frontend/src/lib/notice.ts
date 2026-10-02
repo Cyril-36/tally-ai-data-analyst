@@ -9,6 +9,7 @@ export type NoticeVariant =
   | 'failed'
   | 'provider'
   | 'budget'
+  | 'disabled'
   | 'forbidden'
   | 'invalid'
   | 'network'
@@ -69,9 +70,17 @@ const DEFAULTS: Record<NoticeVariant, Omit<NoticeCopy, 'variant' | 'body'> & { b
     tag: 'AI service unavailable',
     tone: 'error',
     title: 'The AI service could not answer',
-    body: 'The AI provider failed or is switched off.',
+    body: 'The AI provider failed.',
     next: 'Retry shortly. Uploads, data quality, anomalies and the dashboard keep working.',
     actions: ['retry', 'edit'],
+  },
+  disabled: {
+    tag: 'AI turned off',
+    tone: 'warn',
+    title: 'An admin has turned AI analysis off',
+    body: 'AI analysis is disabled.',
+    next: 'Uploads, data quality, anomalies, saved results and the dashboard keep working.',
+    actions: ['edit'],
   },
   budget: {
     tag: 'Analysis limit reached',
@@ -129,6 +138,8 @@ export function variantFor(outcome: Outcome | 'network', message: string | null 
       return 'provider';
     case 'budget_exhausted':
       return 'budget';
+    case 'ai_disabled':
+      return 'disabled';
     case 'permission_denied':
     case 'not_found':
       return 'forbidden';

@@ -349,4 +349,31 @@ def test_single_metric_anomaly_tool_accepts_generic_metric_name(make_client, mon
     result = response.json()
     assert result["outcome"] == "ok"
     assert result["anomalies"]["status"] == "insufficient_data"
-    assert any(sentence.startswith("Anomaly check:") for sentence in result["answer_sentences"])
+    assert result["answer_sentences"][0].startswith("Unusual values could not be checked:")
+
+
+def test_clarification_options_are_plain_phrases_for_any_schema():
+    from app.agent.service import _plain_option
+
+    for ok in ("revenue", "resolution_time", "declining sales", "tickets per agent"):
+        assert _plain_option(ok), ok
+    for bad in ("revenue was £5,000", "top 5", "<b>x</b>", "", "a b c d e f g", 42):
+        assert not _plain_option(bad), bad
+
+
+def test_a_new_pin_is_titled_with_its_question(make_client, monkeypatch):
+    from tests.test_fake_provider import ask
+
+    monkeypatch.setenv("LLM_PROVIDER", "fake")
+    from app.config import get_settings
+
+    get_settings.cache_clear()
+    client = make_client()
+    loaded = client.post("/api/datasets/sample").json()["created"]
+    conv = client.post("/api/conversations", json={
+        "title": "t", "dataset_ids": [d["id"] for d in loaded]}).json()["id"]
+    question = "Which region generated the highest revenue?"
+    result = ask(client, conv, question).json()
+    pin = client.post("/api/pins", json={"result_id": result["id"]}).json()
+    assert pin["title"] == question
+    get_settings.cache_clear()

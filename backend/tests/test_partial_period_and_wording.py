@@ -91,7 +91,7 @@ def test_partial_last_month_is_caveated_and_left_out_of_trend_and_anomalies(tmp_
     assert trend.period == "2025-12-01 to 2026-08-01"
     assert trend.periods_covered == 9
     sentence = next(s for s in composed.answer_sentences if "increased" in s or "decreased" in s)
-    assert sentence.endswith("from 2025-12-01 to 2026-08-01, across 9 periods.")
+    assert sentence.endswith("from Dec 2025 to Aug 2026, across 9 periods.")
     assert validate_claims(composed) == composed.claims
     # A trend that runs into the partial month is not accepted.
     stretched = trend.model_copy(
@@ -265,11 +265,11 @@ def test_trend_and_percentage_sentences_use_the_metric_unit():
         )
     )
     assert (
-        "The selected data: revenue increased by £1,500.00 from 2026-01-01 to 2026-03-01, "
+        "The selected data: revenue increased by £1,500.00 from Jan 2026 to Mar 2026, "
         "across 3 periods." in composed.answer_sentences
     )
     assert (
-        "The selected data: revenue increased by 25% in 2026-03-01 versus the previous "
+        "The selected data: revenue increased by 25% in Mar 2026 versus the previous "
         "observed period." in composed.answer_sentences
     )
     assert validate_claims(composed) == composed.claims
@@ -282,3 +282,37 @@ def test_a_model_supplied_unit_is_still_rejected():
     assert validate_claims(composed.model_copy(update={"claims": [forged]})) == []
     bare = composed.claims[0].model_copy(update={"unit": None})
     assert validate_claims(composed.model_copy(update={"claims": [bare]})) == []
+
+
+def test_periods_read_by_grain_and_the_first_months_are_not_narrated():
+    from app.agent.composer import _period
+
+    assert [_period("2026-01-01", g) for g in ("month", "quarter", "year", "week", "day")] == [
+        "Jan 2026", "Q1 2026", "2026", "week of 1 Jan 2026", "1 Jan 2026"]
+    assert _period("not a date", "month") == "not a date"
+    table = table_of(
+        [("period", ColumnRole.time), ("revenue", ColumnRole.metric)],
+        [["2026-01-01", 1000.0], ["2026-02-01", 2000.0], ["2026-03-01", 2500.0]],
+    )
+    composed = compose(
+        with_spec(
+            table, [REVENUE], time_bucket={"column": ref("orders", "order_date"), "grain": "month"}
+        )
+    )
+    # Trend + latest change only; "revenue in Jan 2026 was ..." filler is not narrated.
+    assert not any(" was " in s for s in composed.answer_sentences)
+    assert len(composed.answer_sentences) == 2
+
+
+def test_a_limited_time_series_still_gets_value_sentences():
+    table = table_of(
+        [("period", ColumnRole.time), ("revenue", ColumnRole.metric)],
+        [["2026-01-01", 1000.0], ["2026-02-01", 2000.0]],
+    )
+    composed = compose(
+        with_spec(
+            table, [REVENUE], limit=2,
+            time_bucket={"column": ref("orders", "order_date"), "grain": "month"},
+        )
+    )
+    assert "The selected data: revenue in Jan 2026 was £1,000.00." in composed.answer_sentences

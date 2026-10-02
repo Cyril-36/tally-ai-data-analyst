@@ -9,3 +9,12 @@ describe('analysis budget notice', () => {
     expect(notice.body).toContain('token budget');
   });
 });
+
+describe('AI switched off by an admin', () => {
+  it('is not presented as a provider outage', () => {
+    const notice = noticeFor('ai_disabled', 'AI analysis is disabled. Dataset tools and saved results remain available.');
+    expect(notice.variant).toBe('disabled');
+    expect(notice.title).toBe('An admin has turned AI analysis off');
+    expect(notice.body).toContain('AI analysis is disabled');
+  });
+});

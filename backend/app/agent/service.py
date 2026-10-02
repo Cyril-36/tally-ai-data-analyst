@@ -33,8 +33,9 @@ run_analysis takes spec_json: one complete AnalysisSpec JSON object matching the
 schema. Do not add an extra closing brace. Fix schema errors using the reported paths.
 Continue the previous resolved spec for follow-ups, preserving filters unless changed.
 When metric/date/business meaning is ambiguous, clarify before analyzing. Use the selected
-schema to identify metrics. Revenue may use a revenue column, or be derived as
-quantity*unit_price-discount_amount ONLY when those columns exist; disclose via the spec.
+schema to identify metrics. A metric may be an existing numeric column or arithmetic
+over existing numeric columns (e.g. quantity times price minus discount) ONLY when every
+column it uses exists in the selected schema; the spec shows the derivation.
 If a metric and grouping are explicit, analyze rather than clarify. "By quarter" means
 the quarter time grain. When asked for SQL for a named analysis, run that analysis so
 the application can display its exact compiled SQL; never invent SQL text.
@@ -95,7 +96,7 @@ def run(
     settings = get_settings()
     if not read_system_settings(conn).llm_enabled:
         raise AppError(
-            Outcome.provider_failed,
+            Outcome.ai_disabled,
             "AI analysis is disabled. Dataset tools and saved results remain available.",
         )
     ids = state.get("dataset_ids", [])
@@ -194,7 +195,7 @@ def run(
             tool_count += 1
             if not read_system_settings(conn).llm_enabled:
                 raise AppError(
-                    Outcome.provider_failed, "AI analysis was disabled by an administrator."
+                    Outcome.ai_disabled, "AI analysis was disabled by an administrator."
                 )
             # Revalidate ownership and versions before EVERY tool, not only initial selection.
             catalog = tools.build_catalog(conn, user, ids)
@@ -367,12 +368,7 @@ def _dispatch(name, args, conn, user, catalog, ids, conversation_id, question, p
             "date": "Which date column or time period should I use?",
             "dataset": "Which dataset should I analyze?",
         }
-        allowed = (
-            {c for d in catalog.values() for c in d.columns}
-            | set(catalog)
-            | {"revenue", "profit", "quantity", "declining sales", "low revenue", "low profit"}
-        )
-        options = [o for o in args.get("options", []) if o in allowed][:6]
+        options = [o for o in args.get("options", []) if _plain_option(o)][:6]
         return _result(
             user,
             conversation_id,
@@ -404,3 +400,15 @@ def suggestions(spec: AnalysisSpec | None, catalog) -> list[str]:
         questions.append("Compare these groups.")
     questions.append("Check this metric for unusual values.")
     return questions
+_OPTION = re.compile(r"[A-Za-z][A-Za-z _/&'-]{0,59}")
+
+
+def _plain_option(option: str) -> bool:
+    """A clarification option is a suggested reply the user can click (it becomes their next
+    question), never a claim. Keep short plain phrases; drop anything carrying numbers,
+    currency or markup. Nothing here is specific to one dataset."""
+    return (
+        isinstance(option, str)
+        and _OPTION.fullmatch(option.strip()) is not None
+        and len(option.split()) <= 6
+    )

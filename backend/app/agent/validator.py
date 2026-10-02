@@ -9,7 +9,8 @@ from app.contracts.spec import Aggregate, BinOp, Col
 # The demo data's single reporting currency (PLAN.md section 12). A metric is only labelled
 # with it when its own name or the columns it is built from read as money.
 CURRENCY = "GBP"
-_MONEY = re.compile(r"price|amount|revenue|cost|sales|profit|discount|spend|fee|income|value", re.I)
+# Money-like column names. Deliberately excludes generic words such as "value" or "score".
+_MONEY = re.compile(r"price|amount|revenue|cost|sales|profit|discount|spend|fee|income", re.I)
 
 
 def metric_unit(result, metric):

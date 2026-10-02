@@ -122,7 +122,12 @@ def test_anomaly_run_detects_the_planted_spike_and_drop(workspace, question):
     result = ask(client, conversation_id, question).json()
     assert result["outcome"] == "ok", result
     assert result["anomalies"]["status"] == "completed_found"
-    assert any(sentence.startswith("Anomaly check:") for sentence in result["answer_sentences"])
+    sentences = result["answer_sentences"]
+    # The answer leads with what was asked for, in readable periods, with little filler.
+    assert sentences[0] == "2 unusual values found across 5 series."
+    assert sentences[1].startswith("West, Jan 2026: revenue was £18,846.06, unusually high")
+    assert sentences[2].startswith("South, Aug 2025: revenue was £183.64, unusually low")
+    assert len(sentences) <= 3 + 3 and not any("-01" in s for s in sentences)
     flagged = {(f["row_key"]["region"], str(f["row_key"]["period"])[:7])
                for f in result["anomalies"]["flags"]}
     assert ("West", "2026-01") in flagged and ("South", "2025-08") in flagged

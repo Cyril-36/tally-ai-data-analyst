@@ -2,6 +2,7 @@
 
 import math
 from collections import defaultdict
+from datetime import date
 
 from app.agent.validator import is_partial, metric_unit, validate_claims
 from app.contracts.outcomes import Outcome
@@ -23,6 +24,7 @@ def compose(result: AnalysisResult) -> AnalysisResult:
     times = [c.name for c in result.table.columns if c.role == ColumnRole.time]
     metrics = [c.name for c in result.table.columns if c.role == ColumnRole.metric]
     claims = []
+    complete = not (result.meta and result.meta.truncated or result.spec and result.spec.limit)
     # Select a readable subset; the complete table remains available.
     for row in result.table.rows[:6]:
         values = dict(zip(names, row, strict=True))
@@ -44,7 +46,6 @@ def compose(result: AnalysisResult) -> AnalysisResult:
                     ),
                 )
             )
-    complete = not (result.meta and result.meta.truncated or result.spec and result.spec.limit)
     if complete and not times and dimensions:
         for metric in metrics:
             ordered = [
@@ -170,22 +171,63 @@ def compose(result: AnalysisResult) -> AnalysisResult:
                 ),
             }
         )
-    sentences = [_render(c) for c in checked]
+    grain = result.spec.time_bucket.grain if result.spec and result.spec.time_bucket else None
+    # A series with a trend or latest change is summarised by those; its individual period
+    # values (first rows, comparison inputs) stay as claims but are not narrated.
+    summarised = [c.entity for c in checked if c.kind in (ClaimKind.trend, ClaimKind.comparison)]
+    narrated = [
+        c for c in checked if not (times and c.kind == ClaimKind.value and c.entity in summarised)
+    ]
+    sentences = [_render(c, grain) for c in narrated]
     if result.anomalies:
-        report = result.anomalies
-        sentences.append(
-            f"Anomaly check: {report.status.value.replace('_', ' ')}; "
-            f"{len(report.flags)} values flagged across {report.series_checked} series."
-        )
-        for flag in report.flags[:3]:
-            label = ", ".join(str(v) for v in flag.row_key.values()) or "Observation"
-            unit = metric_unit(result, flag.metric)
-            sentences.append(
-                f"{label}: {flag.metric} was {_format(flag.value, unit, '.6g')}, compared with "
-                f"a median of {_format(flag.median, unit, '.6g')} in {flag.reference}. Its "
-                f"robust z-score {flag.robust_z:,.6g} exceeded {flag.threshold:,.6g}."
-            )
+        # The question was about unusual values, so they lead the answer.
+        sentences = [*_anomaly_sentences(result, grain), *sentences[:MAX_CONTEXT_SENTENCES]]
     return result.model_copy(update={"claims": checked, "answer_sentences": sentences})
+
+
+MAX_CONTEXT_SENTENCES = 3
+
+
+def _anomaly_sentences(result, grain):
+    report = result.anomalies
+    if report.status.value == "completed_none":
+        return [f"No unusual values found across {report.series_checked} series."]
+    if report.status.value != "completed_found":
+        return [f"Unusual values could not be checked: {report.reason or 'not enough data'}."]
+    count = len(report.flags)
+    plural = "value" if count == 1 else "values"
+    sentences = [f"{count} unusual {plural} found across {report.series_checked} series."]
+    for flag in report.flags[:5]:
+        unit = metric_unit(result, flag.metric)
+        times = {c.name for c in result.table.columns if c.role == ColumnRole.time}
+        entity = ", ".join(str(v) for k, v in flag.row_key.items() if k not in times)
+        when = ", ".join(_period(v, grain) for k, v in flag.row_key.items() if k in times)
+        label = ", ".join(x for x in (entity, when) if x) or "One observation"
+        side = "high" if flag.value > flag.median else "low"
+        typical = f"{entity}'s typical" if entity else "the typical"
+        sentences.append(
+            f"{label}: {flag.metric} was {_format(flag.value, unit)}, unusually {side} against "
+            f"{typical} {flag.metric} of {_format(flag.median, unit)} "
+            f"(robust z {flag.robust_z:,.2f}; threshold {flag.threshold:,.2g})."
+        )
+    return sentences
+
+
+def _period(value, grain):
+    """ISO period start as people read it: Jan 2026, Q1 2026, 2026, 3 Feb 2026."""
+    try:
+        day = date.fromisoformat(str(value)[:10])
+    except ValueError:
+        return str(value)
+    if grain == "month":
+        return day.strftime("%b %Y")
+    if grain == "quarter":
+        return f"Q{(day.month - 1) // 3 + 1} {day.year}"
+    if grain == "year":
+        return str(day.year)
+    if grain == "week":
+        return f"week of {day.day} {day.strftime('%b %Y')}"
+    return f"{day.day} {day.strftime('%b %Y')}"
 
 
 def _format(value, unit, general=".12g"):
@@ -199,8 +241,11 @@ def _format(value, unit, general=".12g"):
     return f"{value:,{general}}"
 
 
-def _render(claim):
+def _render(claim, grain=None):
     subject = ", ".join(str(v) for v in claim.entity.values()) or "The selected data"
+    if claim.period and grain:
+        period = " to ".join(_period(p, grain) for p in claim.period.split(" to "))
+        claim = claim.model_copy(update={"period": period})  # display only; validated already
     if claim.kind == ClaimKind.rank:
         return (
             f"{subject} had the highest {claim.metric}: {_format(claim.value, claim.unit)} "

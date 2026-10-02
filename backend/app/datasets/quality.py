@@ -12,6 +12,7 @@ Score (0-100) = 100 minus these capped penalties, floored at 0:
   variants       5 per column with spelling variants of one value (cap 15)
   future dates   5 per date column with values after the reference date (cap 10)
 Candidate keys and negative values are informational and cost nothing.
+Any penalised issue caps the score at 99, so a flagged dataset never reads 100/100.
 """
 
 import re
@@ -142,6 +143,8 @@ def quality_report(parquet_path: Path, profile: dict, reference_date: date) -> d
     penalties["variants"] = min(15.0, 5.0 * len(variants))
     penalties["future_dates"] = min(10.0, 5.0 * len(future_dates))
     score = max(0, round(100 - sum(penalties.values())))
+    if any(p > 0 for p in penalties.values()):
+        score = min(score, 99)  # a tiny penalty must not round back up to a perfect score
 
     return {
         "score": score,
