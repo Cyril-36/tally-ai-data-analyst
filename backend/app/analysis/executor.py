@@ -24,6 +24,7 @@ from typing import Any
 from app.analysis.catalog import Catalog
 from app.analysis.compiler import compile_spec, dataset_names
 from app.analysis.joins import check_join
+from app.analysis.periods import day_label, period_label
 from app.analysis.validator import expr_text, validate
 from app.config import get_settings
 from app.contracts.outcomes import AppError, Outcome
@@ -188,8 +189,8 @@ def run_spec(spec: AnalysisSpec, catalog: Catalog) -> tuple[ResultTable, Executi
                 Caveat(
                     code="partial_period",
                     message=(
-                        f"{_bucket_label(start, grain)} only contains data up to "
-                        f"{latest.isoformat()}, so it is incomplete."
+                        f"{_capitalised(period_label(start, grain))} only contains data up to "
+                        f"{day_label(latest)}, so it is incomplete."
                     ),
                 )
             )
@@ -238,14 +239,8 @@ def _bucket_bounds(day: date, grain: str) -> tuple[date, date]:
     return start, date(day.year + nxt // 12, nxt % 12 + 1, 1) - timedelta(days=1)
 
 
-def _bucket_label(start: date, grain: str) -> str:
-    if grain == "year":
-        return f"{start.year}"
-    if grain == "quarter":
-        return f"{start.year}-Q{(start.month - 1) // 3 + 1}"
-    if grain == "month":
-        return f"{start.year}-{start.month:02d}"
-    return f"The week of {start.isoformat()}"
+def _capitalised(text: str) -> str:
+    return text[:1].upper() + text[1:]
 
 
 def _refs(expr: Expr | None) -> list[ColumnRef]:

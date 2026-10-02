@@ -377,3 +377,26 @@ def test_a_new_pin_is_titled_with_its_question(make_client, monkeypatch):
     pin = client.post("/api/pins", json={"result_id": result["id"]}).json()
     assert pin["title"] == question
     get_settings.cache_clear()
+
+
+def test_repeated_analyses_stop_with_a_clarification(make_client, monkeypatch, caplog):
+    # Live Gemini kept re-running the same analysis on a follow-up instead of finishing.
+    owner = make_client()
+    _, conversation_id = _setup(owner)
+    calls = []
+
+    class RepeatingProvider:
+        def complete(self, messages, remaining_s, max_tokens):
+            calls.append(1)
+            return Reply([ToolCall(f"a{len(calls)}", "run_analysis",
+                                   {"spec_json": json.dumps(SPEC)})], tokens=100)
+
+    monkeypatch.setattr("app.agent.provider.get_provider", lambda: RepeatingProvider())
+    response = owner.post(f"/api/conversations/{conversation_id}/ask",
+                          json={"question": "Now only East", "request_key": "repeat"})
+    assert response.status_code == 200, response.text
+    result = response.json()
+    assert result["outcome"] == "needs_clarification"
+    assert result["clarification"]["question"].startswith("I tried 3 calculations")
+    assert len(calls) == 4  # three attempts, then the fourth request is answered by asking
+    assert any(r.getMessage() == "agent_analysis_attempts_exhausted" for r in caplog.records)

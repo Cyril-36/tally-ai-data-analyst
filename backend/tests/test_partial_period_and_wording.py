@@ -83,7 +83,7 @@ def test_partial_last_month_is_caveated_and_left_out_of_trend_and_anomalies(tmp_
 
     assert result.meta.partial_period == "2026-09-01"
     caveat = next(c for c in result.meta.caveats if c.code == "partial_period")
-    assert caveat.message == "2026-09 only contains data up to 2026-09-02, so it is incomplete."
+    assert caveat.message == "Sep 2026 only contains data up to 2 Sep 2026, so it is incomplete."
     assert result.table.rows[-1] == ["2026-09-01", 5.0]  # the row stays in the table
 
     composed = compose(result)
@@ -132,7 +132,7 @@ def test_partial_period_respects_filters_and_grain(tmp_path):
     meta = answer(catalog, quarter).meta
     assert meta.partial_period == "2026-01-01"
     assert next(c for c in meta.caveats if c.code == "partial_period").message == (
-        "2026-Q1 only contains data up to 2026-03-09, so it is incomplete."
+        "Q1 2026 only contains data up to 9 Mar 2026, so it is incomplete."
     )
     year = {**MONTHLY_REVENUE, "time_bucket": {**MONTHLY_REVENUE["time_bucket"], "grain": "year"}}
     assert answer(catalog, year).meta.partial_period == "2026-01-01"
@@ -286,7 +286,7 @@ def test_a_model_supplied_unit_is_still_rejected():
 
 
 def test_periods_read_by_grain_and_the_first_months_are_not_narrated():
-    from app.agent.composer import _period
+    from app.analysis.periods import period_label as _period
 
     assert [_period("2026-01-01", g) for g in ("month", "quarter", "year", "week", "day")] == [
         "Jan 2026", "Q1 2026", "2026", "week of 1 Jan 2026", "1 Jan 2026"]

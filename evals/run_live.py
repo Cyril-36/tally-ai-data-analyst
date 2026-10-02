@@ -459,8 +459,9 @@ def run(check_only: bool, case_ids: set[str] | None = None) -> int:
                     "actual_answer_sentences": actual.get("answer_sentences"),
                     "actual_anomalies": actual.get("anomalies"),
                     "clarification": actual.get("clarification"),
+                    # Tool calls only; the trace also holds a result summary per call.
                     "trace_tools": [
-                        step.get("tool") for step in actual.get("trace", []) if step.get("tool")
+                        step["tool"] for step in actual.get("trace", []) if "args" in step
                     ],
                 }
                 rows.append(entry)

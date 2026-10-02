@@ -2,9 +2,9 @@
 
 import math
 from collections import defaultdict
-from datetime import date
 
 from app.agent.validator import is_partial, metric_unit, validate_claims
+from app.analysis.periods import period_label
 from app.contracts.outcomes import Outcome
 from app.contracts.result import (
     AnalysisResult,
@@ -202,7 +202,7 @@ def _anomaly_sentences(result, grain):
         unit = metric_unit(result, flag.metric)
         times = {c.name for c in result.table.columns if c.role == ColumnRole.time}
         entity = ", ".join(str(v) for k, v in flag.row_key.items() if k not in times)
-        when = ", ".join(_period(v, grain) for k, v in flag.row_key.items() if k in times)
+        when = ", ".join(period_label(v, grain) for k, v in flag.row_key.items() if k in times)
         label = ", ".join(x for x in (entity, when) if x) or "One observation"
         side = "high" if flag.value > flag.median else "low"
         typical = f"{entity}'s typical" if entity else "the typical"
@@ -212,23 +212,6 @@ def _anomaly_sentences(result, grain):
             f"(robust z {flag.robust_z:,.2f}; threshold {flag.threshold:,.2g})."
         )
     return sentences
-
-
-def _period(value, grain):
-    """ISO period start as people read it: Jan 2026, Q1 2026, 2026, 3 Feb 2026."""
-    try:
-        day = date.fromisoformat(str(value)[:10])
-    except ValueError:
-        return str(value)
-    if grain == "month":
-        return day.strftime("%b %Y")
-    if grain == "quarter":
-        return f"Q{(day.month - 1) // 3 + 1} {day.year}"
-    if grain == "year":
-        return str(day.year)
-    if grain == "week":
-        return f"week of {day.day} {day.strftime('%b %Y')}"
-    return f"{day.day} {day.strftime('%b %Y')}"
 
 
 def _format(value, unit, general=".12g"):
@@ -247,7 +230,7 @@ def _format(value, unit, general=".12g"):
 def _render(claim, grain=None):
     subject = ", ".join(str(v) for v in claim.entity.values()) or "The selected data"
     if claim.period and grain:
-        period = " to ".join(_period(p, grain) for p in claim.period.split(" to "))
+        period = " to ".join(period_label(p, grain) for p in claim.period.split(" to "))
         claim = claim.model_copy(update={"period": period})  # display only; validated already
     if claim.kind == ClaimKind.rank:
         return (
