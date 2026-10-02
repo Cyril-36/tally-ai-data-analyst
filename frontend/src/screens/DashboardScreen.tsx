@@ -4,6 +4,7 @@ import { ApiError } from '../api/client';
 import { conversations as convApi, exportResult, pins as pinsApi } from '../api/endpoints';
 import type { DashboardItem } from '../api/types';
 import { ChartFrame } from '../components/ChartFrame';
+import { OverviewSection } from '../components/OverviewSection';
 import { currencyFor, formatCell, shortDate, shortId } from '../lib/format';
 import { contextItems, currencyChanges, sourceVersions } from '../lib/resultView';
 import { useToast } from '../state/toast';
@@ -147,6 +148,7 @@ export function DashboardScreen() {
           <h2 className="page-title">Dashboard</h2>
           <p className="page-lede">Pinned results keep their own data, filters and period. Drag cards, or use the arrows, to reorder.</p>
         </div>
+        <OverviewSection />
         {items && items.length === 0 && (
           <div className="empty-box" style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center', padding: 36 }}>
             <div className="serif" style={{ fontSize: 26, color: 'var(--ink)' }}>

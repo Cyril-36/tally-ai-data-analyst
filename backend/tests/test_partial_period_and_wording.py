@@ -250,7 +250,7 @@ def test_counts_are_integers_and_unitless_metrics_keep_plain_numbers():
         )
     )
     assert (
-        composed.answer_sentences[0] == "West had the highest avg_qty: 2.5 among 2 returned groups."
+        composed.answer_sentences[0] == "West had the highest avg qty: 2.5 among 2 returned groups."
     )
     assert composed.claims[0].unit is None
 

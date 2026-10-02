@@ -8,6 +8,7 @@ import type {
   DatasetDetail,
   DatasetMeta,
   Dependents,
+  Overview,
   Pin,
   ProviderTest,
   QualityReport,
@@ -47,6 +48,7 @@ export const datasets = {
   rename: (datasetId: string, name: string) => patch<DatasetMeta>(`/api/datasets/${id(datasetId)}`, { name }),
   setCurrency: (datasetId: string, currency: DatasetMeta['currency']) =>
     patch<DatasetMeta>(`/api/datasets/${id(datasetId)}`, { currency }),
+  overview: (datasetId: string) => post<Overview>(`/api/datasets/${id(datasetId)}/overview`, {}),
   remove: (datasetId: string) => del<{ deleted: string }>(`/api/datasets/${id(datasetId)}?confirm=true`),
   sample: () => post<SampleLoadResult>('/api/datasets/sample'),
 };

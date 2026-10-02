@@ -15,6 +15,7 @@ from app.contracts.outcomes import AppError, Outcome
 from app.contracts.result import AnalysisResult, ChartSpec
 from app.db import get_conn
 from app.workspace import store
+from app.workspace.overview import build_overview
 
 router = APIRouter()
 CurrentUser = Annotated[User, Depends(get_current_user)]
@@ -299,3 +300,9 @@ def delete_pin(pin_id: str, user: CurrentUser, conn: Conn) -> dict:
     authz.require_owned(conn, "pins", pin_id, user, Action.delete)
     conn.execute("DELETE FROM pins WHERE id = ?", (pin_id,))
     return {"deleted": pin_id}
+
+
+@router.post("/api/datasets/{dataset_id}/overview")
+def dataset_overview(dataset_id: str, user: CurrentUser, conn: Conn) -> dict:
+    """Automatic overview cards for one dataset; no AI involved (see workspace/overview.py)."""
+    return build_overview(conn, user, dataset_id)

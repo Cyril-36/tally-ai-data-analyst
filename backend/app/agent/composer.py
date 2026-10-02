@@ -207,8 +207,8 @@ def _anomaly_sentences(result, grain):
         side = "high" if flag.value > flag.median else "low"
         typical = f"{entity}'s typical" if entity else "the typical"
         sentences.append(
-            f"{label}: {flag.metric} was {_format(flag.value, unit)}, unusually {side} against "
-            f"{typical} {flag.metric} of {_format(flag.median, unit)} "
+            f"{label}: {_words(flag.metric)} was {_format(flag.value, unit)}, unusually {side} "
+            f"against {typical} {_words(flag.metric)} of {_format(flag.median, unit)} "
             f"(robust z {flag.robust_z:,.2f}; threshold {flag.threshold:,.2g})."
         )
     return sentences
@@ -251,23 +251,30 @@ def _render(claim, grain=None):
         claim = claim.model_copy(update={"period": period})  # display only; validated already
     if claim.kind == ClaimKind.rank:
         return (
-            f"{subject} had the highest {claim.metric}: {_format(claim.value, claim.unit)} "
+            f"{subject} had the highest {_words(claim.metric)}: {_format(claim.value, claim.unit)} "
             f"among {claim.rank_of} returned groups."
         )
     if claim.kind == ClaimKind.trend:
         word = {"up": "increased", "down": "decreased", "flat": "changed"}[claim.direction]
         return (
-            f"{subject}: {claim.metric} {word} by {_format(abs(claim.value), claim.unit)} "
+            f"{subject}: {_words(claim.metric)} {word} by {_format(abs(claim.value), claim.unit)} "
             f"from {claim.period}, across {claim.periods_covered} periods."
         )
     if claim.kind == ClaimKind.comparison:
         word = {"up": "increased", "down": "decreased", "flat": "changed"}[claim.direction]
         return (
-            f"{subject}: {claim.metric} {word} by {_format(abs(claim.value), claim.unit)} "
+            f"{subject}: {_words(claim.metric)} {word} by {_format(abs(claim.value), claim.unit)} "
             f"in {claim.period} versus the previous observed period."
         )
     period = f" in {claim.period}" if claim.period else ""
-    return f"{subject}: {claim.metric}{period} was {_format(claim.value, claim.unit)}."
+    if claim.unit == "count":
+        return f"{subject}{period}: {_format(claim.value, claim.unit)} {_words(claim.metric)}."
+    return f"{subject}: {_words(claim.metric)}{period} was {_format(claim.value, claim.unit)}."
+
+
+def _words(metric):
+    """Output names read as words in sentences: total_quantity -> total quantity."""
+    return metric.replace("_", " ")
 
 
 def _number(value):

@@ -615,3 +615,61 @@ th.ds-prev__n {
   width: 18px;
   height: 18px;
 }
+
+/* Automatic overview (Dashboard) — same card language as pinned results. */
+.overview {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.overview__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+.overview__title {
+  margin: 0 0 4px;
+  font: 400 24px var(--font-serif);
+  color: var(--ink);
+}
+.overview__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.overview__kpis {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+  gap: 12px;
+}
+.overview__kpi {
+  padding: 14px 16px;
+}
+.overview__kpi-label {
+  font: 500 11px var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.overview__kpi-value {
+  margin: 6px 0 0;
+  font-size: 28px;
+  color: var(--ink);
+}
+.overview__note {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.overview__skipped {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  color: var(--muted);
+}

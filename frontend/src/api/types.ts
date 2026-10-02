@@ -299,3 +299,15 @@ export interface ProviderTest {
   latency_ms: number;
   model: string;
 }
+
+export type OverviewKind = 'totals' | 'trend' | 'breakdown' | 'mix';
+
+/** POST /api/datasets/{id}/overview: schema-chosen cards, each a stored AnalysisResult. */
+export interface Overview {
+  dataset_id: string;
+  dataset_version: number;
+  conversation_id: string;
+  reused: boolean;
+  cards: { kind: OverviewKind; result: AnalysisResult; status: ResultStatus }[];
+  skipped: { kind: OverviewKind; reason: string }[];
+}
