@@ -42,6 +42,9 @@ _ORDER_DATE = TimeBucket(column=ColumnRef(dataset="orders", column="order_date")
 _CUSTOMER_JOIN = Join(left=ColumnRef(dataset="orders", column="customer_id"),
                       right=ColumnRef(dataset="customers", column="customer_id"))
 
+_PRODUCT_JOIN = Join(left=ColumnRef(dataset="orders", column="product_id"),
+                     right=ColumnRef(dataset="products", column="product_id"))
+
 _SPECS = {
     "region": AnalysisSpec(
         base_dataset="orders", metrics=[_REVENUE], dimensions=[_REGION],
@@ -54,6 +57,11 @@ _SPECS = {
         dimensions=[ColumnRef(dataset="customers", column="customer_id"),
                     ColumnRef(dataset="customers", column="customer_name")],
         sort=[SortKey(by="revenue", descending=True)], limit=5),
+    # The follow-up to the "underperforming" clarification when the user picks revenue.
+    "products": AnalysisSpec(
+        base_dataset="orders", metrics=[_REVENUE], joins=[_PRODUCT_JOIN],
+        dimensions=[ColumnRef(dataset="products", column="product_name")],
+        sort=[SortKey(by="revenue", descending=False)], limit=5),
     # Per-region monthly series, so each region is judged against its own history.
     "anomalies": AnalysisSpec(
         base_dataset="orders", metrics=[_REVENUE], dimensions=[_REGION], time_bucket=_ORDER_DATE,
@@ -63,17 +71,24 @@ _PLANS = {
     "region": ["run_analysis", "finish"],
     "monthly": ["run_analysis", "finish"],
     "customers": ["check_join", "run_analysis", "finish"],
+    "products": ["check_join", "run_analysis", "finish"],
     "anomalies": ["run_analysis", "detect_anomalies", "finish"],
 }
-_NEEDS = {"customers": {"orders", "customers"}}
+_NEEDS = {"customers": {"orders", "customers"}, "products": {"orders", "products"}}
+# Topics the sample data cannot answer; a real model would decline with `unsupported`.
+_NOT_IN_DATA = ("employee", "attrition", "headcount", "salary", "weather")
 
 
 def _intent(question: str) -> str | None:
     q = question.casefold()
     if "underperform" in q:
         return "underperform"
+    if any(word in q for word in _NOT_IN_DATA):
+        return "not_in_data"
     if "anomal" in q:
         return "anomalies"
+    if q.strip() == "revenue" or ("product" in q and "revenue" in q):
+        return "products"
     if "region" in q and "revenue" in q:
         return "region"
     if "customer" in q and ("top" in q or "best" in q):
@@ -101,6 +116,8 @@ class ScriptedProvider(Provider):
         if intent == "underperform":
             args = {"reason": "metric", "options": ["revenue", "profit", "declining sales"]}
             return Reply(_call("clarify", args, step))
+        if intent == "not_in_data":
+            return Reply(_call("unsupported", {"reason": "missing_data"}, step))
         if intent is None:  # the fixed clarify text asks which metric to use
             return Reply(_call("clarify", {"reason": "metric", "options": ["revenue"]}, step))
         if not {"orders", *_NEEDS.get(intent, ())} <= datasets:

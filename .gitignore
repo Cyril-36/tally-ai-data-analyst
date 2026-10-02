@@ -25,3 +25,6 @@ var/
 .DS_Store
 *.swp
 
+
+frontend/playwright-report/
+frontend/test-results/

@@ -34,6 +34,22 @@ Accounts: `analyst1@example.com`, `analyst2@example.com`, `admin@example.com`, w
 
 The current executor achieves **Tier A** isolation: a fresh subprocess per query, an environment without the API key, private copies of selected Parquet files, DuckDB external access disabled and settings locked, resource limits where the OS supports them, a wall-clock kill, and temporary-file cleanup. It executes only backend-generated SQL from validated specs. A separate network-isolated executor service (Tier B) is planned hardening and is not part of this Compose deployment. TLS, backups, and external monitoring must be configured by the deployment environment before public use.
 
+## Frontend
+
+React 18 + TypeScript + Vite in `frontend/`. The dev server proxies `/api` to the backend on `http://localhost:8000`.
+
+```bash
+cd frontend
+npm ci
+npm run dev        # http://localhost:5173 (start the backend on :8000 first)
+npm run typecheck
+npm test           # Vitest component tests
+npm run build      # type-checks, then writes frontend/dist
+npm run e2e        # Playwright; starts the backend (LLM_PROVIDER=fake) and Vite itself
+```
+
+`npm run e2e` needs `uv` and a one-time `npx playwright install chromium`. It seeds demo accounts into a temporary data directory; override the backend command with `E2E_BACKEND_COMMAND` or reuse running servers with `E2E_REUSE_SERVERS=1`.
+
 ## Architecture
 
 ```mermaid
