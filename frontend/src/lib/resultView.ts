@@ -2,6 +2,7 @@
 import type {
   AnalysisResult,
   AnalysisSpec,
+  Claim,
   DatasetMeta,
   Expr,
   Metric,
@@ -261,4 +262,29 @@ export function entityLabel(rowKey: Record<string, unknown>, table?: ResultTable
 
 export function countChecks(result: AnalysisResult): number {
   return result.trace.filter((t) => typeof t.tool === 'string' && 'step' in t).length;
+}
+
+/**
+ * The label under a headline figure, written for what the figure is: a gap to the runner-up is
+ * not "revenue · West", and a period change names its period the way the sentences do.
+ */
+/** The calculation behind a derived claim ("difference", "share_of_total", …), or null. */
+export function calcOp(claim: Claim): string | null {
+  const source = claim.source as { type?: string; op?: string } | null;
+  return source?.type === 'calc' ? (source.op ?? null) : null;
+}
+
+export function kpiLabel(claim: Claim, claims: Claim[], grain?: TimeGrain | null): string {
+  const metric = claim.metric.replace(/_/g, ' ');
+  const entity = Object.values(claim.entity).map(String).join(', ');
+  const period = claim.period ? formatTime(claim.period, grain) : '';
+  if (claim.kind === 'rank') return [metric, entity, claim.rank_of ? `highest of ${claim.rank_of}` : ''].filter(Boolean).join(' · ');
+  if (claim.kind === 'share') return `${entity} · share of total ${metric}`;
+  if (claim.kind === 'comparison' && calcOp(claim) === 'difference') {
+    const other = claims.find((c) => c.id === claim.compared_to);
+    const otherName = other ? Object.values(other.entity).map(String).join(', ') : 'the next group';
+    return `${metric} · ${entity} ${claim.value >= 0 ? 'ahead of' : 'behind'} ${otherName}`;
+  }
+  if (claim.kind === 'comparison') return [metric, entity, 'change vs previous', period].filter(Boolean).join(' · ');
+  return [metric, entity, period].filter(Boolean).join(' · ');
 }

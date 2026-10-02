@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ORDERS, okResult } from '../test/fixtures';
-import { currencyChanges, deriveStatus, plainCalculation, sourceVersions, staleLabel } from './resultView';
+import { currencyChanges, deriveStatus, kpiLabel, plainCalculation, sourceVersions, staleLabel } from './resultView';
 
 const calculated = {
   ...okResult,
@@ -58,5 +58,21 @@ describe('plain-language calculation', () => {
         limit: null,
       }),
     ).toBe('Counts rows; averages unit_price per region.');
+  });
+});
+
+describe('headline figure labels', () => {
+  const base = { metric: 'revenue', unit: 'GBP', rank: null, rank_of: null, direction: null, compared_to: null, periods_covered: null, period: null };
+  const top = { ...base, id: 'c1', kind: 'rank' as const, entity: { region: 'West' }, value: 100, rank: 1, rank_of: 5, direction: 'highest', source: { type: 'cell' } };
+  const runner = { ...base, id: 'c2', kind: 'value' as const, entity: { region: 'North' }, value: 80, source: { type: 'cell' } };
+  const gap = { ...base, id: 'c3', kind: 'comparison' as const, entity: { region: 'West' }, value: 20, compared_to: 'c2', source: { type: 'calc', op: 'difference', inputs: ['c1', 'c2'] } };
+  const share = { ...base, id: 'c4', kind: 'share' as const, unit: '%', entity: { region: 'West' }, value: 25, source: { type: 'calc', op: 'share_of_total', inputs: ['c1'] } };
+  const change = { ...base, id: 'c5', kind: 'comparison' as const, unit: '%', entity: { region: 'East' }, value: -22, period: '2026-09-01', source: { type: 'calc', op: 'pct_change', inputs: [] } };
+  const all = [top, runner, gap, share, change];
+  it('names what each figure is', () => {
+    expect(kpiLabel(top, all)).toBe('revenue · West · highest of 5');
+    expect(kpiLabel(gap, all)).toBe('revenue · West ahead of North');
+    expect(kpiLabel(share, all)).toBe('West · share of total revenue');
+    expect(kpiLabel(change, all, 'month')).toBe('revenue · East · change vs previous · Sep 2026');
   });
 });

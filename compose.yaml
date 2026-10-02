@@ -12,6 +12,7 @@ services:
       LLM_PROVIDER: ${LLM_PROVIDER:-real}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      DEMO_PASSWORD: ${DEMO_PASSWORD:-}  # only for `app seed-demo` on a local demo
     volumes:
       - analyst-data:/srv/app/var
     read_only: true

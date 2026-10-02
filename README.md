@@ -1,8 +1,39 @@
-# AI Data Analyst
+# Tally: AI Data Analyst
 
-This repository contains a React frontend and FastAPI backend for an AI-powered CSV analyst. An authenticated user can upload CSV files, ask questions in natural language, inspect the exact SQL and bound parameters used, see validated summaries and charts, check anomalies, pin results, and export reports.
+Upload one or more CSV files and ask questions in plain English. Tally answers with a short written conclusion, a chart, the result table, the **exact SQL and parameters** that produced it, the assumptions it made, and an explanation of any anomalies. Every figure you see is calculated by the backend and re-checked against the result table; the AI only chooses *which* calculation to run.
 
-The AI provider chooses bounded analysis tools and fills a structured `AnalysisSpec`. Backend code validates that spec, computes the result in DuckDB, checks ownership again, and renders factual sentences from verified result cells. The model never supplies SQL or numbers shown as facts.
+![Asking a question: streamed progress, a checked answer, its chart and the SQL behind it](docs/demo.gif)
+
+**Demo video (23 s):** [docs/demo.mp4](docs/demo.mp4): sign in, load sample data, ask a question, inspect the SQL and sources, detect anomalies, and generate the overview dashboard. *(The recording uses the built-in scripted AI provider, so it runs without an API key; every number in it is computed by the real analysis engine.)*
+
+## Try it in three commands
+
+```bash
+cp .env.example .env            # add LLM_API_KEY for real AI answers (optional, see below)
+docker compose up --build -d    # frontend and backend on http://localhost:8768
+docker compose exec api app seed-demo   # needs DEMO_PASSWORD in .env; demo accounts below
+```
+
+No API key? Set `LLM_PROVIDER=fake` in `.env` to use the scripted provider (a fixed set of demo questions), or use the deterministic parts (uploads, data quality, anomaly explorer, the automatic overview dashboard, exports), which never call an AI. Demo accounts: `analyst1@example.com`, `analyst2@example.com`, `admin@example.com`.
+
+## What it looks like
+
+| | |
+|---|---|
+| ![A checked answer: conclusion with share of total and gap to the runner-up, the calculation in plain words, figures and chart](docs/screenshots/1-answer.png) | ![The SQL, parameters, data sources, assumptions and tool trace behind an answer](docs/screenshots/2-sql-and-sources.png) |
+| **Answer:** one conclusion, one comparison, and what was calculated in plain words. | **How it was calculated:** exact SQL, parameters, sources and versions, and the tool trace. |
+| ![Anomalies: flagged months with observed value, typical value, robust z-score and threshold](docs/screenshots/3-anomalies.png) | ![Automatic overview dashboard: headline totals, trend with anomaly flags, top groups](docs/screenshots/4-overview-dashboard.png) |
+| **Anomalies** with their evidence: value, typical value, robust z and threshold. | **Automatic overview** chosen from the dataset's columns, with no AI involved. |
+| ![Data quality report with score, nulls, duplicates and inconsistent categories](docs/screenshots/5-data-quality.png) | ![The same answer on a phone](docs/screenshots/6-mobile.png) |
+| **Data quality** checks with example rows. | **Mobile** layout. |
+
+## How it stays correct
+
+- **The AI chooses, code calculates.** The model fills a structured `AnalysisSpec`; the backend validates it, compiles SQL with bound parameters and runs it in an isolated DuckDB worker. The model never writes SQL or a number shown as fact.
+- **Sentences are checked claims.** Every figure in the written answer (values, rankings, shares of total, gaps, trends) is recomputed from the result table before it is shown; if a claim fails, the summary is withheld and only the table and chart remain. The "Calculation checked" badge says exactly that: it checks the arithmetic, and the line beside it states which calculation was checked (e.g. "Counts unique order_id values per month").
+- **Ambiguity is surfaced, not guessed.** Unclear questions get a clarification; counting an identifier must say "rows" or "unique entities"; incomplete final periods and excluded values become caveats.
+- **Your data is yours.** Every dataset, result, pin and export is owner-only (another user gets "not found"); admins manage settings but get no access to anyone's data.
+- **Measured, not assumed.** Live Gemini 2.5 Flash: 30/31 on retail questions and 10/10 on an unseen support/subscription schema (details under [Verification](#verification-and-boundaries)). 367 backend tests, 37 component tests and 29 browser flows run in [CI](.github/workflows/ci.yml) without any API key.
 
 ## Run locally
 
@@ -97,7 +128,7 @@ make eval-transfer-check  # validates 10 unrelated holdout baselines offline
 make eval-transfer        # runs the holdout through the live model
 ```
 
-Offline tests cover CSV validation, unauthorized access, admin separation, join fan-out refusal, bound SQL values, executor escapes and limits, anomalies, claim tampering, chart/report consistency, idempotent HTTP turns, SSE clarification, and provider failure. All 31 retail and 10 transfer baselines pass without AI. Final live results with Gemini 2.5 Flash (2026-10-02, clean trees, every case run and every case's actual query and table saved): the retail suite scored **30/31 answer-correct** (right table values, sort and requested limits for the requested calculation) and **24/31 exact-spec** (identical query) on the final agent code `8b28f8d` ([report](evals/reports/20261002T143918134331Z.md)); the independent support/subscription suite scored **10/10** answer-correct and exact-spec ([report](evals/reports/20261002T143146031020Z.md)). That transfer run used the commit just before the final attempt-cap fix; the fix only acts on a fourth analysis request and no transfer case made more than one, so it cannot change those results. The one retail miss counts order rows instead of distinct orders, a model error left visible rather than tuned away. Across runs the same retail suite has scored 26–30/31 (27/31 on `682e92f`, before the cap kept validated results), so expect a few cases of run-to-run variation even at temperature 0; the earlier 19/30 run used older case definitions and is not a controlled comparison.
+Offline tests cover CSV validation, unauthorized access, admin separation, join fan-out refusal, bound SQL values, executor escapes and limits, anomalies, claim tampering, chart/report consistency, idempotent HTTP turns, SSE clarification, and provider failure. All 31 retail and 10 transfer baselines pass without AI. Final live results with Gemini 2.5 Flash (2026-10-02, clean trees, every case run and every case's actual query and table saved): the retail suite scored **30/31 answer-correct** (right table values, sort and requested limits for the requested calculation) and **24/31 exact-spec** (identical query) on the final agent code `8b28f8d` ([report](evals/reports/20261002T143918134331Z.md)); the independent support/subscription suite scored **10/10** answer-correct and exact-spec ([report](evals/reports/20261002T143146031020Z.md)). That transfer run used the commit just before the final attempt-cap fix; the fix only acts on a fourth analysis request and no transfer case made more than one, so it cannot change those results. The one retail miss counted order rows instead of distinct orders. After these runs the validator started refusing `count(<identifier>)` (the model must choose rows or unique entities), the prompt gained a matching general counting rule, and grouped answers gained checked share-of-total and runner-up sentences; those changes are verified offline only, because no new live run was made. A third, unseen logistics holdout (`make eval-holdout`, plain business wording, follow-ups, missing values) is ready but has not been run live. Reports now include latency, tokens per question and, with `LLM_PRICE_INPUT_PER_M`/`LLM_PRICE_OUTPUT_PER_M` set, cost; `python evals/run_live.py --summarize <report.json>` summarises older reports (the final retail run: median 6.8 s, p90 14.7 s, 8,600 tokens per question). Across runs the same retail suite has scored 26–30/31 (27/31 on `682e92f`, before the cap kept validated results), so expect a few cases of run-to-run variation even at temperature 0; the earlier 19/30 run used older case definitions and is not a controlled comparison.
 
 Currency: a money symbol is shown only when the dataset declares its currency (GBP, USD or EUR, set per dataset on the Data screen or with `PATCH /api/datasets/{id}`); the bundled sample declares GBP and new uploads declare none. A metric counts as money when its name or columns read as money (price, amount, revenue, cost, sales, profit, discount, spend, fee, income) and every dataset it uses declares the same currency; otherwise it is shown as a plain number. CSV exports write every stored number exactly (the shortest text that reads back to the same value); rounding happens only on screen and in the written sentences.
 

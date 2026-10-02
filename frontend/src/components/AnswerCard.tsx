@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import type { AnalysisResult, AnomalyFlag, ChartSpec, DatasetMeta, ResultStatus } from '../api/types';
 import { candidateChartTypes } from '../lib/figure';
 import { clock, currencyFor, formatWithUnit, shortId } from '../lib/format';
-import { contextItems, countChecks, currencyChanges, detailItems, formatParam, plainCalculation, sourceVersions, staleLabel, traceLine } from '../lib/resultView';
+import { contextItems, countChecks, currencyChanges, calcOp, detailItems, formatParam, kpiLabel, plainCalculation, sourceVersions, staleLabel, traceLine } from '../lib/resultView';
 import { AnomalyPanel } from './AnomalyPanel';
 import { ChartFrame } from './ChartFrame';
 import { ResultTable } from './ResultTable';
@@ -60,8 +60,8 @@ export function AnswerCard(props: AnswerCardProps) {
         .slice(0, 3)
         .map((c) => ({
           key: c.id,
-          value: formatWithUnit(c.value, c.unit ?? currencyFor(result, c.metric)),
-          label: [c.metric.replace(/_/g, ' '), ...Object.values(c.entity).map(String), c.period].filter(Boolean).join(' · '),
+          value: formatWithUnit(calcOp(c) === 'difference' ? Math.abs(c.value) : c.value, c.unit ?? currencyFor(result, c.metric)),
+          label: kpiLabel(c, result.claims, grain),
         }))
     : [];
   const caveats = result.meta?.caveats ?? [];
