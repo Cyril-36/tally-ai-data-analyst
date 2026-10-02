@@ -170,7 +170,8 @@ export function buildFigure({ table, chart, result, grain, flags, mini = false }
     config: {
       responsive: true,
       displaylogo: false,
-      displayModeBar: !mini,
+      // The prototype shows the toolbar on full charts; on phones it covers the title.
+      displayModeBar: !mini && !(typeof window !== 'undefined' && window.matchMedia?.('(max-width: 640px)').matches),
       modeBarButtonsToRemove: ['lasso2d', 'select2d', 'autoScale2d'],
     },
   };

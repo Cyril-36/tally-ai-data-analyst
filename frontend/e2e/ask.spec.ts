@@ -10,7 +10,7 @@ test.describe('ask', () => {
     await ask(page, Q.revenueByRegion);
 
     // Progress steps appear while the answer does not.
-    await expect(page.getByText('Working · the answer appears once it’s validated')).toBeVisible();
+    await expect(page.getByText('Working · the answer appears once it’s checked')).toBeVisible();
     await expect(page.locator('article.answer')).toHaveCount(0);
 
     const response = await streamed;
@@ -22,7 +22,7 @@ test.describe('ask', () => {
 
     const card = answerCard(page);
     await expect(card).toBeVisible({ timeout: 30_000 });
-    await expect(card.getByText('✓ VALIDATED')).toBeVisible();
+    await expect(card.getByText('✓ CALCULATION CHECKED')).toBeVisible();
     await expect(card.getByRole('heading', { name: Q.revenueByRegion })).toBeVisible();
     // sentences are the backend's own; the table carries the real figures
     await expect(card.locator('.answer__conclusion')).not.toBeEmpty();

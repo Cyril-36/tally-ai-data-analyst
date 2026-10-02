@@ -14,7 +14,7 @@ export function UserBubble({ text }: { text: string }) {
 export function RunningCard({ steps }: { steps: Step[] }) {
   return (
     <div className="running" aria-live="polite" role="status">
-      <span className="eyebrow">Working · the answer appears once it’s validated</span>
+      <span className="eyebrow">Working · the answer appears once it’s checked</span>
       {steps.length === 0 && (
         <div className="running__step">
           <Spinner />

@@ -36,7 +36,7 @@ describe('AnswerCard (outcome ok)', () => {
   it("renders the backend's sentences verbatim and nothing composed in the browser", () => {
     render(<AnswerCard {...props()} />);
     for (const s of okResult.answer_sentences) expect(screen.getByText(s)).toBeInTheDocument();
-    expect(screen.getByText('✓ VALIDATED')).toBeInTheDocument();
+    expect(screen.getByText('✓ CALCULATION CHECKED')).toBeInTheDocument();
   });
 
   it('shows the table rows, caveats, chart (with a table alternative) and the question as the title', () => {
@@ -93,7 +93,7 @@ describe('AnswerCard (narrative_unverified)', () => {
     expect(screen.getByText(/could not be validated/)).toBeInTheDocument();
     expect(screen.getByRole('table', { name: unverifiedResult.question })).toBeInTheDocument();
     expect(screen.getByTestId('plot')).toBeInTheDocument();
-    expect(screen.queryByText(/✓ VALIDATED/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/✓ CALCULATION CHECKED/)).not.toBeInTheDocument();
     expect(container.textContent).not.toMatch(/\bVALIDATED\b/);
     expect(screen.queryByText(okResult.answer_sentences[0])).not.toBeInTheDocument();
   });

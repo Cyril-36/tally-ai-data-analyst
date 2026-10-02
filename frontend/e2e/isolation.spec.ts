@@ -7,7 +7,7 @@ test('cross-user refusal: analyst2 cannot open analyst1’s conversation, result
   await signIn(owner, 'analyst1@example.com');
   await uploadSamples(owner, ['orders.csv', 'customers.csv']);
   await ask(owner, Q.revenueByRegion);
-  await expect(answerCard(owner).getByText('✓ VALIDATED')).toBeVisible({ timeout: 30_000 });
+  await expect(answerCard(owner).getByText('✓ CALCULATION CHECKED')).toBeVisible({ timeout: 30_000 });
   const conversationId = new URL(owner.url()).pathname.split('/').pop() as string;
   const { datasetId, resultId } = await owner.evaluate(async (cid) => {
     const datasets = (await (await fetch('/api/datasets')).json()) as Array<{ id: string }>;

@@ -335,7 +335,7 @@ function PinCard(p: PinCardProps) {
         <dd className="mono">{ctx.find((c) => c.k === 'Period')?.v ?? '—'}</dd>
         <dt>Result</dt>
         <dd className="mono">
-          {shortId(result.id)} · {result.outcome === 'ok' ? 'validated' : 'calculated'} {shortDate(result.created_at)}
+          {shortId(result.id)} · {result.outcome === 'ok' ? 'calculation checked' : 'calculated'} {shortDate(result.created_at)}
         </dd>
       </dl>
 

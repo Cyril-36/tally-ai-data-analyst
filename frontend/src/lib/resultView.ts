@@ -32,6 +32,42 @@ export function describeMetric(metric: Metric, single: boolean): string {
 
 const OPS: Record<string, string> = { eq: '=', ne: '≠', gt: '>', gte: '≥', lt: '<', lte: '≤' };
 
+const VERB: Record<string, string> = {
+  sum: 'Adds up',
+  avg: 'Averages',
+  median: 'Takes the median of',
+  min: 'Takes the lowest',
+  max: 'Takes the highest',
+};
+
+/** One metric in plain words, e.g. "counts unique order_id values" or "adds up quantity * unit_price". */
+function plainMetric(metric: Metric, single: boolean): string {
+  const inner = describeExpr(metric.expr ?? null, single);
+  if (metric.agg === 'count') return metric.expr ? `Counts rows that have a ${inner}` : 'Counts rows';
+  if (metric.agg === 'count_distinct') return `Counts unique ${inner} values`;
+  return `${VERB[metric.agg] ?? metric.agg} ${inner}`;
+}
+
+/**
+ * What the stored calculation does, in one plain sentence ("Counts unique order_id values per
+ * month, where region = West."). Shown next to the check badge so a reader can see which
+ * interpretation was checked, not just that the arithmetic was.
+ */
+export function plainCalculation(spec: AnalysisSpec | null | undefined): string {
+  if (!spec) return '';
+  const single = datasetNamesOf(spec).length === 1;
+  const what = spec.metrics.map((m, i) => {
+    const text = plainMetric(m, single);
+    return i === 0 ? text : text.charAt(0).toLowerCase() + text.slice(1);
+  });
+  const per = [
+    ...spec.dimensions.map((d) => d.column),
+    ...(spec.time_bucket ? [spec.time_bucket.grain] : []),
+  ];
+  const where = spec.filters.map(describeFilter);
+  return `${what.join('; ')}${per.length ? ` per ${per.join(' and ')}` : ''}${where.length ? `, where ${where.join(' and ')}` : ''}.`;
+}
+
 export function describeFilter(f: SpecFilter): string {
   const col = f.column.column;
   const v = f.value;

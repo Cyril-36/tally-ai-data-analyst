@@ -353,6 +353,16 @@ button.caps__item:hover .caps__q {
 .answer__ok {
   color: var(--accent);
 }
+/* What was checked, in plain words: its own line under the badge row. */
+.answer__calc {
+  order: 10;
+  flex-basis: 100%;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--ink);
+}
 .answer__warn {
   color: var(--warn);
 }

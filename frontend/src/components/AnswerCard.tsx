@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import type { AnalysisResult, AnomalyFlag, ChartSpec, DatasetMeta, ResultStatus } from '../api/types';
 import { candidateChartTypes } from '../lib/figure';
 import { clock, currencyFor, formatWithUnit, shortId } from '../lib/format';
-import { contextItems, countChecks, currencyChanges, detailItems, formatParam, sourceVersions, staleLabel, traceLine } from '../lib/resultView';
+import { contextItems, countChecks, currencyChanges, detailItems, formatParam, plainCalculation, sourceVersions, staleLabel, traceLine } from '../lib/resultView';
 import { AnomalyPanel } from './AnomalyPanel';
 import { ChartFrame } from './ChartFrame';
 import { ResultTable } from './ResultTable';
@@ -33,7 +33,7 @@ export interface AnswerCardProps {
 /**
  * One answer, rendered strictly from the stored AnalysisResult: the backend's own sentences,
  * its table, a chart built from table + chart spec, its SQL, caveats and trace. Only an
- * `ok` outcome is ever called validated.
+ * `ok` outcome is ever called checked.
  */
 export function AnswerCard(props: AnswerCardProps) {
   const { result, status, datasets } = props;
@@ -48,6 +48,7 @@ export function AnswerCard(props: AnswerCardProps) {
   const types = useMemo(() => (table && chart ? candidateChartTypes(table, chart) : []), [table, chart]);
   const changes = useMemo(() => currencyChanges(result, datasets), [result, datasets]);
   const stale = staleLabel(status, sources, changes);
+  const calculation = useMemo(() => plainCalculation(result.spec), [result.spec]);
   const checks = countChecks(result);
   const [moreStatements, setMoreStatements] = useState(false);
   const sentences = result.answer_sentences;
@@ -69,7 +70,17 @@ export function AnswerCard(props: AnswerCardProps) {
   return (
     <article id={props.domId} aria-label={result.question} className={`answer card${props.highlighted ? ' answer--hl' : ''}`}>
       <div className="answer__bar mono">
-        {verified ? <span className="answer__ok">✓ VALIDATED</span> : <span className="answer__warn">SUMMARY WITHHELD</span>}
+        {verified ? (
+          <span
+            className="answer__ok"
+            title="Every number and sentence was recomputed from the result table. This checks the calculation, not that it is the one you meant: see the line beside it."
+          >
+            ✓ CALCULATION CHECKED
+          </span>
+        ) : (
+          <span className="answer__warn">SUMMARY WITHHELD</span>
+        )}
+        {calculation && <span className="answer__calc">{calculation}</span>}
         <span>{shortId(result.id)}</span>
         <span>{clock(result.created_at)}</span>
         {(checks > 0 || props.seconds !== undefined) && (

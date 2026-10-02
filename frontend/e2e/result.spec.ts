@@ -8,7 +8,7 @@ test.describe('result → chart switch → export → pin', () => {
     await uploadSamples(page);
     await ask(page, Q.revenueByRegion);
     const card = answerCard(page);
-    await expect(card.getByText('✓ VALIDATED')).toBeVisible({ timeout: 30_000 });
+    await expect(card.getByText('✓ CALCULATION CHECKED')).toBeVisible({ timeout: 30_000 });
 
     // chart type switch: PATCH /api/results/{id}/chart, then the chart re-renders from the response
     const group = card.getByRole('group', { name: 'Chart type' });
@@ -60,7 +60,7 @@ test.describe('result → chart switch → export → pin', () => {
     await signUpFresh(page);
     await uploadSamples(page, ['orders.csv', 'customers.csv']);
     await ask(page, Q.revenueByRegion);
-    await expect(answerCard(page).getByText('✓ VALIDATED')).toBeVisible({ timeout: 30_000 });
+    await expect(answerCard(page).getByText('✓ CALCULATION CHECKED')).toBeVisible({ timeout: 30_000 });
     await answerCard(page).getByRole('button', { name: 'Pin to dashboard' }).click();
     await expect(answerCard(page).getByRole('button', { name: 'Pinned ✓ — view' })).toBeVisible();
 
