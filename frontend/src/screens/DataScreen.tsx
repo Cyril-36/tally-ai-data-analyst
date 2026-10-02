@@ -174,6 +174,16 @@ function DatasetPanel({ meta }: { meta: DatasetMeta }) {
     }
   };
 
+  const changeCurrency = async (value: string) => {
+    try {
+      const updated = await dsApi.setCurrency(meta.id, (value || null) as DatasetMeta['currency']);
+      ws.patchDataset(updated);
+      setRenameError('');
+    } catch (e) {
+      setRenameError(e instanceof ApiError ? e.message : 'Could not change the currency.');
+    }
+  };
+
   const askReplace = async () => {
     let results = 0;
     let pins = 0;
@@ -295,6 +305,21 @@ function DatasetPanel({ meta }: { meta: DatasetMeta }) {
           >
             Rename
           </button>
+          <label className="ds-panel__sel" title="Money columns are shown in this currency. None = plain numbers.">
+            Currency
+            <select
+              className="select"
+              style={{ height: 34, width: 'auto' }}
+              aria-label={`Currency of ${meta.name}`}
+              value={meta.currency ?? ''}
+              onChange={(e) => void changeCurrency(e.target.value)}
+            >
+              <option value="">None</option>
+              <option value="GBP">GBP £</option>
+              <option value="USD">USD $</option>
+              <option value="EUR">EUR €</option>
+            </select>
+          </label>
           <button type="button" className="btn btn--sm" style={{ height: 34 }} onClick={() => void askReplace()}>
             Replace file…
           </button>

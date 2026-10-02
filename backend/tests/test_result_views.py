@@ -152,5 +152,12 @@ def test_csv_export_has_no_binary_float_noise():
     from app.reports.builder import csv_report
 
     data = result()
-    data.table.rows = [["West", datetime(2026, 1, 1).date(), 135306.1999999999]]
-    assert csv_report(data).splitlines()[1] == "West,2026-01-01,135306.2"
+    data.table.rows = [
+        ["West", datetime(2026, 1, 1).date(), 135306.1999999999],
+        ["East", datetime(2026, 1, 1).date(), 123456789012.345],
+        ["North", datetime(2026, 1, 1).date(), 98765432109876.5],
+    ]
+    lines = csv_report(data).splitlines()
+    assert lines[1] == "West,2026-01-01,135306.2"
+    assert lines[2] == "East,2026-01-01,123456789012.345"  # real digits are never rounded
+    assert lines[3] == "North,2026-01-01,98765432109876.5"

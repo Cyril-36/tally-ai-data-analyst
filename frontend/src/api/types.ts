@@ -192,6 +192,8 @@ export interface DatasetMeta {
   row_count: number;
   created_at: string;
   updated_at: string;
+  /** Declared by the user (or the sample data); money is only shown with a symbol when set. */
+  currency: 'GBP' | 'USD' | 'EUR' | null;
 }
 
 export interface SampleLoadResult {

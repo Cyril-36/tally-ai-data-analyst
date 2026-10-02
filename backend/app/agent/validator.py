@@ -6,31 +6,33 @@ import re
 from app.contracts.result import CalcSource, ClaimKind, ColumnRole
 from app.contracts.spec import Aggregate, BinOp, Col
 
-# The demo data's single reporting currency (PLAN.md section 12). A metric is only labelled
-# with it when its own name or the columns it is built from read as money.
-CURRENCY = "GBP"
 # Money-like column names. Deliberately excludes generic words such as "value" or "score".
 _MONEY = re.compile(r"price|amount|revenue|cost|sales|profit|discount|spend|fee|income", re.I)
 
 
 def metric_unit(result, metric):
-    """Unit of a result metric, derived from the spec (never chosen by the model):
-    "GBP" for money, "count" for counting aggregates, otherwise None."""
+    """Unit of a result metric, derived from the spec and data (never chosen by the model):
+    "count" for counting aggregates; a currency code only when the metric reads as money AND
+    every dataset its columns come from declares that same currency; otherwise None."""
     specs = result.spec.metrics if result.spec else []
     found = next((m for m in specs if m.name == metric), None)
     if found is None:
         return None
     if found.agg in (Aggregate.count, Aggregate.count_distinct):
         return "count"
-    names = [metric, *_columns(found.expr)]
-    return CURRENCY if any(_MONEY.search(n) for n in names) else None
+    refs = _refs(found.expr)
+    if not refs or not any(_MONEY.search(n) for n in [metric, *(r.column for r in refs)]):
+        return None
+    declared = result.meta.currencies if result.meta else {}
+    currencies = {declared.get(r.dataset) for r in refs}
+    return currencies.pop() if len(currencies) == 1 and None not in currencies else None
 
 
-def _columns(expr):
+def _refs(expr):
     if isinstance(expr, Col):
-        return [expr.ref.column]
+        return [expr.ref]
     if isinstance(expr, BinOp):
-        return [*_columns(expr.left), *_columns(expr.right)]
+        return [*_refs(expr.left), *_refs(expr.right)]
     return []
 
 

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { sample, signIn, signUpFresh, uploadSamples } from './helpers';
+import { ask, sample, signIn, signUpFresh, uploadSamples } from './helpers';
 
 /**
  * These cover the endpoints listed under "Backend gaps" in docs/FRONTEND_MAP.md (rename, rows
@@ -92,5 +92,25 @@ test.describe('backend gap endpoints', () => {
     await expect(page.getByRole('switch', { name: /AI analysis/ })).toBeChecked();
     await page.getByRole('button', { name: 'Test connection' }).click();
     await expect(page.getByRole('status').filter({ hasText: /responded in \d+ ms|Provider test failed|did not respond/ })).toBeVisible();
+  });
+
+  test('money uses the declared dataset currency, and none shows plain numbers', async ({ page }) => {
+    await signUpFresh(page);
+    await page.getByRole('button', { name: /Load sample data|sample/i }).first().click();
+    await expect(page.getByRole('checkbox', { name: /Use orders/ })).toBeVisible({ timeout: 30_000 });
+    await page.goto('/data');
+    await page.getByRole('tab', { name: /orders/ }).first().click();
+    const currency = page.getByLabel('Currency of orders');
+    await expect(currency).toHaveValue('GBP'); // the sample declares GBP
+    await currency.selectOption('');
+    await expect(currency).toHaveValue('');
+    await page.reload();
+    await page.getByRole('tab', { name: /orders/ }).first().click();
+    await expect(page.getByLabel('Currency of orders')).toHaveValue('');
+    await page.goto('/ask');
+    await ask(page, 'Which region generated the highest revenue?');
+    const answer = page.locator('article.answer').last();
+    await expect(answer).toContainText('West had the highest revenue: 135,306.2', { timeout: 30_000 });
+    await expect(answer).not.toContainText('£');
   });
 });

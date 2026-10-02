@@ -124,3 +124,24 @@ def test_anomaly_score_requires_complete_flags_with_correct_row_values():
     assert _score(case, actual, expected, truth)["anomaly_evidence_valid"] is False
     actual["anomalies"]["flags"] = flags[:1]
     assert _score(case, actual, expected, truth)["anomaly_recall"] == 0.5
+
+
+def test_answer_score_requires_the_requested_order_and_limit():
+    expected_spec = {**spec("revenue", dimensions=REGION),
+                     "sort": [{"by": "revenue", "descending": False}], "limit": 1}
+    expected = {
+        "columns": [
+            {"name": "region", "role": "dimension"},
+            {"name": "revenue", "role": "metric"},
+        ],
+        "rows": [["East", 80.0]],
+    }
+    good_spec = {**expected_spec, "metrics": [{**expected_spec["metrics"][0], "name": "sales"}],
+                 "sort": [{"by": "sales", "descending": False}]}
+    table = {"columns": [{"name": "region", "role": "dimension"},
+                         {"name": "sales", "role": "metric"}], "rows": [["East", 80.0]]}
+    assert _answer_table_matches({"spec": good_spec, "table": table}, expected_spec, expected)
+    flipped = {**good_spec, "sort": [{"by": "sales", "descending": True}]}
+    assert not _answer_table_matches({"spec": flipped, "table": table}, expected_spec, expected)
+    unlimited = {**good_spec, "limit": None}
+    assert not _answer_table_matches({"spec": unlimited, "table": table}, expected_spec, expected)

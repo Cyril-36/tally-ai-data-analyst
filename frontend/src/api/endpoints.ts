@@ -45,6 +45,8 @@ export const datasets = {
     ),
   dependents: (datasetId: string) => get<Dependents>(`/api/datasets/${id(datasetId)}/dependents`),
   rename: (datasetId: string, name: string) => patch<DatasetMeta>(`/api/datasets/${id(datasetId)}`, { name }),
+  setCurrency: (datasetId: string, currency: DatasetMeta['currency']) =>
+    patch<DatasetMeta>(`/api/datasets/${id(datasetId)}`, { currency }),
   remove: (datasetId: string) => del<{ deleted: string }>(`/api/datasets/${id(datasetId)}?confirm=true`),
   sample: () => post<SampleLoadResult>('/api/datasets/sample'),
 };

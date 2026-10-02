@@ -218,3 +218,35 @@ def test_stored_anomaly_result_matches_the_returned_one(workspace):
     assert stored["answer_sentences"][0] == "2 unusual values found across 5 series."
     listed = client.get(f"/api/conversations/{conversation_id}/results").json()
     assert listed[-1]["result"]["answer_sentences"] == returned["answer_sentences"]
+
+
+def test_currency_comes_from_the_dataset_declaration_even_on_a_cached_result(workspace):
+    client, conversation_id = workspace
+    datasets = {d["name"]: d for d in client.get("/api/datasets").json()}
+    assert datasets["orders"]["currency"] == "GBP"  # the sample generator writes GBP
+    first = ask(client, conversation_id, REGION_Q, key="cur-1").json()
+    assert first["answer_sentences"][0].startswith("West had the highest revenue: £")
+
+    cleared = client.patch(f"/api/datasets/{datasets['orders']['id']}", json={"currency": None})
+    assert cleared.status_code == 200 and cleared.json()["currency"] is None
+    second = ask(client, conversation_id, REGION_Q, key="cur-2").json()  # same spec: cache hit
+    assert "£" not in " ".join(second["answer_sentences"])
+    assert second["answer_sentences"][0].startswith("West had the highest revenue: 1")
+
+    client.patch(f"/api/datasets/{datasets['orders']['id']}", json={"currency": "USD"})
+    third = ask(client, conversation_id, REGION_Q, key="cur-3").json()
+    assert third["answer_sentences"][0].startswith("West had the highest revenue: $")
+
+
+def test_dataset_update_rules(workspace, make_client):
+    client, _ = workspace
+    orders = next(d for d in client.get("/api/datasets").json() if d["name"] == "orders")
+    url = f"/api/datasets/{orders['id']}"
+    assert client.patch(url, json={}).status_code == 422
+    assert client.patch(url, json={"currency": "JPY"}).status_code == 422
+    assert client.patch(url, json={"name": None}).status_code == 422
+    other = make_client("someone-else@example.com")
+    assert other.patch(url, json={"currency": None}).status_code == 404
+    with open(SAMPLE / "orders.csv", "rb") as f:
+        replaced = client.put(url, files={"file": ("orders.csv", f, "text/csv")})
+    assert replaced.status_code == 200 and replaced.json()["currency"] == "GBP"

@@ -112,12 +112,12 @@ def run(check_only: bool) -> int:
                     "tokens": usage.get("tokens"),
                     "score": score,
                 }
-                if not score["correct"]:
-                    entry["diagnostics"] = {
-                        "actual_result": actual,
-                        "expected_spec": case.spec,
-                        "expected_table": expected,
-                    }
+                # Saved for every case, not only failures, so accepted answers can be audited.
+                entry["diagnostics"] = {
+                    "actual_result": actual,
+                    "expected_spec": case.spec,
+                    "expected_table": expected,
+                }
                 rows.append(entry)
     if check_only:
         print(f"Validated {len(rows)} transfer golden specs/outcomes without AI calls.")

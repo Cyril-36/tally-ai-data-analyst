@@ -186,6 +186,7 @@ def compose(result: AnalysisResult) -> AnalysisResult:
 
 
 MAX_CONTEXT_SENTENCES = 3
+_CURRENCY_SYMBOLS = {"GBP": "£", "USD": "$", "EUR": "€"}
 
 
 def _anomaly_sentences(result, grain):
@@ -231,9 +232,11 @@ def _period(value, grain):
 
 
 def _format(value, unit, general=".12g"):
-    """Number text for a unit: GBP as £1,234.50, counts as integers, % with a sign-free tail."""
-    if unit == "GBP":
-        return f"{'-' if value < 0 else ''}£{abs(value):,.2f}"
+    """Number text for a unit: a declared currency as £1,234.50 / $… / €… (other codes as
+    "CHF 1,234.50"), counts as integers, % with a sign-free tail."""
+    if unit in _CURRENCY_SYMBOLS or (unit and len(unit) == 3 and unit.isupper()):
+        symbol = _CURRENCY_SYMBOLS.get(unit, f"{unit} ")
+        return f"{'-' if value < 0 else ''}{symbol}{abs(value):,.2f}"
     if unit == "count":
         return f"{round(value):,}"
     if unit == "%":

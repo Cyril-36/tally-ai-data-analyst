@@ -58,6 +58,8 @@ class ExecutionMeta(_Model):
     elapsed_ms: int
     dataset_versions: dict[str, int]  # dataset_id -> version
     caveats: list[Caveat] = Field(default_factory=list)
+    # Currency each used dataset declares (dataset name -> ISO code). Units come only from here.
+    currencies: dict[str, str] = Field(default_factory=dict)
     # Start date (ISO) of a final time bucket that holds data only up to part of its span.
     # Trend claims and anomaly detection skip it; its rows stay in the table.
     partial_period: str | None = None

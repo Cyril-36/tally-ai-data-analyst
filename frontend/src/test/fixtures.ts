@@ -8,6 +8,7 @@ export const ORDERS: DatasetMeta = {
   row_count: 4971,
   created_at: '2026-10-01T10:00:00+00:00',
   updated_at: '2026-10-01T10:00:00+00:00',
+  currency: 'GBP',
 };
 
 const base: AnalysisResult = {

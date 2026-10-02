@@ -151,6 +151,13 @@ def analyze(
                 datetime.now(UTC).isoformat(),
             ),
         )
+    # Declared currencies are read fresh on every call, so a cached table never carries a stale one.
+    meta.currencies = {}
+    for name in dataset_names(spec):
+        row = authz.require_owned(conn, "datasets", catalog[name].id, user, Action.read)
+        currency = json.loads(row["profile_json"]).get("currency")
+        if currency:
+            meta.currencies[name] = currency
     result = AnalysisResult(
         id=uuid.uuid4().hex,
         owner_id=user.id,

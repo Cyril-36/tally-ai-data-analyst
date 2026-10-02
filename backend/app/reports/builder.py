@@ -97,7 +97,7 @@ def _safe(value):
     ):
         return "'" + value
     if isinstance(value, float):
-        # 12 significant digits drops binary noise (135306.1999999999 -> 135306.2)
-        # without rounding any real figure in these tables.
-        return format(value, ".12g")
+        # 15 significant digits (all a double holds reliably) drops binary noise such as
+        # 135306.1999999999 -> 135306.2 while keeping real digits (123456789012.345 stays).
+        return format(value, ".15g")
     return value

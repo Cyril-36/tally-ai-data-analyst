@@ -11,7 +11,7 @@ import sqlite3
 import uuid
 from datetime import UTC, date, datetime
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Query, Response, UploadFile
 from pydantic import BaseModel, ConfigDict, Field
@@ -36,9 +36,16 @@ _META = ("id", "name", "filename", "version", "row_count", "created_at", "update
 _PREVIEW_ROWS = 20
 
 
+# Money is only shown with a currency symbol when the dataset declares its currency.
+_SAMPLE_CURRENCY = "GBP"  # data/generate.py writes the sample in GBP
+
+
 class RenameBody(BaseModel):
+    """Rename and/or declare the dataset's currency (null = no currency)."""
+
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
-    name: str = Field(min_length=1, max_length=128)
+    name: str | None = Field(default=None, min_length=1, max_length=128)
+    currency: Literal["GBP", "USD", "EUR"] | None = None
 
 
 def _now() -> str:
@@ -46,7 +53,16 @@ def _now() -> str:
 
 
 def _meta(row: sqlite3.Row) -> dict:
-    return {k: row[k] for k in _META}
+    return {**{k: row[k] for k in _META},
+            "currency": json.loads(row["profile_json"]).get("currency")}
+
+
+def _set_currency(conn: sqlite3.Connection, dataset_id: str, currency: str | None) -> None:
+    profile = json.loads(conn.execute("SELECT profile_json FROM datasets WHERE id = ?",
+                                      (dataset_id,)).fetchone()[0])
+    profile["currency"] = currency
+    conn.execute("UPDATE datasets SET profile_json = ?, updated_at = ? WHERE id = ?",
+                 (json.dumps(profile), _now(), dataset_id))
 
 
 def _read_upload(conn: sqlite3.Connection, file: UploadFile) -> tuple[str, bytes]:
@@ -171,7 +187,10 @@ def load_sample_data(user: CurrentUser, conn: Conn, response: Response) -> dict:
             if len(data) > read_system_settings(conn).max_upload_mb * 1024 * 1024:
                 raise AppError(Outcome.invalid_input,
                                f"'{filename}': the file is larger than the upload limit.")
-            created.append(_store(conn, user, filename, data))
+            stored = _store(conn, user, filename, data)
+            _set_currency(conn, stored["id"], _SAMPLE_CURRENCY)
+            created.append(conn.execute("SELECT * FROM datasets WHERE id = ?",
+                                        (stored["id"],)).fetchone())
         conn.commit()
     except BaseException:
         conn.rollback()
@@ -236,18 +255,23 @@ def get_dependents(dataset_id: str, user: CurrentUser,
 
 
 @router.patch("/{dataset_id}")
-def rename_dataset(dataset_id: str, body: RenameBody, user: CurrentUser, conn: Conn) -> dict:
-    """Rename only: the data and its version are unchanged."""
+def update_dataset(dataset_id: str, body: RenameBody, user: CurrentUser, conn: Conn) -> dict:
+    """Rename and/or set the declared currency: the data and its version are unchanged."""
     authz.require_owned(conn, "datasets", dataset_id, user, Action.modify)
-    clash = AppError(Outcome.invalid_input, f"You already have a dataset named '{body.name}'.")
-    try:
-        if conn.execute("SELECT 1 FROM datasets WHERE owner_id = ? AND name = ? AND id != ?",
-                        (user.id, body.name, dataset_id)).fetchone():
-            raise clash
-        conn.execute("UPDATE datasets SET name = ?, updated_at = ? WHERE id = ?",
-                     (body.name, _now(), dataset_id))
-    except sqlite3.IntegrityError:
-        raise clash from None
+    if not body.model_fields_set or ("name" in body.model_fields_set and body.name is None):
+        raise AppError(Outcome.invalid_input, "Send a new name and/or a currency to update.")
+    if body.name is not None:
+        clash = AppError(Outcome.invalid_input, f"You already have a dataset named '{body.name}'.")
+        try:
+            if conn.execute("SELECT 1 FROM datasets WHERE owner_id = ? AND name = ? AND id != ?",
+                            (user.id, body.name, dataset_id)).fetchone():
+                raise clash
+            conn.execute("UPDATE datasets SET name = ?, updated_at = ? WHERE id = ?",
+                         (body.name, _now(), dataset_id))
+        except sqlite3.IntegrityError:
+            raise clash from None
+    if "currency" in body.model_fields_set:
+        _set_currency(conn, dataset_id, body.currency)
     return _meta(conn.execute("SELECT * FROM datasets WHERE id = ?", (dataset_id,)).fetchone())
 
 
@@ -259,6 +283,7 @@ def replace_dataset(dataset_id: str, file: UploadFile, user: CurrentUser,
     filename, data = _read_upload(conn, file)
     version = row["version"] + 1
     profile = ingest_csv(data, filename, dataset_parquet_path(dataset_id, version))
+    profile["currency"] = json.loads(row["profile_json"]).get("currency")  # a declaration persists
     conn.execute(
         "UPDATE datasets SET filename = ?, version = ?, row_count = ?, profile_json = ?,"
         " updated_at = ? WHERE id = ?",

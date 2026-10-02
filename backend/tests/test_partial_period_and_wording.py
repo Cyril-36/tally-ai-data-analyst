@@ -167,7 +167,7 @@ def table_of(columns: list[tuple[str, ColumnRole]], rows: list[list]) -> ResultT
     )
 
 
-def with_spec(table: ResultTable, metrics: list[dict], **extra) -> AnalysisResult:
+def with_spec(table: ResultTable, metrics: list[dict], currency="GBP", **extra) -> AnalysisResult:
     s = spec(base_dataset="orders", metrics=metrics, **extra)
     meta = ExecutionMeta(
         sql="x",
@@ -176,6 +176,7 @@ def with_spec(table: ResultTable, metrics: list[dict], **extra) -> AnalysisResul
         truncated=False,
         elapsed_ms=1,
         dataset_versions={"id0": 1},
+        currencies={"orders": currency} if currency else {},  # as the sample data declares
     )
     return AnalysisResult(
         id="r1",
@@ -316,3 +317,21 @@ def test_a_limited_time_series_still_gets_value_sentences():
         )
     )
     assert "The selected data: revenue in Jan 2026 was £1,000.00." in composed.answer_sentences
+
+
+def test_money_without_a_declared_currency_has_no_symbol():
+    table = table_of([("region", DIM[0]), ("revenue", DIM[1])], [["West", 79.0]])
+    composed = compose(
+        with_spec(table, [REVENUE], currency=None, dimensions=[ref("orders", "region")])
+    )
+    assert composed.claims[0].unit is None
+    assert all("£" not in s and "$" not in s for s in composed.answer_sentences)
+    assert "79" in " ".join(composed.answer_sentences)
+
+
+def test_a_declared_currency_other_than_gbp_is_used():
+    table = table_of([("region", DIM[0]), ("revenue", DIM[1])], [["West", 79.0]])
+    composed = compose(
+        with_spec(table, [REVENUE], currency="USD", dimensions=[ref("orders", "region")])
+    )
+    assert "West had the highest revenue: $79.00" in composed.answer_sentences[0]

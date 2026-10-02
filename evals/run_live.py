@@ -138,6 +138,14 @@ def _answer_table_matches(actual: dict, expected_spec: dict, expected_table: dic
         matched_names.append(match["name"])
         unused.remove(match)
 
+    # Ordering and row limits change the answer for ranking questions (top/bottom N, lowest).
+    if observed["limit"] != target["limit"]:
+        return False
+    alias = dict(zip((m["name"] for m in target["metrics"]), matched_names, strict=True))
+    wanted = [(alias.get(k["by"], k["by"]), k["descending"]) for k in target["sort"]]
+    if wanted and [(k["by"], k["descending"]) for k in observed["sort"][: len(wanted)]] != wanted:
+        return False
+
     table = actual["table"]
     columns = table.get("columns", [])
     metric_index = 0
@@ -436,23 +444,23 @@ def run(check_only: bool, case_ids: set[str] | None = None) -> int:
                     "tokens": usage.get("tokens"),
                     "score": score,
                 }
-                if not score["correct"]:
-                    entry["diagnostics"] = {
-                        "actual_result": actual,
-                        "expected_spec": case.spec,
-                        "actual_spec": actual.get("spec"),
-                        "expected_table": expected,
-                        "actual_table": actual.get("table"),
-                        "actual_sql": (actual.get("meta") or {}).get("sql"),
-                        "actual_params": (actual.get("meta") or {}).get("params"),
-                        "actual_claims": actual.get("claims"),
-                        "actual_answer_sentences": actual.get("answer_sentences"),
-                        "actual_anomalies": actual.get("anomalies"),
-                        "clarification": actual.get("clarification"),
-                        "trace_tools": [
-                            step.get("tool") for step in actual.get("trace", []) if step.get("tool")
-                        ],
-                    }
+                # Saved for every case, not only failures, so accepted answers can be audited.
+                entry["diagnostics"] = {
+                    "actual_result": actual,
+                    "expected_spec": case.spec,
+                    "actual_spec": actual.get("spec"),
+                    "expected_table": expected,
+                    "actual_table": actual.get("table"),
+                    "actual_sql": (actual.get("meta") or {}).get("sql"),
+                    "actual_params": (actual.get("meta") or {}).get("params"),
+                    "actual_claims": actual.get("claims"),
+                    "actual_answer_sentences": actual.get("answer_sentences"),
+                    "actual_anomalies": actual.get("anomalies"),
+                    "clarification": actual.get("clarification"),
+                    "trace_tools": [
+                        step.get("tool") for step in actual.get("trace", []) if step.get("tool")
+                    ],
+                }
                 rows.append(entry)
     if check_only:
         print(f"Validated {len(rows)} frozen golden specs/outcomes without AI calls.")
