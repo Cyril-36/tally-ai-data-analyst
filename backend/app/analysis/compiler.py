@@ -41,6 +41,8 @@ class CompiledQuery:
     capped: bool  # True when `limit` came from the row cap, not from the spec
     null_check_sql: str | None  # same params as `sql`; one count column per input below
     null_check_inputs: list[str]  # "dataset.column" labels, in null_check_sql column order
+    # Latest date of the time_bucket column in the filtered data (same params as `sql`).
+    latest_date_sql: str | None = None
 
 
 def dataset_names(spec: AnalysisSpec) -> list[str]:
@@ -118,6 +120,17 @@ def compile_spec(spec: AnalysisSpec, catalog: Catalog) -> CompiledQuery:
         ]
         null_sql = frame(exp.select(*counts)).sql(dialect=DIALECT, identify=True)
 
+    latest_sql = None
+    if spec.time_bucket:
+        ref = spec.time_bucket.column
+        latest = exp.Cast(
+            this=exp.Max(this=_col(alias_of[ref.dataset], ref.column)),
+            to=exp.DataType.build("DATE"),
+        )
+        latest_sql = frame(exp.select(exp.alias_(latest, "latest", quoted=True))).sql(
+            dialect=DIALECT, identify=True
+        )
+
     return CompiledQuery(
         sql=query.sql(dialect=DIALECT, identify=True),
         params=params,
@@ -127,6 +140,7 @@ def compile_spec(spec: AnalysisSpec, catalog: Catalog) -> CompiledQuery:
         capped=spec.limit is None or spec.limit > cap,
         null_check_sql=null_sql,
         null_check_inputs=[f"{ds}.{c}" for ds, c in inputs],
+        latest_date_sql=latest_sql,
     )
 
 

@@ -11,6 +11,8 @@ from app.config import get_settings
 from app.contracts.outcomes import AppError, Outcome
 
 log = logging.getLogger("app.provider")
+_PING_TIMEOUT_S = 8.0
+_PING_MAX_TOKENS = 8
 
 
 def _tool(name: str, description: str, properties: dict, required: list[str]) -> dict:
@@ -109,6 +111,34 @@ class Reply:
 
 
 class Provider:
+    def ping(self) -> str:
+        """One minimal request to check that the provider answers; returns the model name.
+        Raises AppError(provider_failed) without any provider text."""
+        settings = get_settings()
+        if not settings.llm_api_key:
+            raise AppError(Outcome.provider_failed, "The AI provider is not configured.")
+        try:
+            with OpenAI(
+                api_key=settings.llm_api_key,
+                base_url=settings.llm_base_url,
+                timeout=_PING_TIMEOUT_S,
+                max_retries=0,
+            ) as client:
+                response = client.chat.completions.create(
+                    model=settings.llm_model,
+                    messages=[{"role": "user", "content": "ping"}],
+                    temperature=0,
+                    max_tokens=_PING_MAX_TOKENS,
+                )
+            if not response.choices:
+                raise ValueError("empty response")
+        except Exception as exc:
+            log.warning("provider ping failed: type=%s status=%s", type(exc).__name__,
+                        getattr(exc, "status_code", None))
+            raise AppError(Outcome.provider_failed,
+                           "The AI provider did not respond correctly.") from None
+        return settings.llm_model
+
     def complete(self, messages: list[dict], remaining_s: float, max_tokens: int) -> Reply:
         settings = get_settings()
         if not settings.llm_api_key:
@@ -176,5 +206,13 @@ class Provider:
             ) from None
 
 
+def fake_provider_enabled() -> bool:
+    return get_settings().llm_provider.strip().lower() == "fake"
+
+
 def get_provider() -> Provider:
+    if fake_provider_enabled():
+        from app.agent.fake_provider import ScriptedProvider
+
+        return ScriptedProvider()
     return Provider()

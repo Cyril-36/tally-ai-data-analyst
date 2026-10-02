@@ -59,9 +59,9 @@ def test_anomaly_score_requires_complete_flags_with_correct_row_values():
     }
     expected = {
         "columns": [
-            {"name": "region"},
-            {"name": "period"},
-            {"name": "revenue"},
+            {"name": "region", "role": "dimension"},
+            {"name": "period", "role": "time"},
+            {"name": "revenue", "role": "metric"},
         ],
         "rows": [["West", "2026-09-01", 100.0], ["South", "2026-09-01", 5.0]],
     }
