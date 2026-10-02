@@ -13,12 +13,13 @@ from app.analysis.executor import _bucket_bounds, run_spec
 from app.contracts.outcomes import Outcome
 from app.contracts.result import (
     AnalysisResult,
+    Claim,
     ColumnRole,
     ExecutionMeta,
     ResultColumn,
     ResultTable,
 )
-from tests.test_analysis_data import make_catalog, ref, revenue_expr, sample_frames, spec
+from tests.test_analysis_data import col, make_catalog, ref, revenue_expr, sample_frames, spec
 
 MONTHLY_REVENUE = dict(
     base_dataset="orders",
@@ -202,7 +203,10 @@ def test_rank_sentence_uses_entity_value_and_gbp_with_two_decimals():
     )
     composed = compose(with_spec(table, [REVENUE], dimensions=[ref("orders", "region")]))
     assert composed.answer_sentences[0] == (
-        "West had the highest revenue: £135,306.20 among 3 returned groups."
+        "West had the highest revenue: £135,306.20 (44.32% of the total across 3 groups)."
+    )
+    assert composed.answer_sentences[1] == (
+        "That is £45,306.20 more than East (£90,000.00)."
     )
     assert all("region=" not in s for s in composed.answer_sentences)
     assert composed.claims[0].unit == "GBP"
@@ -231,7 +235,7 @@ def test_counts_are_integers_and_unitless_metrics_keep_plain_numbers():
     )
     assert (
         composed.answer_sentences[0]
-        == "West had the highest orders: 1,234 among 2 returned groups."
+        == "West had the highest orders: 1,234 (99.76% of the total across 2 groups)."
     )
     assert composed.claims[0].unit == "count"
 
@@ -250,7 +254,7 @@ def test_counts_are_integers_and_unitless_metrics_keep_plain_numbers():
         )
     )
     assert (
-        composed.answer_sentences[0] == "West had the highest avg qty: 2.5 among 2 returned groups."
+        composed.answer_sentences[0] == "West had the highest avg qty of 2 groups: 2.5."
     )
     assert composed.claims[0].unit is None
 
@@ -334,4 +338,18 @@ def test_a_declared_currency_other_than_gbp_is_used():
     composed = compose(
         with_spec(table, [REVENUE], currency="USD", dimensions=[ref("orders", "region")])
     )
-    assert "West had the highest revenue: $79.00" in composed.answer_sentences[0]
+    assert composed.answer_sentences[0] == "West: revenue was $79.00."  # one group: no ranking
+
+
+def test_shares_are_only_claimed_for_measures_that_add_up():
+    table = table_of([("region", DIM[0]), ("avg_price", DIM[1])], [["West", 30.0], ["East", 10.0]])
+    avg = {"name": "avg_price", "agg": "avg", "expr": col("orders", "unit_price")}
+    composed = compose(with_spec(table, [avg], dimensions=[ref("orders", "region")]))
+    assert composed.answer_sentences[0] == "West had the highest avg price of 2 groups: £30.00."
+    assert not any(c.kind == "share" for c in composed.claims)
+    # A forged share on an average is rejected by the validator.
+    forged = Claim(id="c9", kind="share", metric="avg_price", entity={"region": "West"},
+                   value=75.0, unit="%", source={"type": "calc", "op": "share_of_total",
+                                                  "inputs": [composed.claims[0].id]})
+    assert forged not in validate_claims(composed.model_copy(
+        update={"claims": [*composed.claims, forged]}))

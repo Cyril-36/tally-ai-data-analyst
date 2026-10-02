@@ -58,6 +58,7 @@ def validate_claims(result):
         if isinstance(claim.source, CalcSource):
             expected_unit = {
                 "pct_change": "%",
+                "share_of_total": "%",
                 "difference": metric_unit(result, claim.metric),
             }.get(claim.source.op)
         else:
@@ -139,6 +140,8 @@ def _complete(result):
 
 def _calc(claim, known, result, rows, times):
     inputs = [known.get(i) for i in claim.source.inputs]
+    if claim.source.op == "share_of_total":
+        return _share(claim, inputs, result, rows, times)
     if len(inputs) != 2 or any(c is None for c in inputs):
         return False
     a, b = inputs
@@ -189,6 +192,30 @@ def _calc(claim, known, result, rows, times):
         and _same(claim.value, expected)
         and claim.direction == direction
     )
+
+
+def _share(claim, inputs, result, rows, times):
+    """A share is checked against the total recomputed from the complete table, and only for
+    measures that add up across groups (a sum or a row count; not averages or distinct counts,
+    whose groups can overlap)."""
+    if len(inputs) != 1 or inputs[0] is None or times or not _complete(result):
+        return False
+    (part,) = inputs
+    spec_metric = next((m for m in (result.spec.metrics if result.spec else [])
+                        if m.name == claim.metric), None)
+    if spec_metric is None or spec_metric.agg not in (Aggregate.sum, Aggregate.count):
+        return False
+    values = [r[claim.metric] for r in rows if _number(r[claim.metric])]
+    total = sum(values)
+    if (
+        claim.kind != ClaimKind.share
+        or part.metric != claim.metric
+        or part.entity != claim.entity
+        or total <= 0
+        or any(v < 0 for v in values)
+    ):
+        return False
+    return _same(claim.value, part.value / total * 100)
 
 
 def _number(value):

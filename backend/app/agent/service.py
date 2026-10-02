@@ -40,7 +40,9 @@ When metric/date/business meaning is ambiguous, clarify before analyzing. Use th
 schema to identify metrics. A metric may be an existing numeric column or arithmetic
 over existing numeric columns (e.g. quantity times price minus discount) ONLY when every
 column it uses exists in the selected schema; the spec shows the derivation.
-If a metric and grouping are explicit, analyze rather than clarify. "By quarter" means
+If a metric and grouping are explicit, analyze rather than clarify. Counting entities
+(orders, customers, tickets) uses count_distinct on their id column; count with no column
+counts rows. "By quarter" means
 the quarter time grain. When asked for SQL for a named analysis, run that analysis so
 the application can display its exact compiled SQL; never invent SQL text.
 For an entity count, use count_distinct on its identifier when one is clearly present.

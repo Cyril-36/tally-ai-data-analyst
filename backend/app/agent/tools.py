@@ -54,6 +54,7 @@ def build_catalog(conn: sqlite3.Connection, user: User, dataset_ids: list[str]) 
             row["version"],
             path,
             {c["name"]: c["dtype"] for c in profile["columns"]},
+            frozenset(c["name"] for c in profile["columns"] if c["role_hint"] == "id"),
         )
     return catalog
 

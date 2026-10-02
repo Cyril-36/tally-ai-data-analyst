@@ -21,6 +21,8 @@ class DatasetInfo:
     version: int
     parquet_path: Path
     columns: dict[str, str]  # column name -> duckdb dtype
+    # Columns profiled as identifiers (role_hint "id"): counting them is ambiguous.
+    identifiers: frozenset[str] = frozenset()
 
 
 Catalog = dict[str, DatasetInfo]

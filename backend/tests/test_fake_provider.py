@@ -270,3 +270,25 @@ def test_changing_a_currency_marks_saved_results_and_pins_out_of_date(workspace)
     assert status() == "stale" and pin_status() == "stale"
     client.patch(f"/api/datasets/{orders['id']}", json={"currency": "GBP"})
     assert status() == "current"  # back to what the result was calculated with
+
+
+def test_counting_an_identifier_must_say_rows_or_entities(workspace):
+    # Live miss: count(order_id) was used for "orders"; with a repeated id it overcounts.
+    client, conversation_id = workspace
+    orders = orders_revenue()
+    assert orders.order_id.duplicated().any()  # the sample repeats one order id
+    col = {"kind": "col", "ref": {"dataset": "orders", "column": "order_id"}}
+
+    def analyze(agg, expr=None):
+        metric = {"name": "orders", "agg": agg, **({"expr": expr} if expr else {})}
+        return client.post(f"/api/conversations/{conversation_id}/analyze", json={
+            "question": "How many orders?", "request_key": f"count-{agg}-{bool(expr)}",
+            "spec": {"base_dataset": "orders", "metrics": [metric]}})
+
+    refused = analyze("count", col)
+    assert refused.status_code == 422
+    assert "count_distinct on order_id" in refused.json()["message"]
+    distinct = analyze("count_distinct", col).json()
+    rows = analyze("count").json()
+    assert distinct["table"]["rows"][0][0] == orders.order_id.nunique()
+    assert rows["table"]["rows"][0][0] == len(orders) == orders.order_id.nunique() + 1

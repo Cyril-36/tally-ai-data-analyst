@@ -55,6 +55,7 @@ def validate(spec: AnalysisSpec, catalog: Catalog) -> None:
 
     for metric in spec.metrics:
         _check_metric(metric, scope)
+        _check_entity_count(metric, catalog)
 
     dim_names = [ref.column for ref in spec.dimensions]
     for ref in spec.dimensions:
@@ -133,6 +134,21 @@ def _check_join(join: Join, scope: Scope, catalog: Catalog) -> None:
 
 
 # ---- metrics --------------------------------------------------------------------
+
+
+def _check_entity_count(metric: Metric, catalog: Catalog) -> None:
+    """count(<identifier>) counts rows that have an id, which silently differs from the number
+    of entities when ids repeat (one order on two rows). Make the choice explicit."""
+    if metric.agg != Aggregate.count or not isinstance(metric.expr, Col):
+        return
+    ref = metric.expr.ref
+    info = catalog.get(ref.dataset)
+    if info is not None and ref.column in info.identifiers:
+        raise invalid(
+            f"Metric '{metric.name}': count({ref.column}) counts rows, not unique "
+            f"{ref.column} values. Use count_distinct on {ref.column} to count entities, or "
+            "count with no column to count rows."
+        )
 
 
 def _check_metric(metric: Metric, scope: Scope) -> None:

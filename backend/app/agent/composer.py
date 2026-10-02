@@ -14,6 +14,7 @@ from app.contracts.result import (
     ClaimKind,
     ColumnRole,
 )
+from app.contracts.spec import Aggregate
 
 
 def compose(result: AnalysisResult) -> AnalysisResult:
@@ -53,7 +54,7 @@ def compose(result: AnalysisResult) -> AnalysisResult:
                 for r in result.table.rows
                 if _number(r[names.index(metric)])
             ]
-            if ordered:
+            if len(ordered) >= 2:  # a ranking (and a share) needs at least two groups
                 row, value = max(ordered, key=lambda pair: pair[1])
                 values = dict(zip(names, row, strict=True))
                 claims.insert(
@@ -73,6 +74,9 @@ def compose(result: AnalysisResult) -> AnalysisResult:
                         ),
                     ),
                 )
+                if metric == metrics[0]:
+                    claims.extend(_lead_context(result, claims[0], ordered, names, dimensions,
+                                                len(claims)))
     if complete and times:
         for metric in metrics[:1]:
             grouped = defaultdict(list)
@@ -178,7 +182,7 @@ def compose(result: AnalysisResult) -> AnalysisResult:
     narrated = [
         c for c in checked if not (times and c.kind == ClaimKind.value and c.entity in summarised)
     ]
-    sentences = [_render(c, grain) for c in narrated]
+    sentences = _grouped_sentences(checked) or [_render(c, grain) for c in narrated]
     if result.anomalies:
         # The question was about unusual values, so they lead the answer.
         sentences = [*_anomaly_sentences(result, grain), *sentences[:MAX_CONTEXT_SENTENCES]]
@@ -186,6 +190,69 @@ def compose(result: AnalysisResult) -> AnalysisResult:
 
 
 MAX_CONTEXT_SENTENCES = 3
+
+
+def _lead_context(result, top, ordered, names, dimensions, next_id):
+    """For the leading group: its share of the total and its gap to the runner-up, as claims the
+    validator recomputes from the complete table (shares only where the measure adds up)."""
+    metric = top.metric
+    extra = []
+    runner = sorted(ordered, key=lambda pair: pair[1], reverse=True)[1:2]
+    if runner:
+        row, value = runner[0]
+        values = dict(zip(names, row, strict=True))
+        second = Claim(
+            id=f"c{next_id}", kind=ClaimKind.value, metric=metric,
+            entity={n: values[n] for n in dimensions}, value=float(value),
+            unit=metric_unit(result, metric),
+            source=CellSource(row_key={n: values[n] for n in dimensions}, column=metric),
+        )
+        gap = top.value - second.value
+        extra += [second, Claim(
+            id=f"c{next_id + 1}", kind=ClaimKind.comparison, metric=metric, entity=top.entity,
+            value=gap, unit=metric_unit(result, metric),
+            direction="up" if gap > 0 else "down" if gap < 0 else "flat",
+            compared_to=second.id, source=CalcSource(op="difference", inputs=[top.id, second.id]),
+        )]
+    agg = next((m.agg for m in (result.spec.metrics if result.spec else []) if m.name == metric),
+               None)
+    total = sum(v for _, v in ordered)
+    # Shares only for measures that add up across groups; the validator enforces the same rule.
+    if agg in (Aggregate.sum, Aggregate.count) and total > 0 and all(v >= 0 for _, v in ordered):
+        extra.append(Claim(
+            id=f"c{next_id + len(extra)}", kind=ClaimKind.share, metric=metric,
+            entity=top.entity, value=top.value / total * 100, unit="%",
+            source=CalcSource(op="share_of_total", inputs=[top.id]),
+        ))
+    return extra
+
+
+def _grouped_sentences(checked):
+    """One conclusion and one comparison for a ranked breakdown, instead of restating each
+    group (the table already lists them). None when there is no validated ranking."""
+    top = next((c for c in checked if c.kind == ClaimKind.rank), None)
+    if top is None:
+        return None
+    subject = ", ".join(str(v) for v in top.entity.values())
+    share = next((c for c in checked if c.kind == ClaimKind.share and c.entity == top.entity), None)
+    value = _format(top.value, top.unit)
+    if share:
+        lead = (f"{subject} had the highest {_words(top.metric)}: {value} "
+                f"({_format(share.value, '%')} of the total across {top.rank_of} groups).")
+    else:
+        lead = f"{subject} had the highest {_words(top.metric)} of {top.rank_of} groups: {value}."
+    sentences = [lead]
+    gap = next((c for c in checked if c.kind == ClaimKind.comparison
+                and c.source.type == "calc" and c.source.op == "difference"), None)
+    second = next((c for c in checked if gap and c.id == gap.compared_to), None)
+    if gap and second:
+        runner = ", ".join(str(v) for v in second.entity.values())
+        sentences.append(
+            f"That is {_format(abs(gap.value), gap.unit)} more than {runner} "
+            f"({_format(second.value, second.unit)})."
+        )
+    others = [c for c in checked if c.kind == ClaimKind.rank and c is not top]
+    return sentences + [_render(c) for c in others]
 _CURRENCY_SYMBOLS = {"GBP": "£", "USD": "$", "EUR": "€"}
 
 
