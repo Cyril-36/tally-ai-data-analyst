@@ -110,6 +110,8 @@ def run(check_only: bool) -> int:
                     "http_status": response.status_code,
                     "latency_ms": round((time.monotonic() - started) * 1000),
                     "tokens": usage.get("tokens"),
+                    "prompt_tokens": usage.get("prompt_tokens"),
+                    "completion_tokens": usage.get("completion_tokens"),
                     "score": score,
                 }
                 # Saved for every case, not only failures, so accepted answers can be audited.

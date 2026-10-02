@@ -158,3 +158,21 @@ def test_a_harmless_limit_on_an_unlimited_question_is_accepted():
     cut = {"spec": {**expected_spec, "limit": 1},
            "table": {"columns": expected["columns"], "rows": [["West", 100.0]]}}
     assert not _answer_table_matches(cut, expected_spec, expected)
+
+
+def test_usage_summary_reports_latency_tokens_and_cost_only_when_priced(monkeypatch):
+    from run_live import usage_summary
+
+    cases = [
+        {"latency_ms": 1000, "tokens": 300, "prompt_tokens": 200, "completion_tokens": 100},
+        {"latency_ms": 3000, "tokens": 600, "prompt_tokens": 500, "completion_tokens": 100},
+        {"id": "skipped", "status": "not_run_provider_unavailable"},
+    ]
+    monkeypatch.delenv("LLM_PRICE_INPUT_PER_M", raising=False)
+    plain = usage_summary(cases)
+    assert plain["cases_run"] == 2 and plain["latency_ms"]["max"] == 3000
+    assert plain["tokens_total"] == 900 and plain["cost"] is None
+    monkeypatch.setenv("LLM_PRICE_INPUT_PER_M", "0.3")
+    monkeypatch.setenv("LLM_PRICE_OUTPUT_PER_M", "2.5")
+    priced = usage_summary(cases)["cost"]
+    assert priced["total"] == round((700 * 0.3 + 200 * 2.5) / 1_000_000, 4)

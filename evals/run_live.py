@@ -15,6 +15,7 @@ import math
 import os
 import re
 import shutil
+import statistics
 import subprocess
 import sys
 import tempfile
@@ -308,16 +309,62 @@ def _report_header(settings) -> dict:
         "reference_date": truth["reference_date"],
         "git_sha": _git("rev-parse", "HEAD"),
         "dirty_tree": bool(_git("status", "--porcelain")),
-        "cost": None,
-        "cost_note": "Provider billing rates were not available to this runner.",
         "llm_turn_token_cap": settings.llm_turn_token_cap,
         "llm_max_tokens": settings.llm_max_tokens,
         "llm_wall_s": settings.llm_wall_s,
     }
 
 
+def usage_summary(cases: list[dict]) -> dict:
+    """Latency, tokens and (when prices are configured) cost for the cases that ran."""
+    ran = [c for c in cases if c.get("latency_ms") is not None]
+    latency = sorted(c["latency_ms"] for c in ran)
+    tokens = [c.get("tokens") or 0 for c in ran]
+    summary = {
+        "cases_run": len(ran),
+        "latency_ms": {
+            "median": statistics.median(latency) if latency else None,
+            "p90": latency[round(0.9 * (len(latency) - 1))] if latency else None,
+            "max": latency[-1] if latency else None,
+        },
+        "tokens_total": sum(tokens),
+        "tokens_per_case": round(sum(tokens) / len(ran)) if ran else None,
+        "cost": None,
+    }
+    price_in = os.environ.get("LLM_PRICE_INPUT_PER_M")
+    price_out = os.environ.get("LLM_PRICE_OUTPUT_PER_M")
+    split = all(c.get("prompt_tokens") is not None for c in ran)
+    if price_in and price_out and split and ran:
+        prompt = sum(c["prompt_tokens"] or 0 for c in ran)
+        completion = sum(c.get("completion_tokens") or 0 for c in ran)
+        total = (prompt * float(price_in) + completion * float(price_out)) / 1_000_000
+        summary["cost"] = {
+            "currency": os.environ.get("LLM_PRICE_CURRENCY", "USD"),
+            "total": round(total, 4),
+            "per_case": round(total / len(ran), 5),
+            "prompt_tokens": prompt,
+            "completion_tokens": completion,
+        }
+    return summary
+
+
+def _usage_line(summary: dict) -> str:
+    lat = summary["latency_ms"]
+    cost = summary["cost"]
+    cost_text = (
+        f"{cost['currency']} {cost['total']} total, {cost['per_case']} per case"
+        if cost else "unknown (set LLM_PRICE_INPUT_PER_M and LLM_PRICE_OUTPUT_PER_M)"
+    )
+    return (
+        f"Latency ms: median {lat['median']}, p90 {lat['p90']}, max {lat['max']}. "
+        f"Tokens: {summary['tokens_total']} total, {summary['tokens_per_case']} per case. "
+        f"Cost: {cost_text}."
+    )
+
+
 def _write_report(report: dict) -> Path:
     REPORTS.mkdir(parents=True, exist_ok=True)
+    report["usage"] = usage_summary(report["cases"])
     name = datetime.now(UTC).strftime("%Y%m%dT%H%M%S%fZ")
     path = REPORTS / f"{name}.json"
     path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
@@ -330,7 +377,9 @@ def _write_report(report: dict) -> Path:
         "",
         f"Answer correct: {report['correct']}/{len(report['cases'])}; "
         f"exact-spec correct: {report['strict_correct']}/{len(report['cases'])}; "
-        f"not run: {report['not_run']}. Cost: unknown.",
+        f"not run: {report['not_run']}.",
+        "",
+        _usage_line(report["usage"]),
         "",
         "| Case | Outcome | Answer table | Exact spec | Claims | Chart | Latency ms | Tokens |",
         "|---|---|---|---|---|---|---:|---:|",
@@ -444,6 +493,8 @@ def run(check_only: bool, case_ids: set[str] | None = None) -> int:
                     "message": actual.get("message") if response.status_code != 200 else None,
                     "latency_ms": round((time.monotonic() - started) * 1000),
                     "tokens": usage.get("tokens"),
+                    "prompt_tokens": usage.get("prompt_tokens"),
+                    "completion_tokens": usage.get("completion_tokens"),
                     "score": score,
                 }
                 # Saved for every case, not only failures, so accepted answers can be audited.
@@ -488,5 +539,11 @@ if __name__ == "__main__":
         "--check", action="store_true", help="validate golden specs without AI calls"
     )
     parser.add_argument("--case", action="append", help="run only this case (repeatable)")
+    parser.add_argument("--summarize", metavar="REPORT_JSON",
+                        help="print the usage summary of a saved report (no AI calls)")
     args = parser.parse_args()
+    if args.summarize:
+        saved = json.loads(Path(args.summarize).read_text())
+        print(_usage_line(usage_summary(saved["cases"])))
+        raise SystemExit(0)
     raise SystemExit(run(args.check, set(args.case) if args.case else None))

@@ -141,6 +141,7 @@ def run(
     produced: dict[str, AnalysisResult] = {}
     trace: list[dict] = []
     spent = repairs = tool_count = provider_repairs = analysis_attempts = 0
+    prompt_spent = completion_spent = 0
     started = time.monotonic()
 
     def budget_error(message: str, reason: str) -> AppError:
@@ -178,6 +179,8 @@ def run(
                 continue
             raise
         spent += reply.tokens
+        prompt_spent += reply.prompt_tokens
+        completion_spent += reply.completion_tokens
         if spent > settings.llm_turn_token_cap:
             raise budget_error("The analysis reached its AI token budget.", "tokens_after_call")
         messages.append(
@@ -299,7 +302,9 @@ def run(
                 )
             if isinstance(value, AnalysisResult):
                 value.trace = trace + value.trace + [
-                    {"provider_usage": {"tokens": spent, "tool_calls": tool_count}}
+                    {"provider_usage": {"tokens": spent, "tool_calls": tool_count,
+                                        "prompt_tokens": prompt_spent,
+                                        "completion_tokens": completion_spent}}
                 ]
                 value.suggested_questions = suggestions(value.spec, catalog)
                 log.info(
