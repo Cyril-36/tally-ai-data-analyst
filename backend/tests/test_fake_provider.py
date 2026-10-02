@@ -179,3 +179,23 @@ def test_fake_provider_never_runs_without_the_env_var(make_client, monkeypatch):
 
 def test_ready_reports_ai_available_under_the_fake(fake, client):
     assert client.get("/api/ready").json()["ai_configured"] is True
+
+
+def test_question_outside_the_data_is_declined_as_unsupported(workspace):
+    client, conversation_id = workspace
+    result = ask(client, conversation_id, "What is our employee attrition rate?").json()
+    assert result["outcome"] == "unsupported"
+    assert result["table"] is None and result["answer_sentences"] == []
+
+
+def test_revenue_answer_to_the_clarification_ranks_products_lowest_first(workspace):
+    client, conversation_id = workspace
+    assert ask(client, conversation_id, "Which products are underperforming?").json()[
+        "outcome"] == "needs_clarification"
+    result = ask(client, conversation_id, "revenue").json()
+    assert result["outcome"] == "ok", result
+    products = pd.read_csv(SAMPLE / "products.csv")
+    expected = (orders_revenue().merge(products, on="product_id")
+                .groupby("product_name").revenue.sum().sort_values().head(5))
+    assert [row[0] for row in result["table"]["rows"]] == list(expected.index)
+    assert [row[1] for row in result["table"]["rows"]] == pytest.approx(list(expected.values))

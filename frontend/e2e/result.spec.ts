@@ -65,7 +65,7 @@ test.describe('result → chart switch → export → pin', () => {
     await expect(answerCard(page).getByRole('button', { name: 'Pinned ✓ — view' })).toBeVisible();
 
     // replace orders.csv with a different file (version 2)
-    await page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: /^Data/ }).click();
+    await page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: /^Data( [0-9]+)?$/ }).click();
     await page.getByRole('tab', { name: /orders/ }).click();
     await page.getByRole('button', { name: 'Replace file…' }).click();
     await page.getByRole('alertdialog').getByRole('button', { name: 'Choose replacement file' }).click();
