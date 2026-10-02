@@ -2,6 +2,7 @@
 
 > **This file is the single source of truth.** If the vault copy (`Brain/02-Projects/dbo-ai-data-analyst/PLAN.md`) disagrees, this file wins. Module names below are *planned* responsibilities; the acceptance checks are what define correctness. Update the mapping when the implementation moves.
 >
+> v3 follows two rounds of design review (2026-10-01). The rationale is in `docs/DECISIONS.md`.
 
 ## 1. Principles
 1. **The LLM chooses the route; deterministic code computes every number.** Numbers in prose are rendered from validated claims, never typed by the model.
@@ -206,10 +207,6 @@ Each row gets a test. Destructive actions in the UI need a confirmation dialog t
 - **Day 3:**
   - **feature freeze at start**
   - interaction, security and concurrency tests; Playwright flow
-  - review agents; Docker; deploy
+  - code review; Docker; deploy
   - README, diagram, screenshots, 10–30s video
   - Last 6h reserved for defects and delivery. Post-gate features only if all of this is done.
-
-## 15. Development evidence
-- **The original is kept private** and never edited.
-- Other tools' export support is unverified; check before relying on it, and disclose any gaps rather than reconstructing.

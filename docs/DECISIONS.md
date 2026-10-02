@@ -1,6 +1,7 @@
 # Decisions
 
 ## 2026-10-01: plan v3 after two cross-review rounds
+Accepted from design review (each one corrected a real flaw in v2):
 1. **No free-form LLM SQL in v1.** "SELECT-only + read-only connection" was wrong as a safety claim: DuckDB can read local files from a SELECT (`read_csv('/etc/passwd')`). v1 is structured spec → compiled SQL. The executor is still sandboxed (external access off, extensions off, config locked, worker process, timeouts), because filter values are user-influenced.
 2. **Claims, not number-presence.** "Every number appears in the table" passes "East earned 100" when West earned 100. Claims bind entity + metric + period + filters + value to a row/column or an explicit calc. Prose numbers are rendered by the backend. A failed narrative is suppressed, not shown labelled "unverified".
 3. **The cache key is the resolved spec** (after conversation context), plus dataset versions; permission is rechecked on every read. v2's owner + dataset + question would have mixed up "monthly trends" for West vs East.
