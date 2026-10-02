@@ -353,3 +353,21 @@ def test_shares_are_only_claimed_for_measures_that_add_up():
                                                   "inputs": [composed.claims[0].id]})
     assert forged not in validate_claims(composed.model_copy(
         update={"claims": [*composed.claims, forged]}))
+
+
+def test_two_metric_breakdown_pairs_share_and_gap_with_their_own_metric():
+    # Review finding: the revenue share and gap were attached to the units ranking.
+    table = table_of(
+        [("region", DIM[0]), ("revenue", DIM[1]), ("units", DIM[1])],
+        [["West", 100.0, 8.0], ["East", 60.0, 7.0]],
+    )
+    units = {"name": "units", "agg": "sum", "expr": col("orders", "quantity")}
+    composed = compose(with_spec(table, [REVENUE, units], dimensions=[ref("orders", "region")]))
+    sentences = composed.answer_sentences
+    assert sentences[0] == (
+        "West had the highest revenue: £100.00 (62.5% of the total across 2 groups)."
+    )
+    assert sentences[1] == "That is £40.00 more than East (£60.00)."
+    assert any(s.startswith("West had the highest units") for s in sentences[2:])
+    assert not any("units" in s and ("%" in s or "£" in s) for s in sentences)
+    assert validate_claims(composed) == composed.claims

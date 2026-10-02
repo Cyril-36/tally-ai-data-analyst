@@ -182,7 +182,10 @@ def compose(result: AnalysisResult) -> AnalysisResult:
     narrated = [
         c for c in checked if not (times and c.kind == ClaimKind.value and c.entity in summarised)
     ]
-    sentences = _grouped_sentences(checked) or [_render(c, grain) for c in narrated]
+    lead_metric = result.spec.metrics[0].name if result.spec else None
+    sentences = _grouped_sentences(checked, lead_metric) or [
+        _render(c, grain) for c in narrated
+    ]
     if result.anomalies:
         # The question was about unusual values, so they lead the answer.
         sentences = [*_anomaly_sentences(result, grain), *sentences[:MAX_CONTEXT_SENTENCES]]
@@ -227,14 +230,19 @@ def _lead_context(result, top, ordered, names, dimensions, next_id):
     return extra
 
 
-def _grouped_sentences(checked):
+def _grouped_sentences(checked, lead_metric):
     """One conclusion and one comparison for a ranked breakdown, instead of restating each
-    group (the table already lists them). None when there is no validated ranking."""
-    top = next((c for c in checked if c.kind == ClaimKind.rank), None)
+    group (the table already lists them). None when there is no validated ranking.
+
+    The lead is the ranking of the question's first metric, and its share and gap must be for
+    that same metric: claims are only valid one by one, so pairing them is checked here."""
+    ranks = [c for c in checked if c.kind == ClaimKind.rank]
+    top = next((c for c in ranks if c.metric == lead_metric), ranks[0] if ranks else None)
     if top is None:
         return None
     subject = ", ".join(str(v) for v in top.entity.values())
-    share = next((c for c in checked if c.kind == ClaimKind.share and c.entity == top.entity), None)
+    share = next((c for c in checked if c.kind == ClaimKind.share
+                  and c.metric == top.metric and c.entity == top.entity), None)
     value = _format(top.value, top.unit)
     if share:
         lead = (f"{subject} had the highest {_words(top.metric)}: {value} "
@@ -243,7 +251,8 @@ def _grouped_sentences(checked):
         lead = f"{subject} had the highest {_words(top.metric)} of {top.rank_of} groups: {value}."
     sentences = [lead]
     gap = next((c for c in checked if c.kind == ClaimKind.comparison
-                and c.source.type == "calc" and c.source.op == "difference"), None)
+                and c.source.type == "calc" and c.source.op == "difference"
+                and c.metric == top.metric and c.entity == top.entity), None)
     second = next((c for c in checked if gap and c.id == gap.compared_to), None)
     if gap and second:
         runner = ", ".join(str(v) for v in second.entity.values())
@@ -251,8 +260,10 @@ def _grouped_sentences(checked):
             f"That is {_format(abs(gap.value), gap.unit)} more than {runner} "
             f"({_format(second.value, second.unit)})."
         )
-    others = [c for c in checked if c.kind == ClaimKind.rank and c is not top]
+    others = [c for c in ranks if c is not top]
     return sentences + [_render(c) for c in others]
+
+
 _CURRENCY_SYMBOLS = {"GBP": "£", "USD": "$", "EUR": "€"}
 
 
