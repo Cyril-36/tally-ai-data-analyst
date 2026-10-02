@@ -63,8 +63,6 @@ export const conversations = {
   remove: (convId: string) => del<{ deleted: string }>(`/api/conversations/${id(convId)}`),
   results: (convId: string) => get<StoredResult[]>(`/api/conversations/${id(convId)}/results`),
   /** Non-streaming ask: used by the dashboard's "re-run with current data". */
-  askOnce: (convId: string, body: { question: string; dataset_ids: string[]; request_key: string }) =>
-    post<AnalysisResult>(`/api/conversations/${id(convId)}/ask`, body),
   analyze: (
     convId: string,
     body: { question: string; spec: AnalysisSpec; anomaly_metric?: string; dataset_ids: string[]; request_key: string },
@@ -82,6 +80,8 @@ export const pins = {
   create: (result_id: string, idempotency_key: string) => post<Pin>('/api/pins', { result_id, idempotency_key }),
   update: (pinId: string, body: { title?: string; position?: number }) => patch<Pin>(`/api/pins/${id(pinId)}`, body),
   remove: (pinId: string) => del<{ deleted: string }>(`/api/pins/${id(pinId)}`),
+  /** Re-run the pin's stored calculation on current data (no AI). */
+  refresh: (pinId: string) => post<DashboardItem>(`/api/pins/${id(pinId)}/refresh`, {}),
 };
 
 /* ---- exports (downloads) ---- */

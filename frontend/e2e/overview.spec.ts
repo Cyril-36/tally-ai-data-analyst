@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expect, test } from '@playwright/test';
-import { signUpFresh, uploadSamples } from './helpers';
+import { signIn, signUpFresh, uploadSamples } from './helpers';
 
 const TRANSFER = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../evals/transfer');
 
@@ -46,5 +46,48 @@ test.describe('automatic overview dashboard', () => {
     await page.goto('/dashboard');
     await page.getByRole('button', { name: 'Generate overview' }).click();
     await expect(page.getByRole('list', { name: 'Cards not shown' })).toContainText('Trend over time: No date column', { timeout: 30_000 });
+  });
+
+  test('a stale pinned card re-runs its stored calculation even with AI turned off', async ({ page, browser }) => {
+    await signUpFresh(page);
+    await uploadSamples(page, ['orders.csv']);
+    await page.goto('/dashboard');
+    await page.getByRole('button', { name: 'Generate overview' }).click();
+    const overview = page.getByRole('region', { name: 'Overview' });
+    await expect(overview.locator('li.pin')).toHaveCount(3, { timeout: 30_000 });
+    await overview.locator('li.pin').nth(1).getByRole('button', { name: /^Pin/ }).click();
+    const pinned = page.locator('ul.pins').last().locator('li.pin');
+    await expect(pinned).toHaveCount(1);
+    const resultId = async () => ((await pinned.innerText()).match(/R-[0-9A-F]{6}/) ?? [''])[0];
+    const before = await resultId();
+    expect(before).not.toBe('');
+
+    // The admin switches AI off; the user then changes the dataset's declared currency.
+    const admin = await browser.newPage();
+    await signIn(admin, 'admin@example.com');
+    await admin.goto('/settings');
+    const aiSwitch = admin.getByLabel(/AI analysis/i).first();
+    await aiSwitch.uncheck();
+    await admin.getByRole('button', { name: /Save/ }).click();
+    await expect(aiSwitch).not.toBeChecked();
+    try {
+      await page.goto('/data');
+      await Promise.all([
+        page.waitForResponse((r) => r.request().method() === 'PATCH' && r.url().includes('/api/datasets/') && r.ok()),
+        page.getByLabel('Currency of orders').selectOption('USD'),
+      ]);
+      await page.goto('/dashboard');
+      await expect(pinned).toContainText('currency changed from none to USD'); // an upload declares none
+
+      await pinned.getByRole('button', { name: 'Re-run with current data' }).click();
+      await expect(pinned).not.toContainText('currency changed', { timeout: 15_000 });
+      await expect.poll(resultId).not.toBe(before); // the card now shows a new stored result
+    } finally {
+      // Other specs share this backend: always switch AI back on.
+      await aiSwitch.check();
+      await admin.getByRole('button', { name: /Save/ }).click();
+      await expect(aiSwitch).toBeChecked();
+      await admin.close();
+    }
   });
 });

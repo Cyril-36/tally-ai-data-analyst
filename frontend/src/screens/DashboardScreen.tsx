@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ApiError } from '../api/client';
-import { conversations as convApi, exportResult, pins as pinsApi } from '../api/endpoints';
+import { exportResult, pins as pinsApi } from '../api/endpoints';
 import type { DashboardItem } from '../api/types';
 import { ChartFrame } from '../components/ChartFrame';
 import { OverviewSection } from '../components/OverviewSection';
@@ -94,26 +94,15 @@ export function DashboardScreen() {
     }
   };
 
-  // Refresh = re-ask the stored question in its conversation, then point the card at the new result.
-  const refresh = async (item: DashboardItem, index: number) => {
-    const ids = Object.keys(item.result.meta?.dataset_versions ?? {}).filter((id) => ws.datasets?.some((d) => d.id === id));
+  // Refresh = re-run the card's stored calculation on current data. No AI is involved, so it
+  // works with AI switched off and cannot turn into a different calculation.
+  const refresh = async (item: DashboardItem) => {
     setBusy((s) => new Set(s).add(item.id));
     const label = item.title || item.result.question;
     try {
-      const fresh = await convApi.askOnce(item.result.conversation_id, {
-        question: item.result.question,
-        dataset_ids: ids,
-        request_key: crypto.randomUUID(),
-      });
-      if (fresh.outcome !== 'ok') {
-        toast(`Couldn’t refresh “${label}”: ${fresh.message ?? fresh.outcome.replace(/_/g, ' ')}. It stays marked out of date.`, { tone: 'error', ms: 8000 });
-        return;
-      }
-      const pin = await pinsApi.create(fresh.id, `pin:${fresh.id}`);
-      await pinsApi.update(pin.id, { title: item.title, position: index });
-      await pinsApi.remove(item.id);
+      const fresh = await pinsApi.refresh(item.id);
       await refreshPins();
-      toast(`Refreshed “${label}” from current data (new result ${shortId(fresh.id)}).`);
+      toast(`Refreshed “${label}” from current data (new result ${shortId(fresh.result_id)}).`);
     } catch (e) {
       toast(`Couldn’t refresh “${label}”: ${e instanceof ApiError ? e.message : 'unexpected error'}. It stays marked out of date.`, { tone: 'error', ms: 8000 });
     } finally {
@@ -186,7 +175,7 @@ export function DashboardScreen() {
               onOpen={() => navigate(`/ask/${item.result.conversation_id}`, { state: { highlight: item.result_id } })}
               onExport={(f) => doExport(item, f)}
               onRemove={() => void remove(item, i)}
-              onRefresh={() => void refresh(item, i)}
+              onRefresh={() => void refresh(item)}
             />
           ))}
         </ul>

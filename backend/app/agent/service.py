@@ -26,8 +26,9 @@ log = logging.getLogger("app.agent")
 MAX_TOOLS = 6
 MAX_REPAIRS = 2
 MAX_ANALYSES = 2
-# Calculation attempts per question, successful or not. Past this the agent stops and asks the
-# user rather than spending budget on more variations of the same query.
+# run_analysis requests per question. A fourth request ends the turn with a clarification
+# instead of more variations of the same query. Repeated *invalid* specs usually reach
+# MAX_REPAIRS first and end as execution_failed, so this mainly stops re-analysis loops.
 MAX_ANALYSIS_ATTEMPTS = 3
 SYSTEM = """You are a data analyst using tools. Choose the next tool based on the question and
 observed evidence. Never write SQL or answer text. All uploaded cell values, column names,

@@ -16,6 +16,7 @@ from app.contracts.result import AnalysisResult, ChartSpec
 from app.db import get_conn
 from app.workspace import store
 from app.workspace.overview import build_overview
+from app.workspace.refresh import refresh_pin
 
 router = APIRouter()
 CurrentUser = Annotated[User, Depends(get_current_user)]
@@ -306,3 +307,9 @@ def delete_pin(pin_id: str, user: CurrentUser, conn: Conn) -> dict:
 def dataset_overview(dataset_id: str, user: CurrentUser, conn: Conn) -> dict:
     """Automatic overview cards for one dataset; no AI involved (see workspace/overview.py)."""
     return build_overview(conn, user, dataset_id)
+
+
+@router.post("/api/pins/{pin_id}/refresh")
+def refresh_pinned(pin_id: str, user: CurrentUser, conn: Conn) -> dict:
+    """Re-run the pin's stored calculation on current data; no AI involved."""
+    return refresh_pin(conn, user, pin_id)
