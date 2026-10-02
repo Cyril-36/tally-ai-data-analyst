@@ -1,4 +1,7 @@
-"""Score live agent behavior on two schemas outside the retail development fixture."""
+"""Score live agent behavior on schemas outside the retail development fixture.
+
+Suites: ``transfer`` (support and subscriptions) and ``holdout`` (logistics, asked in ordinary
+business language). Each suite only uploads its own CSVs, so suites stay comparable."""
 
 # This runnable script adds the backend checkout before importing its app package.
 # ruff: noqa: E402
@@ -16,6 +19,8 @@ from fastapi.testclient import TestClient
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
+import holdout_cases
+import transfer_cases
 from run_live import (
     HEADERS,
     _create_conversation,
@@ -24,25 +29,29 @@ from run_live import (
     _sha,
     _write_report,
 )
-from transfer_cases import CASES
 
 from app.config import get_settings
 from app.main import create_app
 
-FIXTURES = ROOT / "evals" / "transfer"
+SUITES = {
+    "transfer": (ROOT / "evals" / "transfer", transfer_cases),
+    "holdout": (ROOT / "evals" / "holdout", holdout_cases),
+}
 
 
-def run(check_only: bool) -> int:
+def run(check_only: bool, suite: str = "transfer") -> int:
+    fixtures, module = SUITES[suite]
+    cases = module.CASES
     logging.getLogger("app").setLevel(logging.WARNING)
     settings = get_settings()
     if not check_only and settings.llm_provider != "fake" and not settings.llm_api_key:
-        print("Set LLM_API_KEY for the live transfer evaluation.", file=sys.stderr)
+        print(f"Set LLM_API_KEY for the live {suite} evaluation.", file=sys.stderr)
         return 2
     header = _report_header(settings)
     header.update({
-        "suite": "transfer",
-        "fixture_sha256": {p.name: _sha(p) for p in sorted(FIXTURES.glob("*.csv"))},
-        "case_set_sha256": _sha(ROOT / "evals" / "transfer_cases.py"),
+        "suite": suite,
+        "fixture_sha256": {p.name: _sha(p) for p in sorted(fixtures.glob("*.csv"))},
+        "case_set_sha256": _sha(Path(module.__file__)),
         "reference_date": "not used",
     })
     rows = []
@@ -57,7 +66,7 @@ def run(check_only: bool) -> int:
                 raise RuntimeError(f"Transfer sign-up failed: {signup.status_code}")
             files = [
                 ("files", (p.name, p.read_bytes(), "text/csv"))
-                for p in sorted(FIXTURES.glob("*.csv"))
+                for p in sorted(fixtures.glob("*.csv"))
             ]
             uploaded = client.post("/api/datasets", files=files)
             if uploaded.status_code != 201:
@@ -65,13 +74,14 @@ def run(check_only: bool) -> int:
             ids = [item["id"] for item in uploaded.json()]
             baseline_id = _create_conversation(client, ids, "Transfer baselines")
             consecutive_provider_failures = 0
-            for case in CASES:
+            groups: dict[str, str] = {}
+            for case in cases:
                 expected = None
                 if case.spec is not None:
                     baseline = client.post(
                         f"/api/conversations/{baseline_id}/analyze",
                         json={"question": case.question, "spec": case.spec,
-                              "request_key": f"transfer-golden-{case.id}"},
+                              "request_key": f"{suite}-golden-{case.id}"},
                     )
                     if baseline.status_code != 200:
                         raise RuntimeError(f"Invalid transfer spec {case.id}: {baseline.text}")
@@ -82,11 +92,15 @@ def run(check_only: bool) -> int:
                 if consecutive_provider_failures >= 3:
                     rows.append({"id": case.id, "status": "not_run_provider_unavailable"})
                     continue
-                conversation = _create_conversation(client, ids, case.id)
+                # Cases in one context group share a conversation, so follow-ups see earlier turns.
+                group = case.context_group or case.id
+                if group not in groups:
+                    groups[group] = _create_conversation(client, ids, case.id)
+                conversation = groups[group]
                 started = time.monotonic()
                 response = client.post(
                     f"/api/conversations/{conversation}/ask",
-                    json={"question": case.question, "request_key": f"transfer-live-{case.id}"},
+                    json={"question": case.question, "request_key": f"{suite}-live-{case.id}"},
                 )
                 actual = response.json()
                 score = _score(case, actual, expected, {})
@@ -122,7 +136,7 @@ def run(check_only: bool) -> int:
                 }
                 rows.append(entry)
     if check_only:
-        print(f"Validated {len(rows)} transfer golden specs/outcomes without AI calls.")
+        print(f"Validated {len(rows)} {suite} golden specs/outcomes without AI calls.")
         return 0
     report = {
         **header, "cases": rows,
@@ -131,12 +145,14 @@ def run(check_only: bool) -> int:
         "not_run": sum(row["status"].startswith("not_run") for row in rows),
     }
     path = _write_report(report)
-    print(f"Transfer evaluation: {report['correct']}/{len(rows)} correct; report: {path}")
+    score = f"{report['correct']}/{len(rows)}"
+    print(f"{suite.capitalize()} evaluation: {score} correct; report: {path}")
     return 0
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
+    parser.add_argument("--suite", choices=sorted(SUITES), default="transfer")
     args = parser.parse_args()
-    raise SystemExit(run(args.check))
+    raise SystemExit(run(args.check, args.suite))

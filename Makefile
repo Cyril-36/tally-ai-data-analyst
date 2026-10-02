@@ -1,4 +1,4 @@
-.PHONY: test lint eval eval-check eval-transfer eval-transfer-check smoke
+.PHONY: test lint eval eval-check eval-transfer eval-transfer-check eval-holdout eval-holdout-check smoke
 
 test:
 	cd backend && .venv/bin/python -m pytest -q tests ../evals/test_scoring.py
@@ -18,6 +18,12 @@ eval-transfer:
 
 eval-transfer-check:
 	backend/.venv/bin/python evals/run_transfer.py --check
+
+eval-holdout:
+	backend/.venv/bin/python evals/run_transfer.py --suite holdout
+
+eval-holdout-check:
+	backend/.venv/bin/python evals/run_transfer.py --suite holdout --check
 
 smoke:
 	backend/.venv/bin/python scripts/smoke_backend.py

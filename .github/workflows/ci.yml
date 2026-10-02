@@ -32,6 +32,7 @@ jobs:
         run: |
           make eval-check
           make eval-transfer-check
+          make eval-holdout-check
           backend/.venv/bin/python -m pytest -q evals
 
   frontend:
