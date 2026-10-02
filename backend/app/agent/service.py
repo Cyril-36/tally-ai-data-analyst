@@ -337,7 +337,9 @@ def _dispatch(name, args, conn, user, catalog, ids, conversation_id, question, p
             # the user's metric wording instead of the result's generated alias.
             metric = metrics[0] if len(metrics) == 1 else requested_metric
             tools.detect_result(result, metric)
-            return compose(result)
+            result = compose(result)
+            produced[result.id] = result  # the stored copy must be the one returned
+            return result
         chart = _validated_json(ChartSpec, args["chart_json"])
         chart = chart.model_copy(update={"title": f"{', '.join(chart.y)} by {chart.x}"})
         tools.set_chart(result, chart)

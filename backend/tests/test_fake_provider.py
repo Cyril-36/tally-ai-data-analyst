@@ -205,3 +205,16 @@ def test_revenue_answer_to_the_clarification_ranks_products_lowest_first(workspa
                 .groupby("product_name").revenue.sum().sort_values().head(5))
     assert [row[0] for row in result["table"]["rows"]] == list(expected.index)
     assert [row[1] for row in result["table"]["rows"]] == pytest.approx(list(expected.values))
+
+
+def test_stored_anomaly_result_matches_the_returned_one(workspace):
+    # Live verification: /ask returned the anomaly sentences but the stored copy (what the UI
+    # reloads) still had the pre-detection narrative.
+    client, conversation_id = workspace
+    returned = ask(client, conversation_id, "Detect anomalies in monthly revenue by region.").json()
+    stored = client.get(f"/api/results/{returned['id']}").json()
+    stored = stored.get("result", stored)
+    assert stored["answer_sentences"] == returned["answer_sentences"]
+    assert stored["answer_sentences"][0] == "2 unusual values found across 5 series."
+    listed = client.get(f"/api/conversations/{conversation_id}/results").json()
+    assert listed[-1]["result"]["answer_sentences"] == returned["answer_sentences"]
