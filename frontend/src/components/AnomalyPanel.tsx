@@ -110,7 +110,7 @@ export function AnomalyPanel({ report, result, onAskDrive, onRetry, methodOpen =
               {report.series_checked} checked · {report.series_skipped} skipped
             </dd>
             <dt>Excluded values</dt>
-            <dd>{report.excluded_values} missing value{report.excluded_values === 1 ? '' : 's'} left out</dd>
+            <dd>{report.excluded_values} value{report.excluded_values === 1 ? '' : 's'} left out (missing, or in an incomplete final period)</dd>
             <dt>Reference population</dt>
             <dd>{references.length ? references.join('; ') : 'Each series is compared with its own history'}</dd>
             <dt>Run</dt>

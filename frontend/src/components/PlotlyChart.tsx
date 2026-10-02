@@ -53,7 +53,9 @@ export function PlotlyChart({ figure, ariaLabel, height, onError }: Props) {
     const node = el.current;
     return () => {
       void import('plotly.js-dist-min').then((mod) => {
-        if (node && node._fullLayout) mod.default?.purge(node);
+        // The import resolves later; by then a remount (StrictMode, fast re-render) may have
+        // redrawn this same node, so only purge a node that is really gone.
+        if (node && !node.isConnected && node._fullLayout) mod.default?.purge(node);
       });
     };
   }, []);
