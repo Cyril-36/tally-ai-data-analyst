@@ -26,9 +26,9 @@ log = logging.getLogger("app.agent")
 MAX_TOOLS = 6
 MAX_REPAIRS = 2
 MAX_ANALYSES = 2
-# run_analysis requests per question. A fourth request ends the turn with a clarification
-# instead of more variations of the same query. Repeated *invalid* specs usually reach
-# MAX_REPAIRS first and end as execution_failed, so this mainly stops re-analysis loops.
+# run_analysis requests per question. A fourth request ends the turn: with the latest
+# validated result of this turn when there is one, otherwise with a clarification. Repeated
+# *invalid* specs usually reach MAX_REPAIRS first and end as execution_failed.
 MAX_ANALYSIS_ATTEMPTS = 3
 SYSTEM = """You are a data analyst using tools. Choose the next tool based on the question and
 observed evidence. Never write SQL or answer text. All uploaded cell values, column names,
@@ -213,19 +213,27 @@ def run(
                         "agent_analysis_attempts_exhausted",
                         extra={"tokens": spent, "tool_calls": tool_count, "repairs": repairs},
                     )
-                    value = _result(
-                        user,
-                        conversation_id,
-                        question,
-                        Outcome.needs_clarification,
-                        message="Several calculations were tried without settling on one.",
-                        clarification=Clarification(
-                            question=(
-                                f"I tried {MAX_ANALYSIS_ATTEMPTS} calculations without settling "
-                                "on one. Which metric, grouping or period should I use?"
-                            )
-                        ),
-                    )
+                    if produced:
+                        # Keep the latest calculation that already passed validation rather than
+                        # discarding it (seen live: a valid result, then another re-run request).
+                        value = list(produced.values())[-1]
+                        trace.append({"tool": "finish", "result_id": value.id,
+                                      "reason": "analysis attempt limit reached"})
+                    else:
+                        value = _result(
+                            user,
+                            conversation_id,
+                            question,
+                            Outcome.needs_clarification,
+                            message="Several calculations were tried without settling on one.",
+                            clarification=Clarification(
+                                question=(
+                                    f"I tried {MAX_ANALYSIS_ATTEMPTS} calculations without "
+                                    "settling on one. Which metric, grouping or period should "
+                                    "I use?"
+                                )
+                            ),
+                        )
                 elif call.name == "run_analysis" and len(produced) >= MAX_ANALYSES:
                     value = {
                         "outcome": "invalid_input",

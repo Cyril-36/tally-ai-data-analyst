@@ -379,24 +379,29 @@ def test_a_new_pin_is_titled_with_its_question(make_client, monkeypatch):
     get_settings.cache_clear()
 
 
-def test_repeated_analyses_stop_with_a_clarification(make_client, monkeypatch, caplog):
-    # Live Gemini kept re-running the same analysis on a follow-up instead of finishing.
+def test_repeated_analyses_end_with_the_latest_validated_result(make_client, monkeypatch, caplog):
+    # Live Gemini: two malformed specs, one valid result, then another re-run request. The cap
+    # must keep that validated result, not discard it for a clarification.
     owner = make_client()
     _, conversation_id = _setup(owner)
     calls = []
+    sequence = ["{bad json", "{bad json", json.dumps(SPEC), json.dumps(SPEC)]
 
     class RepeatingProvider:
         def complete(self, messages, remaining_s, max_tokens):
             calls.append(1)
-            return Reply([ToolCall(f"a{len(calls)}", "run_analysis",
-                                   {"spec_json": json.dumps(SPEC)})], tokens=100)
+            spec_json = sequence[min(len(calls), len(sequence)) - 1]
+            return Reply([ToolCall(f"a{len(calls)}", "run_analysis", {"spec_json": spec_json})],
+                         tokens=100)
 
     monkeypatch.setattr("app.agent.provider.get_provider", lambda: RepeatingProvider())
     response = owner.post(f"/api/conversations/{conversation_id}/ask",
-                          json={"question": "Now only East", "request_key": "repeat"})
+                          json={"question": "What is total revenue?", "request_key": "repeat"})
     assert response.status_code == 200, response.text
     result = response.json()
-    assert result["outcome"] == "needs_clarification"
-    assert result["clarification"]["question"].startswith("I tried 3 calculations")
-    assert len(calls) == 4  # three attempts, then the fourth request is answered by asking
+    assert result["outcome"] == "ok" and result["table"]["rows"]
+    assert len(calls) == 4  # three attempts; the fourth request is answered, not executed
+    assert any(step.get("reason") == "analysis attempt limit reached" for step in result["trace"])
     assert any(r.getMessage() == "agent_analysis_attempts_exhausted" for r in caplog.records)
+    stored = owner.get(f"/api/results/{result['id']}").json()["result"]
+    assert stored["answer_sentences"] == result["answer_sentences"]
